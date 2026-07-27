@@ -18,7 +18,7 @@ func TestDashboardJS_BackupWidget_RendersErrorState(t *testing.T) {
 		{"branches on .error", "bj.error"},
 		{"exposes error_reason as status text", "bj.error_reason"},
 		{"has error-card marker class", "backup-card-error"},
-		{"error message rendered from bj.error", "bj.error || 'Probe failed'"},
+		{"error message rendered from bj.error", "dashboard.status.probe_failed"},
 	}
 	for _, tc := range contracts {
 		t.Run(tc.name, func(t *testing.T) {

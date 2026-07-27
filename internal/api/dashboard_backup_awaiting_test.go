@@ -50,7 +50,7 @@ func TestDashboardJS_BackupSection_RendersAwaitingFirstScan(t *testing.T) {
 		{"headline copy", "Initial scan pending"},
 		{"reads borg count from statusData", "backup_monitor.borg_count"},
 		{"reads duplicacy count from statusData", "backup_monitor.duplicacy_count"},
-		{"explains first-scan-in-progress state", "First scan in progress"},
+		{"explains first-scan-in-progress state", "first_scan_in_progress"},
 		{"links user to Backup Monitors settings", "/settings#backup-monitors"},
 	}
 	for _, tc := range checks {

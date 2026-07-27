@@ -99,12 +99,14 @@ func TestDashboardJS_ServiceCheckTypePill(t *testing.T) {
 	})
 
 	t.Run("services_section_uses_pill_helper", func(t *testing.T) {
-		// Anchor on the section header so we're certain we're
+		// Anchor on the svcChecks variable so we're certain we're
 		// asserting against the right block (DashboardJS has many
-		// section renderers).
-		idx := strings.Index(DashboardJS, "service_checks")
+		// section renderers). Using "service_checks" matches a comment
+		// near the top of the file first, so anchor on the variable
+		// that's defined right before the section render.
+		idx := strings.Index(DashboardJS, "svcChecks")
 		if idx < 0 {
-			t.Fatal("'service_checks' header anchor not found in DashboardJS — test can't locate the right section")
+			t.Fatal("'svcChecks' header anchor not found in DashboardJS — test can't locate the right section")
 		}
 		// Scan a generous window after the anchor; the current
 		// services renderer is under 2kB.
