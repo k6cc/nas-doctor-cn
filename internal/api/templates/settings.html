@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/css/shared.css?v=__VERSION__">
+<script src="/js/i18n.js?v=__VERSION__"></script>
 <style>
 /* Settings-specific styles only */
 
@@ -68,8 +69,8 @@ body.theme-clean .webhook-form{border-color:var(--accent);background:rgba(0,0,0,
 
   <!-- 1. General -->
   <div class="card" id="card-general">
-    <div class="card-title">General</div>
-    <div class="card-desc">Configure scan interval and appearance.</div>
+    <div class="card-title" data-i18n="settings.general.title">General</div>
+    <div class="card-desc" data-i18n="settings.general.desc">Configure scan interval and appearance.</div>
     <div class="form-row">
       <div>
         <label for="scan-preset">Diagnostic Scan Interval</label>
@@ -110,7 +111,16 @@ body.theme-clean .webhook-form{border-color:var(--accent);background:rgba(0,0,0,
       <div id="scan-interval-preview" style="font-size:12px;color:var(--text2);margin-bottom:4px">Scans every 30 minutes</div>
       <div id="scan-cron-preview" style="font-size:11px;font-family:monospace;color:var(--accent);background:rgba(94,106,210,0.06);padding:4px 10px;border-radius:4px;display:inline-block"></div>
     </div>
-    <label>Theme</label>
+    <div class="form-row">
+      <div>
+        <label for="settings-language" data-i18n="settings.language.label">Language</label>
+        <select id="settings-language" onchange="markUnsaved()">
+          <option value="en">English</option>
+          <option value="zh">简体中文</option>
+        </select>
+      </div>
+    </div>
+    <label data-i18n="settings.theme.label">Theme</label>
     <div class="theme-options" id="theme-options">
       <div class="theme-option active" data-theme="midnight" onclick="selectTheme(this)">
         <input type="radio" name="theme" value="midnight" checked>
@@ -1730,6 +1740,16 @@ function loadSettings() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       settings = data;
+      /* Language */
+      var langSel = document.getElementById("settings-language");
+      if (langSel && data.language) {
+        langSel.value = data.language;
+        if (window.i18n) {
+          window.i18n.setLanguage(data.language);
+          window.i18n.translateDOM();
+        }
+      }
+      
       /* Speed test settings */
       var stSel = document.getElementById("speedtest-interval");
       if (stSel && data.speedtest_interval) stSel.value = data.speedtest_interval;
@@ -1886,6 +1906,7 @@ function buildSettingsPayload() {
     // stored-and-incoming clamp still protects against a client
     // sending a lower value.
     settings_version: (base && base.settings_version) || 3,
+    language: document.getElementById("settings-language").value,
     scan_interval: getScanInterval(),
     speedtest_interval: document.getElementById("speedtest-interval").value,
     speedtest_schedule: buildSpeedTestSchedule(),

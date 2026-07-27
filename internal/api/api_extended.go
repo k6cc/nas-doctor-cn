@@ -28,6 +28,7 @@ import (
 // Settings represents the user-configurable application settings stored in the DB.
 type Settings struct {
 	SettingsVersion   int                     `json:"settings_version"`
+	Language          string                  `json:"language"`
 	ScanInterval      string                  `json:"scan_interval"`
 	SpeedTestInterval string                  `json:"speedtest_interval,omitempty"` // e.g. "4h", "1h", "30m"
 	SpeedTestSchedule []string                `json:"speedtest_schedule,omitempty"` // specific times: ["03:00"]
@@ -380,6 +381,7 @@ func parseSpeedTestInterval(v string) (time.Duration, bool) {
 func defaultSettings() Settings {
 	return Settings{
 		SettingsVersion: currentSettingsVersion,
+		Language:        "en",
 		ScanInterval:    "30m",
 		// Speed test default cadence: once a day at 03:00 local time.
 		// Previously defaulted to 4h, which meant ~10 GB/month of speed-test
@@ -887,6 +889,10 @@ func (s *Server) handleUpdateSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if settings.SettingsVersion < currentSettingsVersion {
 		settings.SettingsVersion = currentSettingsVersion
+	}
+
+	if settings.Language == "" {
+		settings.Language = "en"
 	}
 
 	// Basic validation

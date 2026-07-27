@@ -44,9 +44,10 @@ util.fmtUptime = function(s) {
   if (typeof s === "string") return s;
   var days = Math.floor(s / 86400);
   var hours = Math.floor((s % 86400) / 3600);
-  if (days > 0) return days + "d " + hours + "h";
+  var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k, p) { return k; };
+  if (days > 0) return t("time.uptime_days_hours", {d: days, h: hours});
   var mins = Math.floor((s % 3600) / 60);
-  return hours + "h " + mins + "m";
+  return t("time.uptime_hours_mins", {h: hours, m: mins});
 };
 
 util.fmtPercent = function(n) {
@@ -92,12 +93,13 @@ util.relativeTimeAgo = function(when) {
   if (!ms || isNaN(ms)) return "";
   var secs = Math.round((Date.now() - ms) / 1000);
   if (secs < 0) secs = 0;
-  if (secs < 5) return "just now";
-  if (secs < 60) return secs + "s ago";
-  if (secs < 3600) return Math.floor(secs / 60) + "m ago";
-  if (secs < 86400) return Math.floor(secs / 3600) + "h ago";
+  var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k, p) { return k; };
+  if (secs < 5) return t("time.just_now");
+  if (secs < 60) return t("time.secs_ago", {s: secs});
+  if (secs < 3600) return t("time.mins_ago", {m: Math.floor(secs / 60)});
+  if (secs < 86400) return t("time.hours_ago", {h: Math.floor(secs / 3600)});
   var days = Math.floor(secs / 86400);
-  if (days < 30) return days + "d ago";
+  if (days < 30) return t("time.days_ago", {d: days});
   return ">1mo ago";
 };
 
@@ -323,11 +325,12 @@ sections._rangeButtons = function(cls, onclickFn, chartRange) {
 sections.findings = function(sn, st) {
   var esc = util.esc;
   var h = '';
+  var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k, p) { return k; };
   h += '<div class="section-block" data-section="findings">';
   var findings = sn ? (sn.findings || []) : [];
-  h += '<div class="section-title">Findings (' + findings.length + ')</div>';
+  h += '<div class="section-title">' + t("dashboard.findings.title") + ' (' + findings.length + ')</div>';
   if (findings.length === 0) {
-    h += '<div class="empty"><div class="empty-icon">&#9989;</div>No findings yet. Run a scan to check your NAS health.</div>';
+    h += '<div class="empty"><div class="empty-icon">&#9989;</div>' + t("dashboard.findings.empty") + '</div>';
   } else {
     var dismissed = (st && st.dismissed_findings) ? st.dismissed_findings : [];
     var visibleFindings = findings.filter(function(f) { return dismissed.indexOf(f.title) === -1; });
@@ -401,6 +404,7 @@ sections.drives = function(sn, st) {
   var esc = util.esc;
   var colorForPct = util.colorForPct;
   var h = '';
+  var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k, p) { return k; };
   h += '<div class="section-block" data-section="drives">';
   var smart = sn ? (sn.smart || []) : [];
   var disks = sn ? (sn.disks || []) : [];
@@ -521,7 +525,7 @@ sections.drives = function(sn, st) {
     }
     var unmatchedDisks = disks.filter(function(d) { return !mergedView || !usedInMerge[d.mount_point]; });
     if (unmatchedDisks.length > 0) {
-      h += '<div style="margin-top:10px;font-size:11px;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Storage</div>';
+      h += '<div style="margin-top:10px;font-size:11px;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">' + t("dashboard.storage.title") + '</div>';
       for (var di = 0; di < unmatchedDisks.length; di++) {
         var dk = unmatchedDisks[di];
         var pct = dk.used_percent || 0;
@@ -554,6 +558,7 @@ sections.drives = function(sn, st) {
 sections.docker = function(sn, st) {
   var esc = util.esc;
   var h = '';
+  var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k, p) { return k; };
   h += '<div class="section-block" data-section="docker">';
   var docker = sn ? sn.docker : null;
   var mergedContainers = (st && st.sections && st.sections.merged_containers);
@@ -565,26 +570,26 @@ sections.docker = function(sn, st) {
        so the user knows the Advanced-settings filter is in effect (#204). */
     var hiddenCount = (docker.hidden_count || 0);
     var countStr = hiddenCount > 0
-      ? (containers.length + ' shown, ' + hiddenCount + ' hidden')
+      ? (containers.length + ' ' + t("dashboard.docker.shown") + ', ' + hiddenCount + ' ' + t("dashboard.docker.hidden"))
       : String(containers.length);
     h += '<div>';
     if (mergedContainers && runningCsMerged.length > 0) {
-      h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between">Docker Containers (' + countStr + ')';
+      h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between">' + t("dashboard.docker.title") + ' (' + countStr + ')';
       h += sections._rangeButtons("cmetrics", "loadContainerChart", _chartRange);
       h += '</div>';
       for (var cmi = 0; cmi < runningCsMerged.length; cmi++) {
         h += sections._renderContainerCard(runningCsMerged[cmi], cmi);
       }
       if (stoppedCs.length > 0) {
-        h += '<div style="font-size:11px;color:var(--text-quaternary);margin-top:8px">' + stoppedCs.length + ' stopped: ';
+        h += '<div style="font-size:11px;color:var(--text-quaternary);margin-top:8px">' + stoppedCs.length + ' ' + t("dashboard.docker.stopped") + ': ';
         h += stoppedCs.map(function(c) { return esc(c.name); }).join(', ');
         h += '</div>';
       }
     } else {
-      h += '<div class="section-title">Docker Containers (' + countStr + ')</div>';
+      h += '<div class="section-title">' + t("dashboard.docker.title") + ' (' + countStr + ')</div>';
       h += '<div class="table-wrap">';
       h += '<table><thead><tr>';
-      h += '<th>Name</th><th>Image</th><th>Status</th><th>CPU</th><th>Memory</th><th>Uptime</th>';
+      h += '<th>' + t("dashboard.docker.th_name") + '</th><th>' + t("dashboard.docker.th_image") + '</th><th>' + t("dashboard.docker.th_status") + '</th><th>' + t("dashboard.docker.th_cpu") + '</th><th>' + t("dashboard.docker.th_mem") + '</th><th>' + t("dashboard.docker.th_uptime") + '</th>';
       h += '</tr></thead><tbody>';
       for (var ci = 0; ci < containers.length; ci++) {
         var c = containers[ci];
@@ -960,19 +965,20 @@ sections.backup = function(sn, st) {
 sections.network = function(sn) {
   var esc = util.esc;
   var h = '';
+  var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k, p) { return k; };
   h += '<div class="section-block" data-section="network">';
   var net = sn ? sn.network : null;
   if (net && net.interfaces && net.interfaces.length > 0) {
     h += '<div>';
-    h += '<div class="section-title">Network</div>';
+    h += '<div class="section-title">' + t("dashboard.network.title") + '</div>';
     h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);overflow-x:auto">';
     h += '<table style="width:100%;font-size:12px;border-collapse:collapse">';
     h += '<tr style="color:var(--text-quaternary);font-size:10px;text-transform:uppercase;letter-spacing:0.5px">';
-    h += '<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">Interface</th>';
-    h += '<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">State</th>';
-    h += '<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">Speed</th>';
-    h += '<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">MTU</th>';
-    h += '<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">IP</th></tr>';
+    h += '<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">' + t("dashboard.network.th_interface") + '</th>';
+    h += '<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">' + t("dashboard.network.th_state") + '</th>';
+    h += '<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">' + t("dashboard.network.th_speed") + '</th>';
+    h += '<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">' + t("dashboard.network.th_mtu") + '</th>';
+    h += '<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">' + t("dashboard.network.th_ip") + '</th></tr>';
     for (var ni = 0; ni < net.interfaces.length; ni++) {
       var iface = net.interfaces[ni];
       var stateColor = iface.state === "UP" ? "td-healthy" : "td-warn";

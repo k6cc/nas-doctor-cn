@@ -234,6 +234,13 @@ func (s *Server) Router() http.Handler {
 		w.Write([]byte(ChartJS))
 	})
 
+	// Shared i18n logic and dictionaries
+	r.Get("/js/i18n.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Write([]byte(I18nJS))
+	})
+
 	// Shared dashboard rendering JS
 	r.Get("/js/dashboard.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/javascript")

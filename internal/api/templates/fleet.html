@@ -6,7 +6,8 @@
 <title>NAS Doctor</title>
 <link rel="icon" href="/icon.png">
 <link rel="stylesheet" href="/css/shared.css?v=__VERSION__">
-<style>
+<script src="/js/i18n.js?v=__VERSION__"></script>
+</head><style>
 body{padding:0}
 .fleet-container{max-width:1200px;margin:0 auto;padding:24px}
 .fleet-container .header-left img{width:28px;height:28px;border-radius:6px}
@@ -132,12 +133,12 @@ body.theme-clean .mini-stat{background:rgba(0,0,0,0.04)}
       <span class="page-title">Fleet</span>
     </div>
     <div class="nav-links">
-      <a href="/" class="nav-link">Dashboard</a>
-      <a href="/alerts" class="nav-link">Alerts</a>
-      <a href="/service-checks" class="nav-link">Services</a>
-      <a href="/stats" class="nav-link">Stats</a>
-      <a href="/fleet" class="nav-link active">Fleet</a>
-      <a href="/replacement-planner" class="nav-link">Planner</a>
+      <a href="/" class="nav-link" data-i18n="nav.dashboard">Dashboard</a>
+      <a href="/alerts" class="nav-link" data-i18n="nav.alerts">Alerts</a>
+      <a href="/service-checks" class="nav-link" data-i18n="nav.services">Services</a>
+      <a href="/stats" class="nav-link" data-i18n="nav.stats">Stats</a>
+      <a href="/fleet" class="nav-link active" data-i18n="nav.fleet">Fleet</a>
+      <a href="/replacement-planner" class="nav-link" data-i18n="nav.planner">Planner</a>
       <a href="/settings" class="nav-link" title="Settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
       <a href="https://github.com/mcdays94/nas-doctor" class="nav-link" target="_blank" title="GitHub"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg></a>
     </div>
@@ -460,6 +461,7 @@ body.theme-clean .mini-stat{background:rgba(0,0,0,0.04)}
 
   /* ── Render unified findings ── */
   function renderFindings(nodes){
+    var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k){return k;};
     var all=[];
     for(var i=0;i<nodes.length;i++){
       var n=nodes[i];
@@ -469,7 +471,7 @@ body.theme-clean .mini-stat{background:rgba(0,0,0,0.04)}
         all.push({severity:f.severity,title:f.title,category:f.category,server:n.server.name||n.hostname||"?"});
       }
     }
-    if(all.length===0)return'<div style="padding:16px;text-align:center;color:var(--text3);font-size:12px">No findings across the fleet.</div>';
+    if(all.length===0)return'<div style="padding:16px;text-align:center;color:var(--text3);font-size:12px">' + t("fleet.no_findings") + '</div>';
     // Sort: critical first, then warning, then info
     var sevOrder={critical:0,warning:1,info:2};
     all.sort(function(a,b){return(sevOrder[a.severity]||9)-(sevOrder[b.severity]||9);});

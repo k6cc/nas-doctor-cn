@@ -328,7 +328,9 @@ func GenerateReport(snap *internal.Snapshot, sparklines ...ReportSparklines) str
 	b.WriteString("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n")
 	b.WriteString("<meta charset=\"UTF-8\">\n")
 	b.WriteString("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n")
-	b.WriteString("<title>Diagnostic Report — " + escHTML(snap.System.Hostname) + "</title>\n")
+	b.WriteString("<title>Diagnostic Report — ")
+	b.WriteString(escHTML(snap.System.Hostname))
+	b.WriteString("</title>\n")
 	b.WriteString("<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n")
 	b.WriteString("<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n")
 	b.WriteString("<link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap\" rel=\"stylesheet\">\n")
@@ -395,7 +397,7 @@ func GenerateReport(snap *internal.Snapshot, sparklines ...ReportSparklines) str
 	}
 
 	// ── Network Detail ──────────────────────────────────────────────
-	if snap.Network.Interfaces != nil && len(snap.Network.Interfaces) > 0 {
+	if len(snap.Network.Interfaces) > 0 {
 		b.WriteString("<div class=\"page\">\n")
 		writeNetwork(&b, snap)
 		b.WriteString("</div>\n")
@@ -853,15 +855,21 @@ func writeSystemOverview(b *strings.Builder, snap *internal.Snapshot, sparks Rep
 		b.WriteString("  <div style=\"display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap\">\n")
 		b.WriteString("    <div style=\"flex:1;min-width:140px\">\n")
 		b.WriteString("      <div style=\"font-size:8pt;color:var(--cf-text-muted);margin-bottom:2px\">CPU History</div>\n")
-		b.WriteString("      " + svgSparkline(cpuData, 200, 40, "#0072f5") + "\n")
+		b.WriteString("      ")
+		b.WriteString(svgSparkline(cpuData, 200, 40, "#0072f5"))
+		b.WriteString("\n")
 		b.WriteString("    </div>\n")
 		b.WriteString("    <div style=\"flex:1;min-width:140px\">\n")
 		b.WriteString("      <div style=\"font-size:8pt;color:var(--cf-text-muted);margin-bottom:2px\">Memory History</div>\n")
-		b.WriteString("      " + svgSparkline(memData, 200, 40, "#7c3aed") + "\n")
+		b.WriteString("      ")
+		b.WriteString(svgSparkline(memData, 200, 40, "#7c3aed"))
+		b.WriteString("\n")
 		b.WriteString("    </div>\n")
 		b.WriteString("    <div style=\"flex:1;min-width:140px\">\n")
 		b.WriteString("      <div style=\"font-size:8pt;color:var(--cf-text-muted);margin-bottom:2px\">I/O Wait History</div>\n")
-		b.WriteString("      " + svgSparkline(ioData, 200, 40, "#d97706") + "\n")
+		b.WriteString("      ")
+		b.WriteString(svgSparkline(ioData, 200, 40, "#d97706"))
+		b.WriteString("\n")
 		b.WriteString("    </div>\n")
 		b.WriteString("  </div>\n")
 	}

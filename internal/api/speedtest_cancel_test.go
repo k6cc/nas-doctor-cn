@@ -279,6 +279,9 @@ func TestHandleSpeedtestCancel_StreamReceivesCancelledEvent(t *testing.T) {
 			break
 		}
 	}
+	if err := scanner.Err(); err != nil {
+		t.Errorf("scanner error reading SSE stream: %v", err)
+	}
 	if !sawCancelled {
 		t.Errorf("SSE stream did not emit `cancelled` event before end")
 	}

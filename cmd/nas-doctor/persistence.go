@@ -2,7 +2,6 @@ package main
 
 import (
 	"log/slog"
-	"syscall"
 )
 
 // devIDFn resolves a filesystem path to a device identifier. In production
@@ -11,18 +10,6 @@ import (
 // filesystem state. Returning an error lets the caller distinguish "path
 // missing / not accessible" from "path exists on device X".
 type devIDFn func(path string) (uint64, error)
-
-// realDevID returns the device id that the given path currently lives on.
-// On Linux this is populated by the kernel from the inode's superblock,
-// so a bind-mounted /data (hosted by a real filesystem on the host) will
-// have a different Dev than / (the container's overlay rootfs).
-func realDevID(path string) (uint64, error) {
-	var st syscall.Stat_t
-	if err := syscall.Stat(path, &st); err != nil {
-		return 0, err
-	}
-	return uint64(st.Dev), nil
-}
 
 // checkDataPersistenceWith reports whether dataDir appears to be a
 // persistent (bind-mounted) filesystem distinct from rootDir. If dataDir

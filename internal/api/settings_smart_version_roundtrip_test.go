@@ -275,7 +275,6 @@ func TestSettingsHTMLPayloadIncludesSettingsVersion(t *testing.T) {
 			depth--
 			if depth == 0 {
 				returnEnd = i + 1
-				break
 			}
 		}
 		if returnEnd != -1 {

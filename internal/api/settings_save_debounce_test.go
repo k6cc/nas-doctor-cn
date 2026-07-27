@@ -115,7 +115,7 @@ func TestSettingsHTML_SaveSettingsIsDebounced(t *testing.T) {
 	if wrapStart < 0 {
 		t.Fatal("saveSettings wrapper not found")
 	}
-	wrapEnd := strings.Index(html[wrapStart:], "\n}\n")
+	wrapEnd := strings.Index(html[wrapStart:], "}\n")
 	if wrapEnd < 0 {
 		t.Fatal("saveSettings wrapper has no closing brace")
 	}
