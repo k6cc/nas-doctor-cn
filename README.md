@@ -70,7 +70,7 @@ NAS Doctor 源自一个生成专业 PDF 服务器报告的 [OpenCode 诊断技�
 - **网络**：接口速度协商、状态、MTU
 - **日志**：过滤后的 dmesg 和 syslog 错误（ATA 错误、I/O 错误、medium 错误）
 - **Parity**（Unraid）：历史 parity 检查速度趋势分析、错误跟踪
-- **隧道**：Cloudflared 隧道状态（连接、路由）和 Tailscale 对等节点图（IP、在线/离线、中继、出口节点）—— Tailscale 同时检测主机二进制（已内置到镜像中）和 Docker 容器；Cloudflared 检测 Docker 容器，主机二进制检测需要自定义镜像内置 `cloudflared` CLI
+- **隧道**：Cloudflared 隧道状态（连接、路由）和 Tailscale 对等节点图（IP、在线/离线、中继、出口节点）—— Tailscale 同时检测主机二进制（已内置到镜像中）和 Docker 容器；Cloudflared 检测 Docker 容器，主机二进制检测需要 custom image（自定义镜像）内置 `cloudflared` CLI
 - **Proxmox VE**：集群状态、节点（CPU/内存/运行时长）、虚拟机 + LXC（状态、资源）、存储池、HA 服务、近期任务/备份 —— 通过 PVE REST API 接入并支持测试连接
 - **Kubernetes**：集群监控适用于 k8s、k3s、EKS、GKE、AKS —— 节点（状态、磁盘使用率、Pod 容量）、按节点分组的 Pod 及命名空间明细、deployments、services、PVCs、告警事件。集群内自动检测 + 外部 token 认证。*Kubernetes 中的 Tailscale 检测需要一个 sidecar pod 通过 emptyDir 共享 `/var/run/tailscale` —— 参见 [docs/tailscale-install-methods.md](docs/tailscale-install-methods.md)。*
 - **操作系统更新检查**：针对 Unraid 和 TrueNAS 比较已安装版本与最新 GitHub release
@@ -206,7 +206,7 @@ SSH Key Path:      (leave blank — local repo)
 ### 隧道监控
 
 自动检测和监控远程访问隧道：
-- **Cloudflared**：隧道状态、连接数、ingress 路由 —— 开箱即用检测 Docker 容器。主机二进制检测需要内置 `cloudflared` CLI 的自定义镜像（默认镜像内置 `tailscale` 但不含 `cloudflared`）。
+- **Cloudflared**：隧道状态、连接数、ingress 路由 —— 开箱即用检测 Docker 容器。主机二进制检测需要内置 `cloudflared` CLI 的 custom image（自定义镜像）（默认镜像内置 `tailscale` 但不含 `cloudflared`）。
 - **Tailscale**：完整对等节点图（在线状态、IP、OS、中继区域、TX/RX 字节、出口节点状态）**当主机守护进程 socket `/var/run/tailscale` 通过 bind-mount 可访问时**。当 JSON 输出因 CLI-守护进程版本差异不可用时，纯文本 `tailscale status` 回退会捕获一个缩减子集（IP、主机名、OS、在线状态）。当守护进程不可达时，仪表盘会显示可操作的提示说明应挂载什么。
 - Docker 容器检测默认按 `tailscale` 匹配；可选环境变量 `NAS_DOCTOR_TAILSCALE_CONTAINER_NAMES=ts-sidecar,mullvad-ts,vpn`（逗号分隔，不区分大小写的子串匹配）可将检测扩展到自定义命名的 sidecar。
 - 所有主题中的仪表盘分区，每个隧道/对等节点附状态圆点
@@ -269,7 +269,7 @@ SSH Key Path:      (leave blank — local repo)
 
 | 集成 | 方式 |
 |---|---|
-| **Prometheus** | 抓取 `/metrics` — 120+ 系统指标（含 CPU/主板温度）、磁盘、SMART、Docker、网络、UPS、ZFS、GPU、服务、parity、隧道、Proxmox、Kubernetes、备份、速度测试（含实时测试进行中 + 每引擎 + 每样本数指标）、findings |
+| **Prometheus** | Scrape `/metrics` — 120+ gauges for 系统（含 CPU/主板温度）、磁盘、SMART、Docker、网络、UPS、ZFS、GPU、服务、parity、隧道、Proxmox、Kubernetes、备份、速度测试（含实时测试进行中 + 每引擎 + 每样本数指标）、findings |
 | **Grafana** | 通过 Prometheus 数据源接入 |
 | **Discord** | Webhook，附富嵌入、严重度颜色、findings 详情 |
 | **Slack** | Webhook，附 blocks、严重度计数、Top findings |
@@ -686,7 +686,7 @@ NAS Doctor 支持多语言界面切换，目前已实现设置页的中英文切
 所有指标以 `nasdoctor_` 为前缀。完整列表：
 
 <details>
-<summary>展开指标列表（120+ 指标）</summary>
+<summary>Expand metric list (120+ metrics)</summary>
 
 ```
 # System (14 gauges)

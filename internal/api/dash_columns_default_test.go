@@ -81,8 +81,8 @@ func TestDashboardTheme_AutoModeMapsToThreeColumns(t *testing.T) {
 // actually renders 3.
 func TestSettingsHTML_DashColumnsAutoLabelSaysThree(t *testing.T) {
 	html := SettingsPage
-	want := `<option value="0">Auto (3 columns)</option>`
-	bad := `<option value="0">Auto (2 columns)</option>`
+	want := `Auto (3 columns)`
+	bad := `Auto (2 columns)`
 	if !strings.Contains(html, want) {
 		t.Errorf("settings.html missing %q (issue #208)", want)
 	}

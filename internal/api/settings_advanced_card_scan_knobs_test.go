@@ -98,7 +98,7 @@ func TestSettingsHTML_AdvancedCardDescriptorMentionsScanKeywords(t *testing.T) {
 		cardBody = content[cardIdx : cardIdx+1+nextCardIdx]
 	}
 
-	descRE := regexp.MustCompile(`(?s)<div class="card-desc">(.*?)</div>`)
+	descRE := regexp.MustCompile(`(?s)<div class="card-desc"[^>]*>(.*?)</div>`)
 	m := descRE.FindStringSubmatch(cardBody)
 	if m == nil {
 		t.Fatalf("no <div class=\"card-desc\"> found inside card-advanced block")
