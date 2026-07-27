@@ -17,6 +17,9 @@ vendor/
 .DS_Store
 Thumbs.db
 
+# Temp
+/tmp/
+
 # Docker
 .docker/
 

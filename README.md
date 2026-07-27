@@ -5,20 +5,20 @@
 <h1 align="center">NAS Doctor</h1>
 
 <p align="center">
-  <strong><em>Sleep tight knowing your server never does.</em></strong>
+  <strong><em>服务器从不休眠，你尽可安睡。</em></strong>
 </p>
 
 <p align="center">
-  <strong>Local NAS diagnostic and monitoring tool.</strong><br>
-  Run it as a Docker container on your Unraid, TrueNAS, Synology, Proxmox, or Kubernetes cluster.<br>
-  Beautiful dashboards, Prometheus metrics, webhook alerts — no cloud account required.<br>
+  <strong>本地 NAS 诊断与监控工具。</strong><br>
+  以 Docker 容器形式运行在你的 Unraid、TrueNAS、Synology、Proxmox 或 Kubernetes 集群上。<br>
+  精美的仪表盘、Prometheus 指标、webhook 告警 —— 无需云账号。<br>
 </p>
 
-> **Beta** — NAS Doctor is in active development. Core features are stable and tested on Unraid. Other platforms may have edge cases. [Report issues here.](https://github.com/mcdays94/nas-doctor/issues)
+> **Beta** — NAS Doctor 正在积极开发中。核心功能已稳定并在 Unraid 上经过测试，其他平台可能存在边界情况。[在此反馈问题。](https://github.com/k6cc/nas-doctor-cn/issues)
 
 <p align="center">
   <a href="https://nasdoctordemo.mdias.info"><img src="https://img.shields.io/badge/Live%20Demo-nasdoctordemo.mdias.info-6366f1?style=flat-square&logo=cloudflare&logoColor=white" alt="Live Demo"></a>
-  <a href="https://github.com/mcdays94/nas-doctor/pkgs/container/nas-doctor"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fnas-doctor-stats.lusostreams.workers.dev%2Fbadge-monthly.json&style=flat-square&logo=docker&logoColor=white" alt="GHCR pulls/month"></a>
+  <a href="https://github.com/k6cc/nas-doctor-cn/pkgs/container/nas-doctor"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fnas-doctor-stats.lusostreams.workers.dev%2Fbadge-monthly.json&style=flat-square&logo=docker&logoColor=white" alt="GHCR pulls/month"></a>
   <a href="https://buymeacoffee.com/miguelcaetanodias"><img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow.svg?style=flat-square&logo=buy-me-a-coffee" alt="Buy Me A Coffee"></a>
 </p>
 
@@ -26,152 +26,128 @@
 
 ![NAS Doctor Dashboard](screenshots/midnight-top.jpg)
 
-NAS Doctor runs periodic health checks on your server — analyzing SMART data, disk usage, Docker containers, GPU, network speed, process CPU, kernel logs, temperatures, ZFS pools, UPS power, and Unraid parity — then surfaces findings with clear severity ratings, root-cause correlation, and actionable recommendations backed by Backblaze failure rate data.
+NAS Doctor 会定期对你的服务器执行健康检查 —— 分析 SMART 数据、磁盘使用率、Docker 容器、GPU、网络速度、进程 CPU、内核日志、温度、ZFS 池、UPS 电源以及 Unraid parity —— 然后通过清晰的严重级别、根因关联和基于 Backblaze 故障率数据的可操作建议呈现发现。
 
-Born from an [OpenCode diagnostic skill](https://github.com/mcdays94/opencode-server-diagnostic-skill) that generates professional PDF server reports, NAS Doctor packages the same intelligence into a self-hosted app anyone can install.
+NAS Doctor 源自一个生成专业 PDF 服务器报告的 [OpenCode 诊断技能](https://github.com/mcdays94/opencode-server-diagnostic-skill)，将同样的智能封装为任何人都能安装的自托管应用。
 
 ---
 
-## Table of Contents
+## 目录
 
-- [What It Does](#what-it-does)
-- [Quick Start](#quick-start)
-  - [Docker Compose](#docker-compose-recommended)
-  - [Unraid](#unraid--docker-ui-setup)
+- [功能特性](#功能特性)
+- [快速开始](#快速开始)
+  - [Docker Compose](#docker-compose推荐)
+  - [Unraid](#unraid--docker-ui-设置)
   - [Synology DSM](#synology-dsm--container-manager)
   - [TrueNAS SCALE](#truenas-scale)
   - [Kubernetes](#kubernetes-k3s--k8s)
-  - [Proxmox](#proxmox-ve)
-- [Demo](#demo)
-- [Configuration](#configuration)
-- [API Reference](#api-reference)
-- [Project Structure](#project-structure)
-- [Platform Support](#platform-support)
-- [Diagnostic Report](#diagnostic-report)
-- [Agentic Setup](#agentic-setup)
-- [Contributing](#contributing)
+  - [Proxmox](#proxmox-通过-ubuntu-vm--lxc)
+- [国际化 (i18n)](#国际化-i18n)
+- [设置](#设置)
+- [演示](#演示)
+- [API 参考](#api-参考)
+- [Prometheus 指标](#prometheus-指标)
+- [支持的平台](#支持的平台)
+- [文件结构与数据位置](#文件结构与数据位置)
+- [资源使用](#资源使用)
+- [诊断报告](#诊断报告)
+- [智能体设置](#智能体设置)
+- [许可证](#许可证)
 
 ---
 
-## What It Does
+## 功能特性
 
-### Diagnostics
-- **SMART Health**: Per-drive health, temperature, reallocated sectors, pending sectors, UDMA CRC errors, power-on hours, ATA port mapping, with **Backblaze failure-rate thresholds** (Q4-2025 data, 337k+ drives). By default, NAS Doctor respects drive standby and skips spun-down drives rather than waking them for SMART reads — history will show gaps for drives that spin down, which is intentional (reduces wear). Flip **Wake drives for SMART check** in Settings → Advanced to restore every-cycle polling (v0.9.4 behaviour).
-- **Historical Sparklines**: CPU, memory, I/O wait, and per-drive temperature trends inline on the dashboard
-- **Disk Space**: Usage per mount point with color-coded thresholds
-- **System**: CPU, memory, load average, I/O wait, uptime, platform detection, **CPU package temperature**, **mainboard temperature** (auto-detected via `/sys/class/hwmon`; rendered as colour-coded gauges in the dashboard header alongside CPU/Mem/I/O; gracefully hidden when no sensors are exposed, e.g. on Synology DSM)
-- **Docker**: Container listing with status and uptime
-- **ZFS Pool Health**: Pool state, vdev tree, scrub/resilver status, ARC hit rate, fragmentation, dataset listing with compression ratios
-- **UPS / Power**: Battery level, load, runtime, wattage via NUT or apcupsd (local or remote) — with critical alerts for on-battery and low-battery events
-- **Network**: Interface speed negotiation, state, MTU
-- **Logs**: Filtered dmesg and syslog errors (ATA errors, I/O errors, medium errors)
-- **Parity** (Unraid): Historical parity check speed trend analysis, error tracking
-- **Tunnels**: Cloudflared tunnel status (connections, routes) and Tailscale peer graph (IPs, online/offline, relay, exit nodes) — Tailscale detects both host binary (bundled in the image) and Docker containers; Cloudflared detects Docker containers, with host-binary detection requiring a custom image that bundles the `cloudflared` CLI
-- **Proxmox VE**: Cluster status, nodes (CPU/mem/uptime), VMs + LXCs (status, resources), storage pools, HA services, recent tasks/backups — via PVE REST API with test connection
-- **Kubernetes**: Cluster monitoring for k8s, k3s, EKS, GKE, AKS — nodes (status, disk usage, pod capacity), pods grouped by node with namespace breakdown, deployments, services, PVCs, warning events. In-cluster auto-detection + external token auth. *Tailscale detection in Kubernetes requires a sidecar pod sharing `/var/run/tailscale` via emptyDir — see [docs/tailscale-install-methods.md](docs/tailscale-install-methods.md).*
-- **OS Update Check**: Compares installed version against latest GitHub release for Unraid and TrueNAS
+### 诊断
 
-### Analysis Engine
+- **SMART 健康**：每盘健康状态、温度、重分配扇区、待处理扇区、UDMA CRC 错误、通电时长、ATA 端口映射，配有 **Backblaze 故障率阈值**（Q4-2025 数据，337k+ 块硬盘）。默认情况下，NAS Doctor 尊重硬盘待机状态，跳过已停转的硬盘而不唤醒它们读取 SMART —— 历史数据对于停转的硬盘会有间隔，这是有意为之（减少磨损）。在 设置 → 高级 中开启 **为 SMART 检查唤醒硬盘** 可恢复每轮轮询（v0.9.4 行为）。
+- **历史迷你图**：CPU、内存、I/O 等待和每盘温度趋势以行内迷你图形式显示在仪表盘上
+- **磁盘空间**：按挂载点显示使用率，配有颜色编码阈值
+- **系统**：CPU、内存、负载均值、I/O 等待、运行时长、平台检测、**CPU 封装温度**、**主板温度**（通过 `/sys/class/hwmon` 自动检测；在仪表盘头部以颜色编码仪表与 CPU/Mem/I/O 一起显示；当无传感器暴露时优雅隐藏，例如 Synology DSM）
+- **Docker**：容器列表及状态和运行时长
+- **ZFS 池健康**：池状态、vdev 树、scrub/resilver 状态、ARC 命中率、碎片率、数据集列表及压缩比
+- **UPS / 电源**：电池电量、负载、运行时长、瓦数，通过 NUT 或 apcupsd（本地或远程）—— 对使用电池和低电量事件发出严重告警
+- **网络**：接口速度协商、状态、MTU
+- **日志**：过滤后的 dmesg 和 syslog 错误（ATA 错误、I/O 错误、medium 错误）
+- **Parity**（Unraid）：历史 parity 检查速度趋势分析、错误跟踪
+- **隧道**：Cloudflared 隧道状态（连接、路由）和 Tailscale 对等节点图（IP、在线/离线、中继、出口节点）—— Tailscale 同时检测主机二进制（已内置到镜像中）和 Docker 容器；Cloudflared 检测 Docker 容器，主机二进制检测需要自定义镜像内置 `cloudflared` CLI
+- **Proxmox VE**：集群状态、节点（CPU/内存/运行时长）、虚拟机 + LXC（状态、资源）、存储池、HA 服务、近期任务/备份 —— 通过 PVE REST API 接入并支持测试连接
+- **Kubernetes**：集群监控适用于 k8s、k3s、EKS、GKE、AKS —— 节点（状态、磁盘使用率、Pod 容量）、按节点分组的 Pod 及命名空间明细、deployments、services、PVCs、告警事件。集群内自动检测 + 外部 token 认证。*Kubernetes 中的 Tailscale 检测需要一个 sidecar pod 通过 emptyDir 共享 `/var/run/tailscale` —— 参见 [docs/tailscale-install-methods.md](docs/tailscale-install-methods.md)。*
+- **操作系统更新检查**：针对 Unraid 和 TrueNAS 比较已安装版本与最新 GitHub release
 
-20+ diagnostic rules with automatic cross-correlation:
+### 分析引擎
 
-- UDMA CRC errors + slow parity → **Root cause: SATA cable failure**
-- High temperatures + slow parity → **Thermal throttling**
-- No SSD cache + high I/O wait + Docker containers → **I/O starvation**
-- Pending sectors + reallocated sectors → **Failing drive media**
-- Reallocated sectors at Backblaze 12.0x failure rate → **Replace immediately**
-- ZFS pool DEGRADED with REMOVED vdev → **No redundancy, replace disk**
-- UPS on battery with low runtime → **Initiate graceful shutdown**
-- OS significantly out of date → **Security vulnerability risk**
-- And more...
+20+ 条诊断规则，自动交叉关联：
 
-### Alerts & Incident Management
+- UDMA CRC 错误 + parity 缓慢 → **根因：SATA 线缆故障**
+- 高温 + parity 缓慢 → **热降频**
+- 无 SSD 缓存 + 高 I/O 等待 + Docker 容器 → **I/O 饥饿**
+- 待处理扇区 + 重分配扇区 → **硬盘介质故障**
+- 重分配扇区达到 Backblaze 12.0x 故障率 → **立即更换**
+- ZFS 池 DEGRADED 且有 REMOVED vdev → **无冗余，更换硬盘**
+- UPS 使用电池且剩余运行时长低 → **启动优雅关机**
+- 操作系统严重过期 → **安全漏洞风险**
+- 还有更多...
 
-Dedicated `/alerts` page with:
-- **Active Alerts** — acknowledge, snooze, unsnooze with full lifecycle timeline per alert
-- **Incident Timeline & Correlation** — correlate alerts against CPU, memory, I/O wait, and disk temperature over selectable windows (24h/7d/30d)
-- **Predictive Trend Intelligence** — worsening-pattern detection for SMART counters with urgency scoring, confidence levels, and parity risk markers
-- **Notification History** — webhook delivery log with status, error details, and auto-refresh
-- **Draggable cards** — reorder, collapse, and toggle card visibility with layout persistence
+### 告警与事件管理
 
-### Service Checks
+专用 `/alerts` 页面提供：
+- **活跃告警** — 确认、延迟、取消延迟，每条告警有完整生命周期时间线
+- **事件时间线与关联** — 将告警与 CPU、内存、I/O 等待、磁盘温度在可选时间窗口（24h/7d/30d）内关联
+- **预测性趋势智能** — SMART 计数器的恶化模式检测，附紧急度评分、置信度级别和 parity 风险标记
+- **通知历史** — webhook 投递日志，包含状态、错误详情和自动刷新
+- **可拖拽卡片** — 重排、折叠和切换卡片可见性，布局持久化
 
-Dedicated `/service-checks` page with uptime monitoring:
-- **HTTP/HTTPS**, **TCP**, **DNS**, **Ping/ICMP**, **SMB**, **NFS**, **Speed Test** check types
-- **Speed checks**: compare download/upload against contracted speeds with configurable margin of error. Three-state result: green (both pass), orange (degraded), red (both fail)
-- **Per-check configurable intervals** (30s to 1h) with independent scheduling loop
-- **Heartbeat badge cards** — colored dots showing recent check status per service, with favicon for HTTP targets
-- **Paginated log table** with filters (check name, status, time range)
-- Historical response time tracking and uptime percentages
+### 服务检查
 
-### Drive Replacement Planner
+专用 `/service-checks` 页面提供可用性监控：
+- **HTTP/HTTPS**、**TCP**、**DNS**、**Ping/ICMP**、**SMB**、**NFS**、**Speed Test** 检查类型
+- **Speed checks**：将下载/上传与合约速度对比，附可配置的误差范围。三态结果：绿色（两者均通过）、橙色（降级）、红色（两者均失败）
+- **每检查可配置间隔**（30s 到 1h），独立的调度循环
+- **心跳徽章卡片** — 彩色圆点显示每个服务最近的检查状态，HTTP 目标附 favicon
+- **分页日志表** — 支持过滤器（检查名称、状态、时间范围）
+- 历史响应时间跟踪和可用性百分比
 
-Dedicated `/replacement-planner` page with proactive drive lifecycle management:
-- **Health scoring** per drive — composite score based on age, temperature, SMART attributes, and Backblaze annualized failure rates (337k+ drives, Q4-2025 data)
-- **Urgency classification**: Replace Now, Replace Soon, Monitor, Healthy — with color-coded cards
-- **Bathtub curve aging model** — failure multiplier increases at infant (<6 months) and wear-out (>4 years) phases
-- **Cost estimates** per drive — configurable cost-per-TB in Settings, shows per-drive and total replacement cost
-- **Risk factors** — lists specific concerns per drive (age, temperature, reallocated sectors, power-on hours)
-- **Remaining life estimate** — projected years remaining based on current age and rated endurance
+### 硬盘更换规划器
 
-### Backup Monitoring
+专用 `/replacement-planner` 页面提供主动硬盘生命周期管理：
+- **每盘健康评分** — 基于使用时长、温度、SMART 属性和 Backblaze 年化故障率（337k+ 块硬盘，Q4-2025 数据）的综合评分
+- **紧急度分类**：立即更换、即将更换、监控、健康 — 配色编码卡片
+- **浴盆曲线老化模型** — 在早期（<6 个月）和磨损期（>4 年）阶段故障乘数上升
+- **每盘成本估算** — 在 设置 中可配置每 TB 成本，显示每盘和总更换成本
+- **风险因素** — 列出每盘的具体关注点（使用时长、温度、重分配扇区、通电时长）
+- **剩余寿命估算** — 基于当前使用时长和额定耐久度预测的剩余年限
 
-Auto-detects and tracks backups from the following tools when their CLI
-is reachable from the NAS Doctor container:
+### 备份监控
 
-- **Borg**, **Restic**, **Proxmox Backup Server (PBS)**, **Duplicati** — probed via `exec.LookPath` at each scan
-- **Duplicacy** — disk-read, no `duplicacy` binary required (since v0.10.0). Configure CLI repos or saspus/duplicacy-web cache layouts in **Settings → Advanced → Backup Monitors → Duplicacy**. See [Duplicacy Monitoring](#duplicacy-monitoring-disk-read-no-binary-required) below.
-- Tracks last backup time, size, snapshot count, duration, encryption status
-- **Stale backup alerts**: warning >24h, critical >48h, failed backups
+当以下工具的 CLI 可从 NAS Doctor 容器访问时，自动检测并跟踪备份：
 
-> **Note**: Restic, PBS, and Duplicati binaries don't ship in the
-> NAS Doctor Docker image. Borg **is** bundled (since v0.9.10; see
-> External Borg Monitoring below) and can be pointed at host-managed
-> repos via a Read Only bind-mount — no custom image needed. **Duplicacy**
-> needs no binary at all (disk-read; see Duplicacy Monitoring below). For
-> Restic/PBS/Duplicati the Backup dashboard section stays empty unless
-> you install the provider CLI inside the container (custom Dockerfile)
-> or run the provider in a sibling container that shares volumes/network
-> with NAS Doctor.
+- **Borg**、**Restic**、**Proxmox Backup Server (PBS)**、**Duplicati** — 每次扫描时通过 `exec.LookPath` 探测
+- **Duplicacy** — 磁盘读取，无需 `duplicacy` 二进制（自 v0.10.0 起）。在 **设置 → 高级 → Backup Monitors → Duplicacy** 中配置 CLI 仓库或 saspus/duplicacy-web 缓存布局。参见下文 [Duplicacy 监控](#duplicacy-监控磁盘读取无需二进制)。
+- 跟踪上次备份时间、大小、快照数、时长、加密状态
+- **过期备份告警**：超过 24h 警告、超过 48h 严重、备份失败
 
-#### External Borg Monitoring (host-managed repos)
+> **注意**：Restic、PBS 和 Duplicati 二进制不包含在 NAS Doctor Docker 镜像中。Borg **已**内置（自 v0.9.10 起；见下文外部 Borg 监控），可通过只读 bind-mount 指向主机管理的仓库 —— 无需自定义镜像。**Duplicacy** 完全不需要二进制（磁盘读取；见下文 Duplicacy 监控）。对于 Restic/PBS/Duplicati，除非在容器内安装 provider CLI（自定义 Dockerfile）或在与 NAS Doctor 共享卷/网络的兄弟容器中运行 provider，否则备份仪表盘部分会保持为空。
 
-If your Borg setup runs on the **host** (e.g. Unraid User Scripts,
-Synology Task Scheduler) rather than inside the NAS Doctor container,
-you can still monitor it. Borg is bundled in the image so the **binary
-requires no host mount** — just bind-mount the repo path **Read Only**.
+#### 外部 Borg 监控（主机管理的仓库）
 
-> NAS Doctor uses `borg --bypass-lock` to avoid writing to the repo, so
-> a Read Only mount is safe. The only theoretical race (read during a
-> concurrent `borg create` by the host) produces a momentarily-stale
-> archive count until the next scan — no corruption.
+如果你的 Borg 设置运行在 **主机** 上（例如 Unraid User Scripts、Synology Task Scheduler）而非 NAS Doctor 容器内，仍然可以监控。Borg 已内置在镜像中，因此 **二进制不需要主机挂载** —— 只需将仓库路径以 **只读** 方式 bind-mount。
 
-Configure in **Settings → Advanced → Backup Monitors → Borg**:
+> NAS Doctor 使用 `borg --bypass-lock` 避免写入仓库，因此只读挂载是安全的。唯一理论上的竞态（在主机并发执行 `borg create` 时读取）会产生一个暂时陈旧的归档计数直到下次扫描 —— 不会损坏数据。
 
-1. **Repo Path** — path to the Borg repo visible inside the container.
-   Bind-mount your host's repo location into the container first, as
-   **Read Only** (`:ro` or `Mode="ro"`).
-   Example: host `/mnt/user/appdata/borg/repo` → container
-   `/mnt/user/appdata/borg/repo` (RO).
-2. **Label** — optional display name for the dashboard (e.g. `Offsite`).
-3. **Passphrase Env Var** — optional, defaults to `BORG_PASSPHRASE`.
-   The name of a Docker env var containing the repo's passphrase.
-   NAS Doctor **never stores the passphrase itself** — it only reads
-   the env var you set on the container.
-4. **SSH Key Path** — optional, for `ssh://` remote repos. Absolute
-   path inside the container (bind-mount your key file read-only).
-5. **Binary Path** — optional override. Leave blank to use the bundled
-   binary. Overrides **must be musl-compatible** (the Alpine base image
-   can't exec glibc-linked binaries).
+在 **设置 → 高级 → Backup Monitors → Borg** 中配置：
 
-Each entry has a **Test** button that probes the repo on demand. Failed
-repos render as red error cards on the dashboard with a specific reason
-(`binary_not_found`, `repo_inaccessible`, `passphrase_rejected`,
-`ssh_timeout`, `corrupt_repo`, `unknown`) so you can tell at a glance
-which of your repos needs attention.
+1. **仓库路径** — 容器内可见的 Borg 仓库路径。先将主机的仓库位置以 **只读** 方式（`:ro` 或 `Mode="ro"`）bind-mount 到容器中。
+   示例：主机 `/mnt/user/appdata/borg/repo` → 容器
+   `/mnt/user/appdata/borg/repo`（RO）。
+2. **标签** — 可选，仪表盘上的显示名称（例如 `Offsite`）。
+3. **密码环境变量** — 可选，默认 `BORG_PASSPHRASE`。包含仓库密码的 Docker 环境变量名。NAS Doctor **从不存储密码本身** — 仅读取你在容器上设置的环境变量。
+4. **SSH 密钥路径** — 可选，用于 `ssh://` 远程仓库。容器内的绝对路径（将密钥文件以只读方式 bind-mount）。
+5. **二进制路径** — 可选覆盖。留空使用内置二进制。覆盖项 **必须兼容 musl**（Alpine 基础镜像无法执行 glibc 链接的二进制）。
 
-**Worked Unraid example** — host runs Borg via User Scripts with repo
-at `/mnt/user/appdata/borg/main`, encrypted:
+每个条目都有 **测试** 按钮，可按需探测仓库。失败的仓库在仪表盘上呈现为红色错误卡片，附带具体原因（`binary_not_found`、`repo_inaccessible`、`passphrase_rejected`、`ssh_timeout`、`corrupt_repo`、`unknown`），让你一眼就能看出哪个仓库需要关注。
+
+**Unraid 实战示例** — 主机通过 User Scripts 运行 Borg，仓库位于 `/mnt/user/appdata/borg/main`，已加密：
 
 ```
 # In the Unraid Docker config for nas-doctor:
@@ -179,7 +155,7 @@ Path:  /mnt/user/appdata/borg/main  →  /mnt/user/appdata/borg/main (RO)
 Env:   BORG_PASSPHRASE              =  <your-passphrase>
 ```
 
-Then in Settings → Advanced → Backup Monitors → Borg → Add Borg repo:
+然后在 设置 → 高级 → Backup Monitors → Borg → Add Borg repo：
 
 ```
 Enabled:           on
@@ -190,149 +166,122 @@ Passphrase Env:    BORG_PASSPHRASE
 SSH Key Path:      (leave blank — local repo)
 ```
 
-Click **Test** to verify; the response shows the archive count on
-success or a specific error reason on failure. No container restart
-needed — the repo appears on the dashboard at the next scan tick.
+点击 **测试** 验证；响应在成功时显示归档计数，失败时显示具体错误原因。无需重启容器 —— 仓库会在下次扫描周期出现在仪表盘上。
 
-#### Duplicacy Monitoring (disk-read, no binary required)
+#### Duplicacy 监控（磁盘读取，无需二进制）
 
-Both vanilla Duplicacy CLI installs and the popular
-[saspus/duplicacy-web](https://hub.docker.com/r/saspus/duplicacy-web)
-container are monitored by **reading the on-disk JSON snapshot files**
-that Duplicacy writes alongside its repo cache — **no `duplicacy` binary
-is invoked, no subprocess spawned, no network call made**. This sidesteps
-Duplicacy's source-available CLI licence (so we don't bundle a binary)
-and works equally well for both deployment shapes.
+无论是原版 Duplicacy CLI 安装还是流行的 [saspus/duplicacy-web](https://hub.docker.com/r/saspus/duplicacy-web) 容器，都通过 **读取 Duplicacy 写入其仓库缓存旁的磁盘 JSON 快照文件** 来监控 —— **不调用 `duplicacy` 二进制、不创建子进程、不发起网络请求**。这绕过了 Duplicacy 的 source-available CLI 许可（因此我们不内置二进制），并对两种部署形态同样适用。
 
-Configure in **Settings → Advanced → Backup Monitors → Duplicacy**:
+在 **设置 → 高级 → Backup Monitors → Duplicacy** 中配置：
 
-1. **Kind** — `cli-repo` (vanilla CLI install) or `web-cache` (saspus/
-   duplicacy-web container layout).
-2. **Path** — repo root (cli-repo) or the cache root (web-cache),
-   visible inside the NAS Doctor container. Bind-mount your Duplicacy
-   path **Read Only** — disk-read makes RO mounts safe.
-3. **Storage ID** — only for `kind=web-cache`. Names the per-repo
-   subdir under Path that the saspus container writes to.
-4. **Stale After (days)** — repo whose newest snapshot is older than
-   this threshold reports the `stale` reason. Default 30 days; set
-   per-entry to support mixed daily/weekly/monthly schedules.
-5. **Label** — optional display name for the dashboard.
+1. **类型 (Kind)** — `cli-repo`（原版 CLI 安装）或 `web-cache`（saspus/duplicacy-web 容器布局）。
+2. **路径** — 仓库根目录（cli-repo）或缓存根目录（web-cache），需在 NAS Doctor 容器内可见。将你的 Duplicacy 路径以 **只读** 方式 bind-mount —— 磁盘读取使 RO 挂载安全。
+3. **存储 ID (Storage ID)** — 仅用于 `kind=web-cache`。命名 Path 下 saspus 容器写入的每仓库子目录。
+4. **过期天数 (Stale After)** — 最新快照早于此阈值的仓库报告 `stale` 原因。默认 30 天；可按条目设置以支持日/周/月混合调度。
+5. **标签** — 可选，仪表盘上的显示名称。
 
-Each entry has a **Test** button that runs the disk-read against the
-tentative config and shows the outcome immediately (no save+scan+wait
-loop). Reason codes are a closed set:
+每个条目都有 **测试** 按钮，针对试探性配置执行磁盘读取并立即显示结果（无需保存+扫描+等待循环）。原因码为封闭集合：
 
-`ok` · `path_not_found` · `path_unreadable` · `not_a_duplicacy_repo` ·
-`storage_id_not_found` · `no_snapshots_yet` · `stale` · `corrupt_snapshot`
+`ok` · `path_not_found` · `path_unreadable` · `not_a_duplicacy_repo` · `storage_id_not_found` · `no_snapshots_yet` · `stale` · `corrupt_snapshot`
 
-The dashboard widget renders one row per configured entry with the
-kind tag (`DUPLICACY:CLI-REPO` / `DUPLICACY:WEB-CACHE`), a
-severity-coloured status pill keyed off the reason code (ok=success,
-no_snapshots_yet=info, stale=warning, anything else=error), snapshot
-count, last-backup-age, and an orthogonal `RUNNING` badge when a
-lock or `incomplete` marker is detected on disk. Failed entries
-render as red error cards with the specific reason so users can tell
-at a glance whether they have a misconfigured Path, a missing Storage
-ID, or a fresh-never-run repo.
+仪表盘小部件为每个已配置条目渲染一行，包含类型标签（`DUPLICACY:CLI-REPO` / `DUPLICACY:WEB-CACHE`）、基于原因码的严重度彩色状态药丸（ok=success，no_snapshots_yet=info，stale=warning，其他=error）、快照数、上次备份距今时长，以及在磁盘上检测到锁或 `incomplete` 标记时正交显示的 `RUNNING` 徽章。失败条目以红色错误卡片形式渲染并附具体原因，让用户一眼就能区分是路径配错、缺少 Storage ID，还是从未运行过的新仓库。
 
-Per-entry Prometheus gauges:
-`nasdoctor_backup_duplicacy_snapshots_total{label="…"}`,
-`_last_backup_age_seconds{label="…"}`,
-`_last_backup_size_bytes{label="…"}`,
-`_status{label="…",reason="…"}` (1 for the entry's current reason
-code, 0 for the others — same convention as
-`nasdoctor_speedtest_engine`).
+每条目 Prometheus 指标：
+`nasdoctor_backup_duplicacy_snapshots_total{label="…"}`、
+`_last_backup_age_seconds{label="…"}`、
+`_last_backup_size_bytes{label="…"}`、
+`_status{label="…",reason="…"}`（当前原因码为 1，其他为 0 — 与 `nasdoctor_speedtest_engine` 相同的约定）。
 
-### Network Speed Test
+### 网络速度测试
 
-- **Live-progress streaming during a test** — when a manual or scheduled test runs, the dashboard speed-test card grows a strip showing the active phase (`LATENCY → DOWNLOAD → UPLOAD`), a sweeping gauge with current Mbps, a big numeric readout, and a mini sparkline of recent samples. Streamed via Server-Sent Events; multi-tab and reconnect-mid-test work transparently (full sample replay on reconnect). The strip's **Cancel** button (since v0.9.14) aborts the in-flight test promptly — kills the speedtest subprocess, closes the SSE stream, and resets the in-progress Prometheus gauge. **Best-effort through reverse proxies**: some configurations (notably Cloudflare Access / Tunnel) buffer SSE event lines until the response completes, so the strip may stay frozen on `0 MBPS` until the test ends and the final result lands. Direct-LAN access streams smoothly; the final result + per-sample history work correctly in both cases.
-- **"Run now" button** on the speedtest card — idempotent. Kicks off a one-off test or attaches to one already in flight. Bypasses the "Disabled" cron setting (Disabled governs *scheduled* tests, not manual runs).
-- **Engine**: bundled `showwin/speedtest-go` (pure Go, primary). Falls back to bundled Ookla CLI if the primary engine errors. Each historical row records which engine produced it; the dashboard caption next to the latest result shows `via {engine}`, and a per-row engine column is exported via Prometheus + the snapshot API so you can correlate cross-engine measurements yourself.
-- **Per-sample history** — every test's per-sample throughput is persisted in a `speedtest_samples` table. Expand any past type=speed entry on `/service-checks` to see how throughput evolved during that test window.
-- **Empty-state from history** — fresh installs and cold-starts render the most-recent successful test from history with a "Last test: X ago" relative-time caption rather than waiting for the next cron tick.
-- Download, upload, latency, jitter with historical charts (1H/1D/1W).
-- Independent 4-hour schedule (configurable, or "Disabled" for metered connections).
-- Server name, ISP, and external IP reported.
+- **测试期间的实时进度流式传输** — 当手动或计划测试运行时，仪表盘 speed-test 卡片会扩展出一条显示活动阶段（`LATENCY → DOWNLOAD → UPLOAD`）的条带，包含扫描式仪表显示当前 Mbps、大号数字读数和最近样本的迷你图。通过 Server-Sent Events 流式传输；多标签页和测试中途重连均可透明工作（重连时完整样本回放）。条带的 **取消** 按钮（自 v0.9.14 起）会立即中止进行中的测试 —— 终止 speedtest 子进程、关闭 SSE 流并重置进行中的 Prometheus 指标。**反向代理下的尽力而为**：某些配置（特别是 Cloudflare Access / Tunnel）会缓冲 SSE 事件行直到响应完成，因此条带可能停留在 `0 MBPS` 直到测试结束并最终结果落地。直连 LAN 访问可平滑流式传输；两种情况下最终结果 + 每样本历史均正常工作。
+- speedtest 卡片上的 **"立即运行" 按钮** — 幂等。触发一次性测试或附加到已运行的测试。绕过 "Disabled" cron 设置（Disabled 治理 *计划* 测试，而非手动运行）。
+- **引擎**：内置 `showwin/speedtest-go`（纯 Go，主要）。如主引擎出错则回退到内置 Ookla CLI。每条历史记录会记录由哪个引擎产生；最新结果旁的仪表盘说明显示 `via {engine}`，并通过 Prometheus + 快照 API 导出每行引擎列，方便你自行关联跨引擎测量。
+- **每样本历史** — 每次测试的每样本吞吐量持久化在 `speedtest_samples` 表中。在 `/service-checks` 上展开任何过去的 type=speed 条目即可查看该测试窗口内吞吐量的变化。
+- **基于历史的空状态** — 全新安装和冷启动会从历史中渲染最近一次成功测试，附 "Last test: X ago" 相对时间说明，而非等待下一次 cron 触发。
+- 下载、上传、延迟、抖动，附历史图表（1H/1D/1W）。
+- 独立的 4 小时调度（可配置，或选择 "Disabled" 以适应按量计费网络）。
+- 报告服务器名称、ISP 和外部 IP。
 
-### Tunnel Monitoring
+### 隧道监控
 
-Automatic detection and monitoring of remote access tunnels:
-- **Cloudflared**: Tunnel status, connection count, ingress routes — detects Docker containers out of the box. Host-binary detection requires a custom image that bundles the `cloudflared` CLI (the default image bundles `tailscale` but not `cloudflared`).
-- **Tailscale**: Full peer graph (online status, IPs, OS, relay regions, TX/RX bytes, exit node status) **when the host daemon socket `/var/run/tailscale` is accessible via bind-mount**. A plain-text `tailscale status` fallback captures a reduced subset (IPs, hostnames, OS, online state) when JSON output is unavailable due to CLI-daemon version skew. When the daemon is unreachable the dashboard surfaces an actionable hint explaining what to mount.
-- Docker-container detection matches `tailscale` by default; opt-in env var `NAS_DOCTOR_TAILSCALE_CONTAINER_NAMES=ts-sidecar,mullvad-ts,vpn` (comma-separated, case-insensitive substring match) extends detection to custom-named sidecars.
-- Dashboard section in all themes with status dots per tunnel/peer
-- Full coverage matrix across install methods (host binary, Docker, Kubernetes sidecar) in [docs/tailscale-install-methods.md](docs/tailscale-install-methods.md)
+自动检测和监控远程访问隧道：
+- **Cloudflared**：隧道状态、连接数、ingress 路由 —— 开箱即用检测 Docker 容器。主机二进制检测需要内置 `cloudflared` CLI 的自定义镜像（默认镜像内置 `tailscale` 但不含 `cloudflared`）。
+- **Tailscale**：完整对等节点图（在线状态、IP、OS、中继区域、TX/RX 字节、出口节点状态）**当主机守护进程 socket `/var/run/tailscale` 通过 bind-mount 可访问时**。当 JSON 输出因 CLI-守护进程版本差异不可用时，纯文本 `tailscale status` 回退会捕获一个缩减子集（IP、主机名、OS、在线状态）。当守护进程不可达时，仪表盘会显示可操作的提示说明应挂载什么。
+- Docker 容器检测默认按 `tailscale` 匹配；可选环境变量 `NAS_DOCTOR_TAILSCALE_CONTAINER_NAMES=ts-sidecar,mullvad-ts,vpn`（逗号分隔，不区分大小写的子串匹配）可将检测扩展到自定义命名的 sidecar。
+- 所有主题中的仪表盘分区，每个隧道/对等节点附状态圆点
+- 跨安装方式的完整覆盖矩阵（主机二进制、Docker、Kubernetes sidecar）见 [docs/tailscale-install-methods.md](docs/tailscale-install-methods.md)
 
-### Top Processes
+### Top 进程
 
-Real-time process monitoring with Docker container attribution:
-- **Dashboard section** — Top 10 processes ranked by CPU%, each tagged with its Docker container name via Linux cgroup matching
-- **Click-through** — Click any process to jump to its CPU history chart on `/stats`
-- **Historical charts** — Per-process CPU% time series on `/stats` with **1H/1D/1W/1M** range selector
-- **Container attribution** — Reads `/proc/PID/cgroup` to match processes to Docker containers. Supports cgroup v1 (Unraid) and cgroup v2 (TrueNAS SCALE)
-- **5-minute collection** — Process stats collected every 5 minutes alongside container stats
-- **Alert rules** — Configurable `cpu_above` and `mem_above` thresholds per process
+实时进程监控，附带 Docker 容器归因：
+- **仪表盘分区** — 按 CPU% 排序的 Top 10 进程，每个通过 Linux cgroup 匹配标记其 Docker 容器名
+- **点击穿透** — 点击任何进程跳转到其在 `/stats` 上的 CPU 历史图表
+- **历史图表** — `/stats` 上的每进程 CPU% 时间序列，支持 **1H/1D/1W/1M** 范围选择器
+- **容器归因** — 读取 `/proc/PID/cgroup` 将进程匹配到 Docker 容器。支持 cgroup v1（Unraid）和 cgroup v2（TrueNAS SCALE）
+- **5 分钟采集** — 进程统计每 5 分钟与容器统计一起采集
+- **告警规则** — 每进程可配置的 `cpu_above` 和 `mem_above` 阈值
 
-> **Requires `--pid=host`** (or `pid: host` in compose) — without it, the container only sees its own processes.
+> **需要 `--pid=host`**（或 compose 中的 `pid: host`） —— 否则容器只能看到自己的进程。
 
-### Parity Detail
+### Parity 详情
 
-Dedicated `/parity` page with full parity check history:
-- **Speed trend chart** across all historical checks
-- **Expandable detail cards** per check (duration, speed, errors, action, array size, exit code)
-- Dashboard shows **scrollable badge pills** sorted newest-first (replaces the old table)
+专用 `/parity` 页面提供完整 parity 检查历史：
+- 跨所有历史检查的 **速度趋势图**
+- 每次检查的 **可展开详情卡片**（时长、速度、错误、动作、阵列大小、退出码）
+- 仪表盘显示按最新优先排序的 **可滚动徽章药丸**（替代旧表格）
 
-### Notification Rules
+### 通知规则
 
-Dropdown-driven notification builder with full granularity — no YAML, no complex policy syntax:
-- **13 categories**: Findings, Disk Space, Disk Temperature, SMART Health, Service Checks, Process, Parity, UPS/Power, Docker, System, ZFS, Tunnels, Platform Update
-- **Condition dropdowns** that change per category — e.g., SMART offers "health fails", "reallocated above", "pending above", "CRC errors above", "power-on hours above"
-- **Target selection** from live data — pick a specific drive, service, container, ZFS pool, or tunnel from a dropdown populated by the latest scan
-- **Threshold values** — set exact numbers (e.g., disk space below 10%, temp above 55°C)
-- **5 one-click presets**: Critical alerts, Disk health watch, Service uptime, Power protection, Storage warnings
-- **Quiet Hours** — suppress notifications during a daily time window (alerts still recorded)
-- **Maintenance Windows** — scheduled suppression periods per hostname
-- **Default Cooldown** — global deduplication window per rule
+下拉菜单驱动的通知构建器，粒度完整 —— 无需 YAML，无需复杂策略语法：
+- **13 个类别**：Findings、磁盘空间、磁盘温度、SMART 健康、服务检查、进程、Parity、UPS/电源、Docker、系统、ZFS、隧道、平台更新
+- **条件下拉菜单** 按类别变化 —— 例如，SMART 提供 "health fails"、"reallocated above"、"pending above"、"CRC errors above"、"power-on hours above"
+- **目标选择** 来自实时数据 —— 从下拉菜单（由最新扫描填充）中选择特定硬盘、服务、容器、ZFS 池或隧道
+- **阈值** — 设置精确数字（例如，磁盘空间低于 10%、温度高于 55°C）
+- **5 个一键预设**：严重告警、硬盘健康监控、服务可用性、电源保护、存储警告
+- **静默时段** — 在每日时间窗口内抑制通知（告警仍会记录）
+- **维护窗口** — 按主机名调度抑制时段
+- **默认冷却** — 每条规则的全局去重窗口
 
-### API Key Authentication
+### API 密钥认证
 
-Per-instance API key system for securing fleet communication:
-- **Generate/Copy/Revoke** from Settings — key format `nd-{uuid}`
-- All `/api/v1/*` endpoints protected when key is set (including `/health`)
-- Dashboard UI exempt (same-origin requests pass through)
-- Fleet test validates end-to-end with API key before saving
-- Docker HEALTHCHECK and K8s probes use TCP port check (no auth needed)
+每实例 API 密钥系统，用于保护舰队通信：
+- 从 设置 **生成/复制/撤销** —— 密钥格式 `nd-{uuid}`
+- 设置密钥后所有 `/api/v1/*` 端点受保护（包括 `/health`）
+- 仪表盘 UI 豁免（同源请求直接通过）
+- 舰队测试在保存前使用 API 密钥验证端到端
+- Docker HEALTHCHECK 和 K8s 探针使用 TCP 端口检查（无需认证）
 
-### Multi-Server Fleet Monitoring
+### 多服务器舰队监控
 
-Monitor all your NAS Doctor instances from a visual topology view at `/fleet`:
-- **Visual topology** with central primary node and connected remote servers
-- Per-server: platform icon, hostname, IP, NAS Doctor version, uptime, health status, finding counts
-- **Auto-detect connection type**: LAN (private IP) vs public hostname with tunnel detection (Cloudflare, Tailscale)
-- **Custom auth headers** per server for Cloudflare Access, Authelia, etc.
-- **Test Connection** validates NAS Doctor signature + API key end-to-end
-- **Auto-create service check** when adding a fleet server
-- **Edit/Remove** per server with collapsible form
-- **Open Dashboard** link to view remote instance directly
-- API key required for fleet polling
+通过 `/fleet` 的可视化拓扑视图监控你所有的 NAS Doctor 实例：
+- **可视化拓扑**，中心主节点和连接的远程服务器
+- 每服务器：平台图标、主机名、IP、NAS Doctor 版本、运行时长、健康状态、发现计数
+- **自动检测连接类型**：LAN（私有 IP）vs 公网主机名（含隧道检测 Cloudflare、Tailscale）
+- **每服务器自定义认证头** 用于 Cloudflare Access、Authelia 等
+- **测试连接** 验证 NAS Doctor 签名 + API 密钥端到端
+- **添加舰队服务器时自动创建服务检查**
+- 每服务器 **编辑/移除**，附可折叠表单
+- **打开仪表盘** 链接直接查看远程实例
+- 舰队轮询需要 API 密钥
 
-### Integrations
+### 集成
 
-| Integration | How |
+| 集成 | 方式 |
 |---|---|
-| **Prometheus** | Scrape `/metrics` — 120+ gauges for system (incl. CPU/mobo temps), disk, SMART, Docker, network, UPS, ZFS, GPU, services, parity, tunnels, Proxmox, Kubernetes, backup, speed test (incl. live-test in-progress + per-engine + per-sample-count gauges), findings |
-| **Grafana** | Connect via Prometheus data source |
-| **Discord** | Webhook with rich embeds, severity colors, finding details |
-| **Slack** | Webhook with blocks, severity counts, top findings |
-| **Gotify** | Native push notifications with priority mapping |
-| **Ntfy** | Push notifications with priority and tags |
-| **Generic HTTP** | JSON payload with HMAC-SHA256 signing for custom integrations |
+| **Prometheus** | 抓取 `/metrics` — 120+ 系统指标（含 CPU/主板温度）、磁盘、SMART、Docker、网络、UPS、ZFS、GPU、服务、parity、隧道、Proxmox、Kubernetes、备份、速度测试（含实时测试进行中 + 每引擎 + 每样本数指标）、findings |
+| **Grafana** | 通过 Prometheus 数据源接入 |
+| **Discord** | Webhook，附富嵌入、严重度颜色、findings 详情 |
+| **Slack** | Webhook，附 blocks、严重度计数、Top findings |
+| **Gotify** | 原生推送通知，附优先级映射 |
+| **Ntfy** | 推送通知，附优先级和标签 |
+| **通用 HTTP** | JSON 负载，附 HMAC-SHA256 签名用于自定义集成 |
 
 ---
 
-## Quick Start
+## 快速开始
 
-### Docker Compose (recommended)
+### Docker Compose（推荐）
 
 ```yaml
 services:
@@ -373,56 +322,56 @@ volumes:
 docker compose up -d
 ```
 
-Then open `http://your-nas:8060`. See platform-specific sections below for Unraid, Synology, and TrueNAS configurations.
+然后打开 `http://your-nas:8060`。Unraid、Synology 和 TrueNAS 的平台特定配置见下文相应章节。
 
-### Unraid — Docker UI Setup
+### Unraid — Docker UI 设置
 
-1. Go to **Docker** tab → scroll down → **Add Container**
-2. Fill in the fields:
+1. 进入 **Docker** 标签 → 下拉滚动 → **Add Container**
+2. 填写字段：
 
-| Field | Value |
+| 字段 | 值 |
 |---|---|
 | **Name** | `nas-doctor` |
 | **Repository** | `ghcr.io/mcdays94/nas-doctor:latest` |
-| **Icon URL** | `https://raw.githubusercontent.com/mcdays94/nas-doctor/main/icons/icon3.png` |
-| **WebUI** | `http://[IP]:8060/` (if you change the listen port below, update this to match) |
+| **Icon URL** | `https://raw.githubusercontent.com/k6cc/nas-doctor-cn/main/icons/icon3.png` |
+| **WebUI** | `http://[IP]:8060/`（如修改下方监听端口，需同步更新此项） |
 | **Network Type** | `Host` |
-| **Privileged** | `On` (**required** — SMART access needs raw device access) |
-| **Extra Parameters** | `--pid=host` (**required** for Top Processes to see host processes) |
+| **Privileged** | `On`（**必需** — SMART 访问需要原始设备访问） |
+| **Extra Parameters** | `--pid=host`（**必需**，让 Top 进程看到主机进程） |
 
-3. Add these **path mappings** (click "Add another Path, Port, Variable..." for each):
+3. 添加以下 **路径映射**（每条点击 "Add another Path, Port, Variable..."）：
 
-| Name | Container Path | Host Path | Mode | Why |
+| 名称 | 容器路径 | 主机路径 | 模式 | 用途 |
 |---|---|---|---|---|
-| Data | `/data` | `/mnt/user/appdata/nas-doctor` | RW | Database, config, backups |
-| Docker Socket | `/var/run/docker.sock` | `/var/run/docker.sock` | RO | Container monitoring |
-| Boot Config | `/host/boot` | `/boot` | RO | Parity logs, Unraid ident |
-| System Logs | `/host/log` | `/var/log` | RO | dmesg, syslog analysis |
-| Host Mounts | `/host/mnt` | `/mnt` | RO | Per-disk space monitoring |
-| Unraid Version | `/etc/unraid-version` | `/etc/unraid-version` | RO | OS update detection |
-| Disk Slots | `/var/local/emhttp` | `/var/local/emhttp` | RO | Drive slot mapping for merged drive view |
-| Device Nodes | `/dev` | `/dev` | RO | SMART and GPU device access |
-| Sysfs | `/sys` | `/sys` | RO | GPU telemetry and drive mapping |
-| Tailscale Socket | `/var/run/tailscale` | `/var/run/tailscale` | RO | **Required if you use Tailscale** for peer graph detection (`tailscale-nas-util` plugin OR `network_mode: host` Tailscale container). Leave blank if you don't use Tailscale. Without this mount the dashboard surfaces an "Unreachable" hint instead of peer data. |
+| Data | `/data` | `/mnt/user/appdata/nas-doctor` | RW | 数据库、配置、备份 |
+| Docker Socket | `/var/run/docker.sock` | `/var/run/docker.sock` | RO | 容器监控 |
+| Boot Config | `/host/boot` | `/boot` | RO | Parity 日志、Unraid 标识 |
+| System Logs | `/host/log` | `/var/log` | RO | dmesg、syslog 分析 |
+| Host Mounts | `/host/mnt` | `/mnt` | RO | 每盘空间监控 |
+| Unraid Version | `/etc/unraid-version` | `/etc/unraid-version` | RO | 操作系统更新检测 |
+| Disk Slots | `/var/local/emhttp` | `/var/local/emhttp` | RO | 用于合并硬盘视图的硬盘槽位映射 |
+| Device Nodes | `/dev` | `/dev` | RO | SMART 和 GPU 设备访问 |
+| Sysfs | `/sys` | `/sys` | RO | GPU 遥测和硬盘映射 |
+| Tailscale Socket | `/var/run/tailscale` | `/var/run/tailscale` | RO | **使用 Tailscale 时必需**，用于对等节点图检测（`tailscale-nas-util` 插件或 `network_mode: host` 的 Tailscale 容器）。如不使用 Tailscale 则留空。无此挂载时仪表盘会显示 "Unreachable" 提示而非对等节点数据。 |
 
-4. Add these **variables**:
+4. 添加以下 **变量**：
 
-| Key | Value |
+| 键 | 值 |
 |---|---|
-| `TZ` | Your timezone (e.g. `Europe/Lisbon`, `America/New_York`) |
-| `NAS_DOCTOR_LISTEN` | HTTP listen address, default `:8060`. Change to e.g. `:8067` if port 8060 is in use. Bare port numbers also work (`8067` is normalized to `:8067` automatically). Because the container runs in host networking, this variable — not a Docker port mapping — is how the listen port is set. |
+| `TZ` | 你的时区（例如 `Europe/Lisbon`、`America/New_York`） |
+| `NAS_DOCTOR_LISTEN` | HTTP 监听地址，默认 `:8060`。如端口 8060 被占用可改为 `:8067`。也支持纯端口号（`8067` 会自动规范化为 `:8067`）。由于容器以 host 网络模式运行，此变量（而非 Docker 端口映射）是设置监听端口的方式。 |
 
-5. Click **Apply**
+5. 点击 **Apply**
 
-Then open `http://your-unraid-ip:8060` (or whichever port you set).
+然后打开 `http://your-unraid-ip:8060`（或你设置的端口）。
 
-> **Important**: Privileged mode and the Host Mounts volume (`/mnt:/host/mnt:ro`) are required. Without privileged, SMART data won't work. Without `/mnt`, per-disk space won't show.
+> **重要**：特权模式和 Host Mounts 卷（`/mnt:/host/mnt:ro`）是必需的。无特权模式 SMART 数据无法工作。无 `/mnt` 每盘空间不会显示。
 >
-> **Changing the port**: Because the container uses host networking, the "Web UI Port" field in the template sets `NAS_DOCTOR_LISTEN` (not a Docker port mapping). If you change it, also update the WebUI URL in Unraid (container settings → Advanced View → WebUI) so the icon opens the right port.
+> **修改端口**：由于容器使用 host 网络，模板中的 "Web UI Port" 字段设置的是 `NAS_DOCTOR_LISTEN`（而非 Docker 端口映射）。如修改它，也请在 Unraid 中更新 WebUI URL（容器设置 → Advanced View → WebUI），让图标打开正确端口。
 
 ### Synology DSM — Container Manager
 
-Deploy via **Container Manager** (or Docker via SSH).
+通过 **Container Manager** 部署（或通过 SSH 使用 Docker）。
 
 ```yaml
 services:
@@ -445,19 +394,19 @@ services:
     restart: unless-stopped
 ```
 
-Then open `http://your-synology-ip:8060`.
+然后打开 `http://your-synology-ip:8060`。
 
-> **Synology notes**:
-> - **Privileged mode is required** for SMART access — `smartctl` needs raw device access via `SYS_RAWIO` capability
-> - **Mount `/dev:/dev:ro`** — Synology drive bays use `/dev/sata*` device nodes which must be visible to the container for SMART queries. NAS Doctor automatically tries SCSI-to-ATA translation (`--device=sat`) as a fallback
-> - Mount each `/volume<#>` you want monitored — Synology uses `/volume1`, `/volume2`, etc. instead of `/mnt`
-> - There is no `/boot` or `/etc/unraid-version` on Synology — omit those mounts
-> - Parity analysis is Unraid-specific and will be skipped automatically
-> - If SMART still shows warnings, try adding `cap_add: [SYS_RAWIO]` explicitly
+> **Synology 注意事项**：
+> - **必需特权模式** 用于 SMART 访问 — `smartctl` 需要通过 `SYS_RAWIO` capability 进行原始设备访问
+> - **挂载 `/dev:/dev:ro`** — Synology 硬盘托架使用 `/dev/sata*` 设备节点，必须在容器中可见才能查询 SMART。NAS Doctor 会自动尝试 SCSI 到 ATA 转换（`--device=sat`）作为回退
+> - 挂载每个你想监控的 `/volume<#>` — Synology 使用 `/volume1`、`/volume2` 等，而非 `/mnt`
+> - Synology 上没有 `/boot` 或 `/etc/unraid-version` — 省略这些挂载
+> - Parity 分析是 Unraid 专有的，会自动跳过
+> - 如果 SMART 仍显示警告，尝试显式添加 `cap_add: [SYS_RAWIO]`
 
 ### TrueNAS SCALE
 
-Deploy via **Apps** or via SSH with Docker Compose.
+通过 **Apps** 或通过 SSH 使用 Docker Compose 部署。
 
 ```yaml
 services:
@@ -482,21 +431,21 @@ services:
     restart: unless-stopped
 ```
 
-Then open `http://your-truenas-ip:8060`.
+然后打开 `http://your-truenas-ip:8060`。
 
-> **TrueNAS notes**:
-> - **Privileged mode is required** for SMART access
-> - **Mount `/dev:/dev:ro`** for SMART device access and **`/sys:/sys:ro`** for GPU telemetry
-> - **`/dev/dri`** device passthrough enables Intel iGPU monitoring (usage, temperature, power)
-> - ZFS pool health, scrub status, ARC hit rate, and dataset listing work automatically
-> - Mount `/mnt` to see all pool/dataset storage usage
-> - TrueNAS version is detected from `/etc/version` or `/etc/os-release` — no API auth needed
-> - Parity analysis is Unraid-specific and will be skipped automatically
-> - UPS monitoring works if NUT is configured (TrueNAS has built-in NUT support)
+> **TrueNAS 注意事项**：
+> - **必需特权模式** 用于 SMART 访问
+> - **挂载 `/dev:/dev:ro`** 用于 SMART 设备访问，**`/sys:/sys:ro`** 用于 GPU 遥测
+> - **`/dev/dri`** 设备直通启用 Intel iGPU 监控（使用率、温度、功率）
+> - ZFS 池健康、scrub 状态、ARC 命中率和数据集列表自动工作
+> - 挂载 `/mnt` 以查看所有池/数据集存储使用率
+> - TrueNAS 版本从 `/etc/version` 或 `/etc/os-release` 检测 — 无需 API 认证
+> - Parity 分析是 Unraid 专有的，会自动跳过
+> - 如配置了 NUT 则 UPS 监控可工作（TrueNAS 内置 NUT 支持）
 
-### Kubernetes (k3s / k8s)
+### Kubernetes（k3s / k8s）
 
-Deploy via kubectl or GitOps (ArgoCD/Flux):
+通过 kubectl 或 GitOps（ArgoCD/Flux）部署：
 
 ```yaml
 apiVersion: apps/v1
@@ -532,18 +481,18 @@ spec:
             claimName: nas-doctor-data
 ```
 
-You'll also need a ServiceAccount + ClusterRole with read access to nodes, pods, deployments, services, namespaces, PVCs, and events. See the [full K8s manifests](https://github.com/mcdays94/k3s-gitops/tree/main/apps/nas-doctor) for a complete example.
+还需要一个 ServiceAccount + ClusterRole，对 nodes、pods、deployments、services、namespaces、PVCs 和 events 有读权限。完整示例参见 [完整 K8s manifests](https://github.com/mcdays94/k3s-gitops/tree/main/apps/nas-doctor)。
 
-> **K8s notes**:
-> - Enable **In-cluster auto-detect** in Settings → Kubernetes (uses mounted service account token)
-> - The `view` ClusterRole is NOT sufficient — nodes are cluster-scoped. Use a custom ClusterRole
-> - Multi-arch image: runs on amd64 and arm64 (Raspberry Pi) nodes
-> - No Docker socket needed — K8s integration uses the API directly
-> - Disk usage per node comes from `ephemeral-storage` capacity
+> **K8s 注意事项**：
+> - 在 设置 → Kubernetes 中启用 **集群内自动检测**（使用挂载的 service account token）
+> - `view` ClusterRole 不够 — nodes 是集群范围的。使用自定义 ClusterRole
+> - 多架构镜像：可在 amd64 和 arm64（树莓派）节点上运行
+> - 无需 Docker socket — K8s 集成直接使用 API
+> - 每节点磁盘使用率来自 `ephemeral-storage` 容量
 
-### Proxmox (via Ubuntu VM / LXC)
+### Proxmox（通过 Ubuntu VM / LXC）
 
-Deploy via Portainer or Docker Compose on a Proxmox VM:
+通过 Portainer 或 Docker Compose 在 Proxmox VM 上部署：
 
 ```yaml
 services:
@@ -565,19 +514,19 @@ volumes:
   nas-doctor-data:
 ```
 
-Then go to Settings → Proxmox VE, enter your PVE API URL (`https://proxmox:8006`), create an API token (Datacenter → Permissions → API Tokens, uncheck Privilege Separation), and click Test Connection.
+然后进入 设置 → Proxmox VE，输入你的 PVE API URL（`https://proxmox:8006`），创建 API token（Datacenter → Permissions → API Tokens，取消勾选 Privilege Separation），点击 Test Connection。
 
-> **Proxmox notes**:
-> - Self-signed PVE certificates are accepted automatically
-> - Node filter dropdown auto-populated from Test Connection
-> - Display alias for friendly naming (e.g., "Proxmox LDN")
-> - Analyzer detects: node offline, memory critical, storage full, stale backups, HA errors, failed tasks
-> - SMART monitoring requires physical disk passthrough to the VM/LXC
+> **Proxmox 注意事项**：
+> - 自签名 PVE 证书自动接受
+> - 节点过滤器下拉菜单从 Test Connection 自动填充
+> - 显示别名用于友好命名（例如 "Proxmox LDN"）
+> - 分析器检测：节点离线、内存严重不足、存储满、过期备份、HA 错误、失败任务
+> - SMART 监控需要物理硬盘直通到 VM/LXC
 
-### Build from Source
+### 从源码构建
 
 ```bash
-git clone https://github.com/mcdays94/nas-doctor.git
+git clone https://github.com/k6cc/nas-doctor-cn.git
 cd nas-doctor
 go build -o nas-doctor ./cmd/nas-doctor
 ./nas-doctor -listen :8060 -data ./data -interval 30m
@@ -611,90 +560,133 @@ go build -o nas-doctor ./cmd/nas-doctor
 
 ---
 
-## Settings
+## 国际化 (i18n)
 
-All configurable from the web UI at `/settings`, organized with a sticky section nav:
+NAS Doctor 支持多语言界面切换，目前已实现设置页的中英文切换，架构设计支持后期轻松添加其他语言。
 
-- **General**: Scan interval (preset or custom with cron preview), theme selection, app icon
-- **Webhooks**: Add/remove/test Discord, Slack, Gotify, Ntfy, or generic HTTP webhooks with optional custom headers and HMAC signing
-- **Notification Rules**: Dropdown-driven rule builder with 13 categories, live target selection, threshold inputs, one-click presets, quiet hours, and maintenance windows
-- **Service Checks**: HTTP, TCP, DNS, Ping/ICMP, SMB/NFS uptime monitoring with per-check configurable intervals (30s–1h)
-- **Fleet**: Add/remove remote NAS Doctor instances with optional API key auth
-- **Dashboard Sections**: Toggle visibility of individual sections (SMART, Docker, ZFS, UPS, Parity, Network, Tunnels, etc.)
-- **Data & Retention**: Snapshot retention days, max DB size cap, notification log retention
-- **Backup**: Scheduled DB backups with configurable location, interval, and retention count
-- **Log Forwarding**: Forward scan results to **Loki**, **syslog** (UDP/TCP), or any **HTTP JSON** endpoint after each scan — with custom headers, labels, and payload format (full, findings only, summary)
+### 架构
 
-### Environment Variables
+- **后端**：使用 Go `embed` 包嵌入 JSON 字典文件，无需外部资源依赖
+- **字典文件**：位于 `internal/api/i18n/locales/`，`en.json`（英文）和 `zh.json`（中文），各包含 407 个翻译 key
+- **语言解析优先级**：URL 查询参数 `?lang=` → Cookie `nas-doctor-lang` → `Accept-Language` 请求头 → 默认英文
+- **前端运行时**：通过 `data-i18n`（textContent）、`data-i18n-html`（innerHTML）和 `data-i18n-attr`（属性翻译）三种标记实现 DOM 元素翻译
+- **即时切换**：语言切换无需页面刷新，同时通过 Cookie + localStorage 持久化用户选择
+- **防闪烁 (FOUC)**：内联脚本在 DOM 渲染前从 Cookie 读取语言设置，避免页面闪烁
 
-| Variable | Default | Description |
-|---|---|---|
-| `NAS_DOCTOR_LISTEN` | `:8060` | HTTP listen address. Accepts `:port`, `host:port`, or bare `port` (normalized). |
-| `NAS_DOCTOR_DATA` | `/data` | SQLite database directory |
-| `NAS_DOCTOR_INTERVAL` | `30m` | Diagnostic scan interval |
-| `NAS_DOCTOR_UPS_NAME` | (auto-detect) | NUT UPS name (skip auto-detect from `upsc -l`) |
-| `NAS_DOCTOR_NUT_HOST` | (local) | Remote NUT server host (queries `upsname@host`) |
-| `NAS_DOCTOR_APCUPSD_HOST` | (local) | Remote apcupsd daemon `host:port` |
-| `TZ` | `UTC` | Timezone |
+### 使用方法
 
----
+1. 打开 **设置** 页面
+2. 在 **常规** 卡片中找到 **语言** 下拉框
+3. 选择 `English` 或 `简体中文`，界面立即切换
 
-## API Reference
+### 添加新语言
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/api/v1/health` | GET | Healthcheck (status, version, uptime) |
-| `/api/v1/status` | GET | Server status summary with section visibility |
-| `/api/v1/snapshot/latest` | GET | Full latest diagnostic snapshot |
-| `/api/v1/snapshot/{id}` | GET | Specific snapshot by ID |
-| `/api/v1/snapshots` | GET | List recent snapshots |
-| `/api/v1/scan` | POST | Trigger immediate diagnostic scan |
-| `/api/v1/history/speedtest` | GET | Speed test history (query: `?hours=N`) |
-| `/api/v1/history/processes` | GET | Process CPU/memory history (query: `?hours=N`) |
-| `/api/v1/history/containers` | GET | Container stats history (query: `?hours=N`) |
-| `/api/v1/history/gpu` | GET | GPU metrics history (query: `?hours=N`) |
-| `/api/v1/settings` | GET/PUT | Read/write application settings |
-| `/api/v1/settings/test-webhook` | POST | Send test notification to a webhook |
-| `/api/v1/sparklines` | GET | Condensed system + SMART history for charts |
-| `/api/v1/history/system` | GET | System metrics history (CPU, memory, I/O) |
-| `/api/v1/disks` | GET | List all drives with SMART data |
-| `/api/v1/disks/{serial}` | GET | Per-drive detail with full SMART history |
-| `/api/v1/alerts` | GET | List alerts (filterable by status) |
-| `/api/v1/alerts/{id}` | GET | Get single alert detail |
-| `/api/v1/alerts/{id}/events` | GET | Alert lifecycle timeline events |
-| `/api/v1/alerts/{id}/ack` | POST | Acknowledge an alert |
-| `/api/v1/alerts/{id}/unack` | POST | Unacknowledge an alert |
-| `/api/v1/alerts/{id}/snooze` | POST | Snooze an alert (with `until` timestamp) |
-| `/api/v1/alerts/{id}/unsnooze` | POST | Unsnooze an alert |
-| `/api/v1/incidents/timeline` | GET | Incident timeline with system metrics overlay |
-| `/api/v1/incidents/correlation` | GET | Alert correlation (before/during/after metrics) |
-| `/api/v1/smart/trends` | GET | SMART degradation trends with risk scoring |
-| `/api/v1/notifications/log` | GET | Webhook delivery history |
-| `/api/v1/service-checks` | GET | Latest service check results |
-| `/api/v1/service-checks/history` | GET | Service check result history |
-| `/api/v1/service-checks/run` | POST | Trigger service checks immediately |
-| `/api/v1/speedtest/run` | POST | Start a speed test (or attach to one in flight). Idempotent — returns `{test_id, started_at, engine}` |
-| `/api/v1/speedtest/stream/{test_id}` | GET | Server-Sent Events stream of a live test's progress. Event types: `start`, `phase_change`, `sample`, `result`, `error`, `end` |
-| `/api/v1/speedtest/samples/{test_id}` | GET | JSON array of per-sample throughput readings for a completed test (used by the expanded-log mini-chart on `/service-checks`) |
-| `/api/v1/findings/dismiss` | POST | Dismiss a finding from the dashboard |
-| `/api/v1/findings/restore` | POST | Restore a dismissed finding |
-| `/api/v1/db/stats` | GET | Database size and row counts |
-| `/api/v1/backup` | GET/POST | List or trigger database backup |
-| `/api/v1/fleet` | GET | Aggregated status of all remote servers |
-| `/service-checks` | GET | Service checks dashboard (HTML) |
-| `/parity` | GET | Parity history detail page (HTML) |
-| `/api/v1/fleet/servers` | GET/PUT | Manage remote server list |
-| `/api/v1/fleet/test` | POST | Test connectivity to a remote server |
-| `/metrics` | GET | Prometheus metrics endpoint |
+以添加日语为例，只需 3 步：
+
+1. 复制 `internal/api/i18n/locales/en.json` 为 `locales/ja.json`，翻译所有 value
+2. 在 `internal/api/i18n/i18n.go` 的 `IsValid()` 函数中添加 `"ja"`
+3. 在 `internal/api/templates/settings.html` 的语言下拉框中添加：
+   ```html
+   <option value="ja">日本語</option>
+   ```
+
+无需改动其他任何文件——`go:embed locales/*.json` 会自动拾取新字典文件。
+
+### Key 命名规范
+
+翻译 key 采用点分层级命名：`settings.<卡片>.<元素>`
+
+例如：
+- `settings.general.title` — 常规设置卡片标题
+- `settings.webhooks.add` — Webhooks 卡片的添加按钮
+- `settings.behavior.quiet_hours.start.label` — 通知行为卡片中静默时段的开始标签
 
 ---
 
-## Prometheus Metrics
+## 设置
 
-All metrics prefixed with `nasdoctor_`. Full list:
+`/settings` Web UI 中的所有可配置项，按粘性分区导航组织：
+
+- **常规**：扫描间隔（预设或自定义附 cron 预览）、主题选择、应用图标
+- **Webhooks**：添加/移除/测试 Discord、Slack、Gotify、Ntfy 或通用 HTTP webhooks，可选自定义 headers 和 HMAC 签名
+- **通知规则**：下拉菜单驱动的规则构建器，13 个类别、实时目标选择、阈值输入、一键预设、静默时段和维护窗口
+- **服务检查**：HTTP、TCP、DNS、Ping/ICMP、SMB/NFS 可用性监控，每检查可配置间隔（30s–1h）
+- **舰队**：添加/移除远程 NAS Doctor 实例，可选 API 密钥认证
+- **仪表盘分区**：切换各分区可见性（SMART、Docker、ZFS、UPS、Parity、网络、隧道等）
+- **数据与保留**：快照保留天数、最大数据库大小上限、通知日志保留
+- **备份**：计划数据库备份，可配置位置、间隔和保留数量
+- **日志转发**：每次扫描后将扫描结果转发到 **Loki**、**syslog**（UDP/TCP）或任何 **HTTP JSON** 端点 — 支持自定义 headers、labels 和负载格式（完整、仅 findings、摘要）
+
+### 环境变量
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| `NAS_DOCTOR_LISTEN` | `:8060` | HTTP 监听地址。接受 `:port`、`host:port` 或纯 `port`（自动规范化）。 |
+| `NAS_DOCTOR_DATA` | `/data` | SQLite 数据库目录 |
+| `NAS_DOCTOR_INTERVAL` | `30m` | 诊断扫描间隔 |
+| `NAS_DOCTOR_UPS_NAME` | （自动检测） | NUT UPS 名称（跳过从 `upsc -l` 自动检测） |
+| `NAS_DOCTOR_NUT_HOST` | （本地） | 远程 NUT 服务器主机（查询 `upsname@host`） |
+| `NAS_DOCTOR_APCUPSD_HOST` | （本地） | 远程 apcupsd 守护进程 `host:port` |
+| `TZ` | `UTC` | 时区 |
+
+---
+
+## API 参考
+
+| 端点 | 方法 | 说明 |
+|---|---|---|
+| `/api/v1/health` | GET | 健康检查（状态、版本、运行时长） |
+| `/api/v1/status` | GET | 服务器状态摘要，附分区可见性 |
+| `/api/v1/snapshot/latest` | GET | 完整最新诊断快照 |
+| `/api/v1/snapshot/{id}` | GET | 按 ID 获取特定快照 |
+| `/api/v1/snapshots` | GET | 列出最近快照 |
+| `/api/v1/scan` | POST | 触发立即诊断扫描 |
+| `/api/v1/history/speedtest` | GET | 速度测试历史（查询：`?hours=N`） |
+| `/api/v1/history/processes` | GET | 进程 CPU/内存历史（查询：`?hours=N`） |
+| `/api/v1/history/containers` | GET | 容器统计历史（查询：`?hours=N`） |
+| `/api/v1/history/gpu` | GET | GPU 指标历史（查询：`?hours=N`） |
+| `/api/v1/settings` | GET/PUT | 读/写应用设置 |
+| `/api/v1/settings/test-webhook` | POST | 向 webhook 发送测试通知 |
+| `/api/v1/sparklines` | GET | 用于图表的精简系统 + SMART 历史 |
+| `/api/v1/history/system` | GET | 系统指标历史（CPU、内存、I/O） |
+| `/api/v1/disks` | GET | 列出所有硬盘及 SMART 数据 |
+| `/api/v1/disks/{serial}` | GET | 每盘详情，附完整 SMART 历史 |
+| `/api/v1/alerts` | GET | 列出告警（按状态过滤） |
+| `/api/v1/alerts/{id}` | GET | 获取单条告警详情 |
+| `/api/v1/alerts/{id}/events` | GET | 告警生命周期时间线事件 |
+| `/api/v1/alerts/{id}/ack` | POST | 确认告警 |
+| `/api/v1/alerts/{id}/unack` | POST | 取消确认告警 |
+| `/api/v1/alerts/{id}/snooze` | POST | 延迟告警（附 `until` 时间戳） |
+| `/api/v1/alerts/{id}/unsnooze` | POST | 取消延迟告警 |
+| `/api/v1/incidents/timeline` | GET | 事件时间线，附系统指标叠加 |
+| `/api/v1/incidents/correlation` | GET | 告警关联（之前/期间/之后指标） |
+| `/api/v1/smart/trends` | GET | SMART 退化趋势，附风险评分 |
+| `/api/v1/notifications/log` | GET | Webhook 投递历史 |
+| `/api/v1/service-checks` | GET | 最新服务检查结果 |
+| `/api/v1/service-checks/history` | GET | 服务检查结果历史 |
+| `/api/v1/service-checks/run` | POST | 立即触发服务检查 |
+| `/api/v1/speedtest/run` | POST | 启动速度测试（或附加到已运行的测试）。幂等 — 返回 `{test_id, started_at, engine}` |
+| `/api/v1/speedtest/stream/{test_id}` | GET | 实时测试进度的 Server-Sent Events 流。事件类型：`start`、`phase_change`、`sample`、`result`、`error`、`end` |
+| `/api/v1/speedtest/samples/{test_id}` | GET | 完成测试的每样本吞吐量读数 JSON 数组（由 `/service-checks` 上展开日志迷你图使用） |
+| `/api/v1/findings/dismiss` | POST | 从仪表盘忽略某条 finding |
+| `/api/v1/findings/restore` | POST | 恢复已忽略的 finding |
+| `/api/v1/db/stats` | GET | 数据库大小和行数 |
+| `/api/v1/backup` | GET/POST | 列出或触发数据库备份 |
+| `/api/v1/fleet` | GET | 所有远程服务器的聚合状态 |
+| `/service-checks` | GET | 服务检查仪表盘（HTML） |
+| `/parity` | GET | Parity 历史详情页（HTML） |
+| `/api/v1/fleet/servers` | GET/PUT | 管理远程服务器列表 |
+| `/api/v1/fleet/test` | POST | 测试到远程服务器的连通性 |
+| `/metrics` | GET | Prometheus 指标端点 |
+
+---
+
+## Prometheus 指标
+
+所有指标以 `nasdoctor_` 为前缀。完整列表：
 
 <details>
-<summary>Expand metric list (120+ metrics)</summary>
+<summary>展开指标列表（120+ 指标）</summary>
 
 ```
 # System (14 gauges)
@@ -789,31 +781,31 @@ nasdoctor_collection_duration_seconds / _last_collection_timestamp
 
 ---
 
-## Supported Platforms
+## 支持的平台
 
-| Platform | Status | Notes |
+| 平台 | 状态 | 说明 |
 |---|---|---|
-| **Unraid** | ✅ Tested | Parity analysis, array status, disk labels, OS update check; dogfooded daily |
-| **Synology DSM** | ⚠️ Community tested | `/volume<#>` detection, `/dev/mapper/cachedev_*` support, SMART health parsing |
-| **TrueNAS SCALE** | ⚠️ Untested | ZFS pool health support built-in, but not yet validated on real hardware |
-| **Proxmox VE** | ⚠️ Community tested | PVE REST API integration with cluster + node + VM/LXC views; dogfooded as a fleet peer |
-| **Kubernetes** (k3s / k8s) | ⚠️ Community tested | In-cluster auto-detection, ServiceAccount + ClusterRole auth; tested on k3s |
-| **QNAP QTS** | ⚠️ Untested | Should work via Container Station |
-| **Generic Linux** | ⚠️ Untested | Any distro with Docker |
+| **Unraid** | ✅ 已测试 | Parity 分析、阵列状态、硬盘标签、操作系统更新检查；每日 dogfood |
+| **Synology DSM** | ⚠️ 社区测试 | `/volume<#>` 检测、`/dev/mapper/cachedev_*` 支持、SMART 健康解析 |
+| **TrueNAS SCALE** | ⚠️ 未测试 | ZFS 池健康支持已内置，但尚未在真实硬件上验证 |
+| **Proxmox VE** | ⚠️ 社区测试 | PVE REST API 集成，附集群 + 节点 + VM/LXC 视图；作为舰队对等节点 dogfood |
+| **Kubernetes**（k3s / k8s） | ⚠️ 社区测试 | 集群内自动检测、ServiceAccount + ClusterRole 认证；在 k3s 上测试 |
+| **QNAP QTS** | ⚠️ 未测试 | 应可通过 Container Station 工作 |
+| **通用 Linux** | ⚠️ 未测试 | 任何带 Docker 的发行版 |
 
-> Tested on **Unraid** daily. Synology, Proxmox, and Kubernetes have community reports / fleet-peer dogfooding. Other platforms should work but may have edge cases with disk detection, SMART access, or platform-specific features. [Report issues here.](https://github.com/mcdays94/nas-doctor/issues)
+> 每日在 **Unraid** 上测试。Synology、Proxmox 和 Kubernetes 有社区报告 / 舰队对等节点 dogfood。其他平台应该可以工作，但在硬盘检测、SMART 访问或平台特定功能上可能存在边界情况。[在此反馈问题。](https://github.com/k6cc/nas-doctor-cn/issues)
 
-### A note from the maintainer
+### 来自维护者的话
 
-NAS Doctor is maintained by one person, and the only platform I have hands-on every day is **Unraid**. Synology DSM, TrueNAS SCALE, Proxmox VE, Kubernetes/k3s, and Docker-on-Linux are all supported and tested via emulation, captured-snapshot replay, and a couple of community fleet peers — but bugs that would be obvious to me on a box I can poke with my hands tend to surface only when a non-Unraid user reports them.
+NAS Doctor 由一人维护，我每天能上手的只有 **Unraid**。Synology DSM、TrueNAS SCALE、Proxmox VE、Kubernetes/k3s 和 Docker-on-Linux 都受支持并通过模拟、快照回放和几个社区舰队对等节点测试 —— 但那些在我能亲手操作的机器上一眼就能看出的 bug，往往只有在非 Unraid 用户报告时才浮出水面。
 
-**If you're running NAS Doctor on Synology, TrueNAS, Proxmox, Kubernetes, or any other non-Unraid host and something looks off — please [open an issue](https://github.com/mcdays94/nas-doctor/issues/new/choose).** Even small UX oddities are useful: "the drive merge view lists my volume twice", "the Proxmox containers widget shows VMs instead of LXCs", "the UPS section is empty even though apcupsd is running". Your reports are how this project stays honest across platforms — they're appreciated, not a burden.
+**如果你在 Synology、TrueNAS、Proxmox、Kubernetes 或任何其他非 Unraid 主机上运行 NAS Doctor 且发现问题 —— 请 [提交 issue](https://github.com/k6cc/nas-doctor-cn/issues/new/choose)。** 即便是小的 UX 异常也有用："硬盘合并视图把我的卷列了两次"、"Proxmox 容器小部件显示的是 VM 而非 LXC"、"UPS 分区为空但 apcupsd 在运行"。你的报告是这个项目跨平台保持诚实的途径 —— 它们是被感激的，不是负担。
 
 ---
 
-## File Structure & Data Locations
+## 文件结构与数据位置
 
-### Inside the container (`/data` volume)
+### 容器内（`/data` 卷）
 
 ```
 /data/
@@ -823,30 +815,30 @@ NAS Doctor is maintained by one person, and the only platform I have hands-on ev
     └── ...
 ```
 
-All configuration is stored in the SQLite database and managed via the web UI at `/settings`. There are no config files to edit manually.
+所有配置存储在 SQLite 数据库中，通过 `/settings` Web UI 管理。无需手动编辑任何配置文件。
 
-### Host bind mounts (read-only)
+### 主机 bind mounts（只读）
 
-All bind mounts in one place — match the per-platform Quick Start tables above. Mount only what applies to your platform; everything is RO except `/data`.
+所有 bind mounts 集中在此 —— 与上方各平台的快速开始表格对应。只挂载适用于你平台的内容；除 `/data` 外全部为 RO。
 
-| Container path | Host path | Purpose |
+| 容器路径 | 主机路径 | 用途 |
 |---|---|---|
-| `/host/mnt` | `/mnt` | Disk space monitoring (Unraid, TrueNAS, Proxmox) |
-| `/host/volume<N>` | `/volume<N>` | Disk space monitoring (Synology — mount each volume) |
-| `/host/log` | `/var/log` | System log analysis (dmesg, syslog) |
-| `/host/boot` | `/boot` | Parity logs, Unraid identification (Unraid only) |
-| `/etc/unraid-version` | `/etc/unraid-version` | Unraid OS detection + update check (Unraid only) |
-| `/var/local/emhttp` | `/var/local/emhttp` | Unraid drive slot mapping for merged drive view (Unraid only) |
-| `/dev` | `/dev` | SMART and GPU device access |
-| `/sys` | `/sys` | GPU telemetry and drive mapping |
-| `/var/run/docker.sock` | `/var/run/docker.sock` | Container monitoring (auto-detect Docker) |
-| `/var/run/tailscale` | `/var/run/tailscale` | Tailscale peer graph (mount only if you use Tailscale on the host) |
+| `/host/mnt` | `/mnt` | 磁盘空间监控（Unraid、TrueNAS、Proxmox） |
+| `/host/volume<N>` | `/volume<N>` | 磁盘空间监控（Synology — 挂载每个卷） |
+| `/host/log` | `/var/log` | 系统日志分析（dmesg、syslog） |
+| `/host/boot` | `/boot` | Parity 日志、Unraid 标识（仅 Unraid） |
+| `/etc/unraid-version` | `/etc/unraid-version` | Unraid 操作系统检测 + 更新检查（仅 Unraid） |
+| `/var/local/emhttp` | `/var/local/emhttp` | Unraid 硬盘槽位映射，用于合并硬盘视图（仅 Unraid） |
+| `/dev` | `/dev` | SMART 和 GPU 设备访问 |
+| `/sys` | `/sys` | GPU 遥测和硬盘映射 |
+| `/var/run/docker.sock` | `/var/run/docker.sock` | 容器监控（自动检测 Docker） |
+| `/var/run/tailscale` | `/var/run/tailscale` | Tailscale 对等节点图（仅在主机上使用 Tailscale 时挂载） |
 
-> **External Borg repos** add their own bind-mount entries on top of the table — see [External Borg Monitoring (host-managed repos)](#external-borg-monitoring-host-managed-repos) above for repo-path mount conventions and required env vars.
+> **外部 Borg 仓库** 在上表基础上添加自己的 bind-mount 条目 — 仓库路径挂载约定和必需环境变量见上方 [外部 Borg 监控（主机管理的仓库）](#外部-borg-监控主机管理的仓库)。
 >
-> **Duplicacy entries** also add bind-mount entries (one per repo or cache root, **Read Only** — disk-read makes RO mounts safe). See [Duplicacy Monitoring (disk-read, no binary required)](#duplicacy-monitoring-disk-read-no-binary-required) above. **No env vars required**, no binary mount, no extra Docker capability.
+> **Duplicacy 条目** 也添加 bind-mount 条目（每个仓库或缓存根一个，**只读** — 磁盘读取使 RO 挂载安全）。见上方 [Duplicacy 监控（磁盘读取，无需二进制）](#duplicacy-监控磁盘读取无需二进制)。**无需环境变量**，无需二进制挂载，无需额外 Docker capability。
 
-### Source tree
+### 源码树
 
 ```
 cmd/nas-doctor/            # Entry point, CLI flags, demo mode
@@ -866,34 +858,34 @@ internal/
 
 ---
 
-## Resource Usage
+## 资源使用
 
-NAS Doctor is designed to be invisible on your system:
+NAS Doctor 设计为在你的系统上几乎不可见：
 
-| Resource | During scan (~15s every 30m) | Between scans |
+| 资源 | 扫描期间（每 30m 约 15s） | 扫描间隔 |
 |---|---|---|
 | **CPU** | <2% | ~0% |
-| **Memory** | ~30-50 MB | ~30-50 MB |
-| **Disk I/O** | Read-only: `/proc`, `smartctl`, `dmesg` | Zero |
-| **Network** | OS update check (1 req/day) | Serves UI only when accessed |
+| **内存** | ~30-50 MB | ~30-50 MB |
+| **磁盘 I/O** | 只读：`/proc`、`smartctl`、`dmesg` | 零 |
+| **网络** | 操作系统更新检查（每天 1 次） | 仅在被访问时服务 UI |
 
 ---
 
-## Demo
+## 演示
 
-**[Live demo: nasdoctordemo.mdias.info](https://nasdoctordemo.mdias.info)** — switch between Unraid, Synology, TrueNAS, Proxmox, and Kubernetes via the toolbar at the top. Read-only, no login. See [demo-worker/README.md](demo-worker/README.md) for how it works.
+**[在线演示：nasdoctordemo.mdias.info](https://nasdoctordemo.mdias.info)** — 通过顶部工具栏在 Unraid、Synology、TrueNAS、Proxmox 和 Kubernetes 之间切换。只读，无需登录。工作原理见 [demo-worker/README.md](demo-worker/README.md)。
 
-Each platform renders realistic per-platform telemetry:
+每个平台渲染真实的平台特定遥测：
 
-- **Drives** — 2–8 SMART drives per platform with Backblaze-informed findings, 30-day temperature sparklines, replacement planner with health scoring, capacity forecast
-- **Compute** — 3–11 Docker containers per platform, Top Processes with container attribution, GPU monitoring (Unraid RTX A2000, Proxmox Tesla P4), CPU + mainboard temperature gauges in the header (Unraid, TrueNAS, Proxmox; gracefully hidden on Synology / Kubernetes to showcase the empty-sensor fallback)
-- **Storage health** — ZFS pools where applicable (TrueNAS raidz2, Proxmox mirror), UPS power monitoring, parity history (Unraid)
-- **Network** — 8 service checks (one per check type: http/tcp/dns/ping/smb/nfs/speed/traceroute) with 7 days of history, 24h speed-test history with `via {engine}` caption on the latest result and per-row engine annotation, expand any speed entry on `/service-checks` for the per-sample throughput chart, Cloudflared + Tailscale tunnels (Unraid + Proxmox)
-- **Backups** — Borg / Restic / PBS / Duplicati / rclone repos with healthy + warning + error states, v0.9.10's external-Borg "CONFIGURED" pill + error-card reason codes, **and v0.10.0's Duplicacy rows** showing both `cli-repo` + `web-cache` layouts on Unraid (one healthy + one stale-with-RUNNING-badge to demonstrate the V1c severity rendering and orthogonal aux flag)
-- **Alerts & incidents** — Active + resolved + snoozed alerts, 10-event incident timeline with system-metric correlation, webhook delivery history
-- **Fleet** — 4 remote servers with topology view and tunnel-type detection
+- **硬盘** — 每平台 2–8 块 SMART 硬盘，附 Backblaze 知情的 findings、30 天温度迷你图、附健康评分的更换规划器、容量预测
+- **计算** — 每平台 3–11 个 Docker 容器、附容器归因的 Top 进程、GPU 监控（Unraid RTX A2000、Proxmox Tesla P4）、头部 CPU + 主板温度仪表（Unraid、TrueNAS、Proxmox；在 Synology / Kubernetes 上优雅隐藏以展示空传感器回退）
+- **存储健康** — 适用处的 ZFS 池（TrueNAS raidz2、Proxmox mirror）、UPS 电源监控、parity 历史（Unraid）
+- **网络** — 8 个服务检查（每种检查类型一个：http/tcp/dns/ping/smb/nfs/speed/traceroute），附 7 天历史、24 小时速度测试历史，最新结果附 `via {engine}` 说明和每行引擎标注，在 `/service-checks` 上展开任何 speed 条目查看每样本吞吐量图表、Cloudflared + Tailscale 隧道（Unraid + Proxmox）
+- **备份** — Borg / Restic / PBS / Duplicati / rclone 仓库，附健康 + 警告 + 错误状态，v0.9.10 的外部 Borg "CONFIGURED" 药丸 + 错误卡片原因码，**以及 v0.10.0 的 Duplicacy 行** 在 Unraid 上同时展示 `cli-repo` + `web-cache` 布局（一个健康 + 一个 stale-with-RUNNING-badge 以演示 V1c 严重度渲染和正交辅助标记）
+- **告警与事件** — 活跃 + 已解决 + 已延迟告警，10 事件事件时间线附系统指标关联、webhook 投递历史
+- **舰队** — 4 个远程服务器，附拓扑视图和隧道类型检测
 
-To run locally with mock data (single-platform Unraid baseline, no NAS needed):
+本地使用 mock 数据运行（单平台 Unraid 基线，无需 NAS）：
 
 ```bash
 go build -o nas-doctor ./cmd/nas-doctor
@@ -902,11 +894,11 @@ go build -o nas-doctor ./cmd/nas-doctor
 
 ---
 
-## Diagnostic Report
+## 诊断报告
 
-Click **Export Report** on the dashboard to generate a print-ready diagnostic report. Open in your browser and use Print > Save as PDF. [View demo report (PDF)](docs/nas-doctor-demo-report.pdf).
+在仪表盘上点击 **Export Report** 生成可打印的诊断报告。在浏览器中打开并使用 打印 > 另存为 PDF。[查看演示报告（PDF）](docs/nas-doctor-demo-report.pdf)。
 
-16 sections: System Overview, Findings, Drive Health & SMART, Docker, GPU, Backup, Speed Test, ZFS, UPS, Network, Service Checks, Proxmox, Kubernetes, Tunnels, Parity, Recommended Actions.
+16 个章节：系统概览、Findings、硬盘健康与 SMART、Docker、GPU、备份、速度测试、ZFS、UPS、网络、服务检查、Proxmox、Kubernetes、隧道、Parity、建议操作。
 
 <p>
   <img src="screenshots/report-cover.jpg" alt="Report — Cover" width="240">
@@ -917,14 +909,14 @@ Click **Export Report** on the dashboard to generate a print-ready diagnostic re
 
 ---
 
-## Agentic Setup
+## 智能体设置
 
-NAS Doctor is also an experiment in how far agentic coding can carry a production-shaped project. The whole thing is written through [opencode](https://opencode.ai), mostly by a mix of Claude Opus 4.7 / 4.6 and GPT Codex 5.3, directed by hand.
+NAS Doctor 也是一次实验，探索智能体编码能在生产形态的项目中走多远。整个项目通过 [opencode](https://opencode.ai) 编写，主要由 Claude Opus 4.7 / 4.6 和 GPT Codex 5.3 混合完成，由人工指导。
 
-In the same spirit, the issue tracker itself is partly automated — an opencode agent triages open issues, posts replies, and drafts PRs. The orchestration uses dedicated agents and sub-agents inspired by [Matt Pocock's](https://www.mattpocock.com/) workflow: a top-level orchestrator that breaks features into independently-shippable pieces and dispatches worker agents to execute them on isolated branches. I wrote up how the setup works in [Cloning Matt Pocock with opencode](https://mdias.info/posts/cloning-matt-pocock-opencode/).
+秉承同样的精神，issue 跟踪器本身也部分自动化 —— 一个 opencode 智能体对开放 issue 进行分类、回复并起草 PR。编排使用受 [Matt Pocock](https://www.mattpocock.com/) 工作流启发的专用智能体和子智能体：一个顶层编排器将功能拆分为可独立交付的部分，并派遣工作智能体在隔离分支上执行。我在 [Cloning Matt Pocock with opencode](https://mdias.info/posts/cloning-matt-pocock-opencode/) 中写下了这套设置的工作方式。
 
 ---
 
-## License
+## 许可证
 
 MIT

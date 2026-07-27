@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 
 	"github.com/mcdays94/nas-doctor/internal"
+	"github.com/mcdays94/nas-doctor/internal/api/i18n"
 	"github.com/mcdays94/nas-doctor/internal/collector"
 	"github.com/mcdays94/nas-doctor/internal/logfwd"
 	"github.com/mcdays94/nas-doctor/internal/notifier"
@@ -892,6 +893,13 @@ func (s *Server) handleUpdateSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if settings.Language == "" {
+		settings.Language = "en"
+	}
+	// Validate against the registered locale set. Unknown values fall
+	// back to English rather than rejecting the save, so a stale client
+	// that still sends "en" after a language was removed doesn't get a
+	// 400 and lose the rest of its settings payload.
+	if !i18n.IsValid(settings.Language) {
 		settings.Language = "en"
 	}
 

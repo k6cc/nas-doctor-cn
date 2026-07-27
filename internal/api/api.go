@@ -17,9 +17,10 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/mcdays94/nas-doctor/internal/collector"
-
 	"github.com/mcdays94/nas-doctor/internal"
+
+	"github.com/mcdays94/nas-doctor/internal/api/i18n"
+	"github.com/mcdays94/nas-doctor/internal/collector"
 	"github.com/mcdays94/nas-doctor/internal/fleet"
 	"github.com/mcdays94/nas-doctor/internal/livetest"
 	"github.com/mcdays94/nas-doctor/internal/notifier"
@@ -234,11 +235,21 @@ func (s *Server) Router() http.Handler {
 		w.Write([]byte(ChartJS))
 	})
 
-	// Shared i18n logic and dictionaries
+	// Shared i18n logic and dictionaries. The language is resolved per
+	// request from the ?lang= query, the nas-doctor-lang cookie, or the
+	// Accept-Language header, so the very first response already carries
+	// the right dictionary (no FOUC).
 	r.Get("/js/i18n.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/javascript")
 		w.Header().Set("Cache-Control", "no-cache")
-		w.Write([]byte(I18nJS))
+		lang := i18n.ResolveLanguage(r)
+		payload, err := i18n.ServeI18nJS(lang)
+		if err != nil {
+			slog.Error("i18n: serve runtime", "lang", lang, "err", err)
+			http.Error(w, "i18n runtime unavailable", http.StatusInternalServerError)
+			return
+		}
+		w.Write(payload)
 	})
 
 	// Shared dashboard rendering JS
