@@ -99,9 +99,10 @@ func TestDashboardJS_TunnelsSection_RendersHappyPathUnchanged(t *testing.T) {
 func TestDashboardJS_TunnelsSection_RendersEmptyTailscale(t *testing.T) {
 	body := tunnelsSectionBody(t)
 
-	// The empty-path copy must be present.
-	if !strings.Contains(body, "no peers reported") {
-		t.Error("sections.tunnels does not render the 'no peers reported' fallback; empty-installed state is silent")
+	// The empty-path copy must be present. After i18n refactor,
+	// assert on the key reference instead of the hardcoded literal.
+	if !strings.Contains(body, "tailscale_no_peers") {
+		t.Error("sections.tunnels does not render the 'tailscale_no_peers' i18n key fallback; empty-installed state is silent")
 	}
 }
 
