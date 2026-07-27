@@ -322,7 +322,7 @@ tbody tr:hover{background:rgba(0,0,0,0.03)}
 <div class="container" id="app">
   <div class="loading" style="padding:80px 0">
     <div class="spinner" style="width:24px;height:24px;margin:0 auto 16px"></div>
-    <div>Loading dashboard...</div>
+    <div data-i18n="dashboard.msg.loading">Loading dashboard...</div>
   </div>
 </div>
 
@@ -344,9 +344,10 @@ tbody tr:hover{background:rgba(0,0,0,0.03)}
     var critCount = st ? (st.critical_count || 0) : 0;
     var warnCount = st ? (st.warning_count || 0) : 0;
     var infoCount = st ? (st.info_count || 0) : 0;
-    var lastScan = (st && st.last_scan) ? new Date(st.last_scan).toLocaleString() : "Never";
+    var lastScan = (st && st.last_scan) ? new Date(st.last_scan).toLocaleString() : window.i18n.t('dashboard.msg.never');
     var sys = sn ? sn.system : null;
-    var healthLabel = esc(health.charAt(0).toUpperCase() + health.slice(1));
+    var _hl = {healthy: window.i18n.t('dashboard.health.healthy'), warning: window.i18n.t('dashboard.health.warning'), critical: window.i18n.t('dashboard.health.critical')};
+    var healthLabel = _hl[health] || esc(health.charAt(0).toUpperCase() + health.slice(1));
     var scanInProgress = NasDashboard.polling.scanInProgress();
 
     var h = "";
@@ -355,7 +356,7 @@ tbody tr:hover{background:rgba(0,0,0,0.03)}
     h += '<header class="header fade-in">';
     h += '<div class="header-left">';
     h += '<a href="/" class="header-brand" style="text-decoration:none;color:inherit"><img src="/icon.png" alt="" style="width:22px;height:22px;border-radius:4px;vertical-align:middle;margin-right:6px;">NAS Doctor</a>';
-    h += '<span class="logo-slogan">Sleep tight knowing your server never does.</span>';
+    h += '<span class="logo-slogan">' + window.i18n.t('dashboard.slogan') + '</span>';
     h += '<span class="page-title">' + esc(hostname) + '</span>';
     h += '</div>';
     h += '<div class="nav-links">';
@@ -378,10 +379,10 @@ tbody tr:hover{background:rgba(0,0,0,0.03)}
       h += '<div class="top-bar-divider"></div>';
     }
     h += '<span class="pill pill-' + (health === "critical" ? "critical" : health === "warning" ? "warning" : "healthy") + '">' + healthLabel + '</span>';
-    if (critCount > 0) h += '<span class="pill pill-critical">' + critCount + ' Critical</span>';
-    if (warnCount > 0) h += '<span class="pill pill-warning">' + warnCount + ' Warning</span>';
-    if (infoCount > 0) h += '<span class="pill pill-info">' + infoCount + ' Info</span>';
-    if (critCount === 0 && warnCount === 0 && infoCount === 0) h += '<span class="pill pill-neutral">No findings</span>';
+    if (critCount > 0) h += '<span class="pill pill-critical">' + critCount + ' ' + window.i18n.t('alerts.critical') + '</span>';
+    if (warnCount > 0) h += '<span class="pill pill-warning">' + warnCount + ' ' + window.i18n.t('alerts.warning') + '</span>';
+    if (infoCount > 0) h += '<span class="pill pill-info">' + infoCount + ' ' + window.i18n.t('alerts.info') + '</span>';
+    if (critCount === 0 && warnCount === 0 && infoCount === 0) h += '<span class="pill pill-neutral">' + window.i18n.t('dashboard.msg.no_findings') + '</span>';
     h += '</div>';
     h += '<div class="top-bar-divider"></div>';
     h += '<div class="top-bar-right">';
@@ -390,11 +391,11 @@ tbody tr:hover{background:rgba(0,0,0,0.03)}
       var mem = sys.mem_percent || 0;
       var io = sys.io_wait_percent || 0;
       var uptime = fmtUptime(sys.uptime_seconds || (st ? st.uptime : null));
-      h += '<span class="stat-item"><span class="stat-label">CPU</span> <span class="stat-val">' + cpu.toFixed(1) + '%</span><canvas id="spark-cpu" width="40" height="18" style="margin-left:3px;vertical-align:middle"></canvas></span>';
+      h += '<span class="stat-item"><span class="stat-label">' + window.i18n.t('dashboard.label.stat_cpu') + '</span> <span class="stat-val">' + cpu.toFixed(1) + '%</span><canvas id="spark-cpu" width="40" height="18" style="margin-left:3px;vertical-align:middle"></canvas></span>';
       h += '<span class="dot-sep">&middot;</span>';
-      h += '<span class="stat-item"><span class="stat-label">Mem</span> <span class="stat-val">' + mem.toFixed(1) + '%</span><canvas id="spark-mem" width="40" height="18" style="margin-left:3px;vertical-align:middle"></canvas></span>';
+      h += '<span class="stat-item"><span class="stat-label">' + window.i18n.t('dashboard.label.stat_mem') + '</span> <span class="stat-val">' + mem.toFixed(1) + '%</span><canvas id="spark-mem" width="40" height="18" style="margin-left:3px;vertical-align:middle"></canvas></span>';
       h += '<span class="dot-sep">&middot;</span>';
-      h += '<span class="stat-item"><span class="stat-label">I/O</span> <span class="stat-val">' + io.toFixed(1) + '%</span></span>';
+      h += '<span class="stat-item"><span class="stat-label">' + window.i18n.t('dashboard.label.stat_io') + '</span> <span class="stat-val">' + io.toFixed(1) + '%</span></span>';
       // Issue #269 — CPU + mainboard temperature gauges. Same
       // graceful-fallback pattern as midnight.html: render only
       // when the snapshot reports a non-zero value, so platforms
@@ -404,14 +405,14 @@ tbody tr:hover{background:rgba(0,0,0,0.03)}
       var moboTemp = sys.mobo_temp_c || 0;
       if (cpuTemp > 0) {
         h += '<span class="dot-sep">&middot;</span>';
-        h += '<span class="stat-item"><span class="stat-label">CPU \u00b0C</span> <span class="stat-val ' + NasDashboard.util.classForTemp(cpuTemp) + '">' + cpuTemp + '\u00b0</span></span>';
+        h += '<span class="stat-item"><span class="stat-label">' + window.i18n.t('dashboard.label.stat_cpu_temp') + '</span> <span class="stat-val ' + NasDashboard.util.classForTemp(cpuTemp) + '">' + cpuTemp + '\u00b0</span></span>';
       }
       if (moboTemp > 0) {
         h += '<span class="dot-sep">&middot;</span>';
-        h += '<span class="stat-item"><span class="stat-label">Mobo \u00b0C</span> <span class="stat-val ' + NasDashboard.util.classForTemp(moboTemp) + '">' + moboTemp + '\u00b0</span></span>';
+        h += '<span class="stat-item"><span class="stat-label">' + window.i18n.t('dashboard.label.stat_mobo_temp') + '</span> <span class="stat-val ' + NasDashboard.util.classForTemp(moboTemp) + '">' + moboTemp + '\u00b0</span></span>';
       }
       h += '<span class="dot-sep">&middot;</span>';
-      h += '<span class="stat-item"><span class="stat-label">Up</span> <span class="stat-val">' + esc(uptime) + '</span></span>';
+      h += '<span class="stat-item"><span class="stat-label">' + window.i18n.t('dashboard.label.stat_up') + '</span> <span class="stat-val">' + esc(uptime) + '</span></span>';
     }
     h += '</div></div>';
 
@@ -432,21 +433,21 @@ tbody tr:hover{background:rgba(0,0,0,0.03)}
       h += '<span style="color:#171717;font-weight:600">' + esc(sysPlat) + '</span>';
       h += '<span style="color:#808080">v' + esc(sysVer) + '</span>';
       if (hasBanner) {
-        h += '<span style="color:#171717;font-weight:600;margin-left:8px">Update \u2192 ' + esc(upd.latest_version) + '</span>';
-        if (upd.release_url) h += '<a href="' + esc(upd.release_url) + '" target="_blank" style="color:#171717;text-decoration:underline;margin-left:auto">Release notes</a>';
+        h += '<span style="color:#171717;font-weight:600;margin-left:8px">' + window.i18n.t('dashboard.label.update') + ' ' + esc(upd.latest_version) + '</span>';
+        if (upd.release_url) h += '<a href="' + esc(upd.release_url) + '" target="_blank" style="color:#171717;text-decoration:underline;margin-left:auto">' + window.i18n.t('dashboard.button.release_notes') + '</a>';
       }
       h += '</div>';
     }
 
     // Scan bar
     h += '<div class="scan-bar fade-in">';
-    h += '<div class="scan-info"><span class="refresh-dot" id="refresh-dot"></span>Last scan: <strong style="color:#4d4d4d">' + esc(lastScan) + '</strong> <span id="refresh-ago" style="opacity:0.6"></span></div>';
+    h += '<div class="scan-info"><span class="refresh-dot" id="refresh-dot"></span>' + window.i18n.t('dashboard.msg.last_scan') + ' <strong style="color:#4d4d4d">' + esc(lastScan) + '</strong> <span id="refresh-ago" style="opacity:0.6"></span></div>';
     h += '<div style="display:flex;gap:8px;align-items:center">';
-    h += '<a href="/api/v1/report" target="_blank" class="ghost-btn" style="text-decoration:none;font-size:12px">Export Report</a>';
+    h += '<a href="/api/v1/report" target="_blank" class="ghost-btn" style="text-decoration:none;font-size:12px">' + window.i18n.t('dashboard.button.export_report') + '</a>';
     if (scanInProgress || (st && st.scan_running)) {
-      h += '<button class="ghost-btn scanning" disabled><span class="spinner"></span> Scanning...</button>';
+      h += '<button class="ghost-btn scanning" disabled><span class="spinner"></span> ' + window.i18n.t('dashboard.msg.scanning') + '</button>';
     } else {
-      h += '<button class="ghost-btn" onclick="window._triggerScan()">Run Scan</button>';
+      h += '<button class="ghost-btn" onclick="window._triggerScan()">' + window.i18n.t('dashboard.button.run_scan') + '</button>';
     }
     h += '</div></div>';
 
@@ -482,7 +483,7 @@ tbody tr:hover{background:rgba(0,0,0,0.03)}
     // Footer
     h += '<div style="text-align:center;padding:32px 0;color:#808080;font-size:12px" class="fade-in">';
     var appVer = (st && st.version) ? st.version : '';
-    h += 'NAS Doctor' + (appVer ? ' <span style="font-family:monospace;opacity:0.6">' + esc(appVer) + '</span>' : '') + ' &middot; Updates when new scan data is available';
+    h += 'NAS Doctor' + (appVer ? ' <span style="font-family:monospace;opacity:0.6">' + esc(appVer) + '</span>' : '') + ' &middot; ' + window.i18n.t('dashboard.msg.updates_when_available');
     h += '</div>';
 
     document.getElementById("app").innerHTML = h;

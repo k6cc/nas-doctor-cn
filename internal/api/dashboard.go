@@ -175,7 +175,7 @@ util.ephemeralDataBanner = function(st) {
   h += '<strong>&#9888; /data is not a persistent bind-mount.</strong> ';
   h += 'History, settings, and the SQLite database will be lost on every container recreation. ';
   h += 'Map a host path (e.g. <code>/mnt/user/appdata/nas-doctor</code>) to <code>/data</code> in your container configuration. ';
-  h += '<a href="https://github.com/mcdays94/nas-doctor#quick-start" target="_blank" rel="noopener">See the README for bind-mount setup &rarr;</a>';
+  h += '<a href="https://github.com/mcdays94/nas-doctor#quick-start" target="_blank" rel="noopener">' + window.i18n.t('dashboard.msg.see_readme') + '</a>';
   h += '</div>';
   return h;
 };
@@ -299,9 +299,9 @@ sections._renderContainerCard = function(cm, idx) {
   h += '</div>';
   h += '<div style="display:flex;gap:16px;font-size:12px;color:var(--text-tertiary);flex-wrap:wrap;margin-bottom:8px">';
   h += '<span class="' + cpuClass + '">CPU: <strong>' + (cm.cpu_percent || 0).toFixed(1) + '%</strong></span>';
-  h += '<span class="' + memClass + '">Mem: <strong>' + (cm.mem_mb || 0).toFixed(0) + ' MB (' + (cm.mem_percent || 0).toFixed(1) + '%)</strong></span>';
-  if (cm.net_in_bytes > 0 || cm.net_out_bytes > 0) h += '<span>Net: <strong style="color:var(--text-primary)">' + fmtBytes(cm.net_in_bytes) + ' / ' + fmtBytes(cm.net_out_bytes) + '</strong></span>';
-  if (cm.block_read_bytes > 0 || cm.block_write_bytes > 0) h += '<span>Disk: <strong style="color:var(--text-primary)">' + fmtBytes(cm.block_read_bytes) + ' / ' + fmtBytes(cm.block_write_bytes) + '</strong></span>';
+  h += '<span class="' + memClass + '">' + window.i18n.t('dashboard.label.mem') + ' <strong>' + (cm.mem_mb || 0).toFixed(0) + ' MB (' + (cm.mem_percent || 0).toFixed(1) + '%)</strong></span>';
+  if (cm.net_in_bytes > 0 || cm.net_out_bytes > 0) h += '<span>' + window.i18n.t('dashboard.label.net') + ' <strong style="color:var(--text-primary)">' + fmtBytes(cm.net_in_bytes) + ' / ' + fmtBytes(cm.net_out_bytes) + '</strong></span>';
+  if (cm.block_read_bytes > 0 || cm.block_write_bytes > 0) h += '<span>' + window.i18n.t('dashboard.label.disk') + ' <strong style="color:var(--text-primary)">' + fmtBytes(cm.block_read_bytes) + ' / ' + fmtBytes(cm.block_write_bytes) + '</strong></span>';
   h += '</div>';
   h += '<canvas id="cmetrics-chart-' + idx + '" data-container="' + esc(cm.name) + '" style="width:100%;height:60px"></canvas>';
   h += '</div>';
@@ -374,20 +374,20 @@ sections.findings = function(sn, st) {
       h += '<div class="finding-details">';
       h += '<div class="finding-desc">' + esc(f.description) + '</div>';
       if (f.evidence && f.evidence.length > 0) {
-        h += '<div class="finding-detail-row"><div class="finding-detail-label">Evidence</div><div class="finding-detail-value"><ul class="finding-evidence-list">';
+        h += '<div class="finding-detail-row"><div class="finding-detail-label">' + window.i18n.t('dashboard.finding.evidence') + '</div><div class="finding-detail-value"><ul class="finding-evidence-list">';
         for (var ei = 0; ei < f.evidence.length; ei++) {
           h += '<li>' + esc(f.evidence[ei]) + '</li>';
         }
         h += '</ul></div></div>';
       }
-      if (f.action) h += '<div class="finding-detail-row"><div class="finding-detail-label">Action</div><div class="finding-detail-value val-accent">' + esc(f.action) + '</div></div>';
-      if (f.impact) h += '<div class="finding-detail-row"><div class="finding-detail-label">Impact</div><div class="finding-detail-value val-italic">' + esc(f.impact) + '</div></div>';
+      if (f.action) h += '<div class="finding-detail-row"><div class="finding-detail-label">' + window.i18n.t('dashboard.finding.action') + '</div><div class="finding-detail-value val-accent">' + esc(f.action) + '</div></div>';
+      if (f.impact) h += '<div class="finding-detail-row"><div class="finding-detail-label">' + window.i18n.t('dashboard.finding.impact') + '</div><div class="finding-detail-value val-italic">' + esc(f.impact) + '</div></div>';
       h += '<div class="finding-meta">';
-      if (f.detected_at) h += '<span><strong>Detected:</strong> ' + new Date(f.detected_at).toLocaleString() + '</span>';
-      if (f.priority) h += '<span><strong>Priority:</strong> ' + esc(f.priority) + '</span>';
-      if (f.cost) h += '<span><strong>Cost:</strong> ' + esc(f.cost) + '</span>';
-      if (f.category) h += '<span><strong>Category:</strong> ' + esc(f.category) + '</span>';
-      h += '<span style="margin-left:auto"><a href="#" onclick="event.stopPropagation();window._dismissFinding(\'' + esc(f.title).replace(/'/g, "\\'") + '\');return false" style="font-size:11px;color:var(--text-quaternary);text-decoration:none">Dismiss</a></span>';
+      if (f.detected_at) h += '<span><strong>' + window.i18n.t('dashboard.finding.detected') + '</strong> ' + new Date(f.detected_at).toLocaleString() + '</span>';
+      if (f.priority) h += '<span><strong>' + window.i18n.t('dashboard.finding.priority') + '</strong> ' + esc(f.priority) + '</span>';
+      if (f.cost) h += '<span><strong>' + window.i18n.t('dashboard.finding.cost') + '</strong> ' + esc(f.cost) + '</span>';
+      if (f.category) h += '<span><strong>' + window.i18n.t('dashboard.finding.category') + '</strong> ' + esc(f.category) + '</span>';
+      h += '<span style="margin-left:auto"><a href="#" onclick="event.stopPropagation();window._dismissFinding(\'' + esc(f.title).replace(/'/g, "\\'") + '\');return false" style="font-size:11px;color:var(--text-quaternary);text-decoration:none">' + window.i18n.t('dashboard.button.dismiss') + '</a></span>';
       h += '</div>';
       h += '</div>';
       h += '</div>';
@@ -423,7 +423,7 @@ sections.drives = function(sn, st) {
       else if ((smart[hc].temperature_c || 0) >= 50 || smart[hc].reallocated_sectors > 0 || smart[hc].pending_sectors > 0) healthWarn++;
       else healthOk++;
     }
-    h += '<div class="section-title" style="display:flex;align-items:center;gap:12px">Drives (' + ((smart.length + standbyDevices.length) || disks.length) + ')';
+    h += '<div class="section-title" style="display:flex;align-items:center;gap:12px">' + window.i18n.t('dashboard.section.drives') + ' (' + ((smart.length + standbyDevices.length) || disks.length) + ')';
     h += '<span class="health-summary" style="display:inline-flex;gap:8px;font-size:11px;color:var(--text-quaternary);font-weight:400;text-transform:none;letter-spacing:0">';
     if (healthOk > 0) h += '<span style="display:flex;align-items:center;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:var(--green)"></span>' + healthOk + ' ok</span>';
     if (healthWarn > 0) h += '<span style="display:flex;align-items:center;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:var(--amber)"></span>' + healthWarn + ' warn</span>';
@@ -514,7 +514,7 @@ sections.drives = function(sn, st) {
       h += '<span class="status-dot unknown"></span>';
       h += '<span style="font-weight:600;font-size:13px;min-width:55px">' + esc(stbDev) + '</span>';
       h += '<span style="font-size:11px;color:var(--text-quaternary);background:var(--bg-elevated);padding:1px 6px;border-radius:4px">standby</span>';
-      h += '<span style="font-size:12px;color:var(--text-tertiary);flex:1">No SMART data: drive is in standby and <a href="/settings#card-advanced" style="color:var(--accent)">Wake drives for SMART check</a> is off.</span>';
+      h += '<span style="font-size:12px;color:var(--text-tertiary);flex:1">' + window.i18n.t('dashboard.msg.no_smart_standby') + ' <a href="/settings#card-advanced" style="color:var(--accent)">Wake drives for SMART check</a> ' + window.i18n.t('dashboard.msg.is_off') + '</span>';
       h += '</div>';
       h += '</div>';
     }
@@ -622,7 +622,7 @@ sections.containerMetrics = function(sn, st) {
       var runningCs = dockerInfo.containers.filter(function(c) { return c.state === "running"; });
       if (runningCs.length > 0) {
         h += '<div>';
-        h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between">Container Metrics (' + runningCs.length + ')';
+        h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between">' + window.i18n.t('dashboard.section.container_metrics') + ' (' + runningCs.length + ')';
         h += sections._rangeButtons("cmetrics", "loadContainerChart", _chartRange);
         h += '</div>';
         for (var cmi2 = 0; cmi2 < runningCs.length; cmi2++) {
@@ -708,11 +708,11 @@ sections.gpu = function(sn) {
       h += '</div>';
       h += '<div style="display:flex;gap:16px;font-size:12px;color:var(--text-tertiary);flex-wrap:wrap;margin-bottom:8px">';
       h += '<span>GPU: <strong style="color:var(--text-primary)">' + (g.usage_percent || 0).toFixed(0) + '%</strong></span>';
-      h += '<span class="' + tempClass + '">Temp: <strong>' + (g.temperature_c || 0) + '\u00b0C</strong></span>';
+      h += '<span class="' + tempClass + '">' + window.i18n.t('dashboard.label.temp') + ' <strong>' + (g.temperature_c || 0) + '\u00b0C</strong></span>';
       if (g.mem_total_mb > 0) h += '<span>VRAM: <strong style="color:var(--text-primary)">' + (g.mem_used_mb || 0).toFixed(0) + ' / ' + (g.mem_total_mb || 0).toFixed(0) + ' MB</strong></span>';
-      if (g.power_watts > 0) h += '<span>Power: <strong style="color:var(--text-primary)">' + (g.power_watts || 0).toFixed(0) + 'W' + (g.power_max_watts > 0 ? ' / ' + (g.power_max_watts).toFixed(0) + 'W' : '') + '</strong></span>';
-      if (g.fan_percent > 0) h += '<span>Fan: ' + (g.fan_percent || 0).toFixed(0) + '%</span>';
-      if (g.encoder_percent > 0 || g.decoder_percent > 0) h += '<span>Enc/Dec: ' + (g.encoder_percent || 0).toFixed(0) + '% / ' + (g.decoder_percent || 0).toFixed(0) + '%</span>';
+      if (g.power_watts > 0) h += '<span>' + window.i18n.t('dashboard.label.power') + ' <strong style="color:var(--text-primary)">' + (g.power_watts || 0).toFixed(0) + 'W' + (g.power_max_watts > 0 ? ' / ' + (g.power_max_watts).toFixed(0) + 'W' : '') + '</strong></span>';
+      if (g.fan_percent > 0) h += '<span>' + window.i18n.t('dashboard.label.fan') + ' ' + (g.fan_percent || 0).toFixed(0) + '%</span>';
+      if (g.encoder_percent > 0 || g.decoder_percent > 0) h += '<span>' + window.i18n.t('dashboard.label.enc_dec') + ' ' + (g.encoder_percent || 0).toFixed(0) + '% / ' + (g.decoder_percent || 0).toFixed(0) + '%</span>';
       h += '</div>';
       h += '<canvas id="gpu-chart-' + gi + '" style="width:100%;height:60px"></canvas>';
       h += '</div>';
@@ -765,12 +765,12 @@ sections.ups = function(sn) {
     h += '</div>';
     h += '<div style="display:flex;gap:16px;font-size:12px;color:var(--text-tertiary);flex-wrap:wrap">';
     h += '<span style="display:inline-flex;align-items:center">' + batteryIcon(ups.battery_percent || 0, !ups.on_battery) + 'Battery: <strong style="color:var(--text-primary);margin-left:3px">' + (ups.battery_percent || 0).toFixed(0) + '%</strong></span>';
-    h += '<span>Load: <strong style="color:var(--text-primary)">' + (ups.load_percent || 0).toFixed(0) + '%</strong></span>';
-    h += '<span>Runtime: <strong style="color:var(--text-primary)">' + (ups.runtime_minutes || 0).toFixed(0) + ' min</strong></span>';
-    if (ups.wattage_watts > 0) h += '<span>Power: <strong style="color:var(--text-primary)">' + (ups.wattage_watts || 0).toFixed(0) + 'W / ' + (ups.nominal_watts || 0).toFixed(0) + 'W</strong></span>';
-    if (ups.input_voltage > 0) h += '<span>Input: ' + (ups.input_voltage || 0).toFixed(0) + 'V</span>';
+    h += '<span>' + window.i18n.t('dashboard.label.load') + ' <strong style="color:var(--text-primary)">' + (ups.load_percent || 0).toFixed(0) + '%</strong></span>';
+    h += '<span>' + window.i18n.t('dashboard.label.runtime') + ' <strong style="color:var(--text-primary)">' + (ups.runtime_minutes || 0).toFixed(0) + ' min</strong></span>';
+    if (ups.wattage_watts > 0) h += '<span>' + window.i18n.t('dashboard.label.power') + ' <strong style="color:var(--text-primary)">' + (ups.wattage_watts || 0).toFixed(0) + 'W / ' + (ups.nominal_watts || 0).toFixed(0) + 'W</strong></span>';
+    if (ups.input_voltage > 0) h += '<span>' + window.i18n.t('dashboard.label.input') + ' ' + (ups.input_voltage || 0).toFixed(0) + 'V</span>';
     h += '</div>';
-    if (ups.last_transfer) h += '<div style="font-size:11px;color:var(--text-quaternary);margin-top:4px">Last transfer: ' + esc(ups.last_transfer) + '</div>';
+    if (ups.last_transfer) h += '<div style="font-size:11px;color:var(--text-quaternary);margin-top:4px">' + window.i18n.t('dashboard.label.last_transfer') + ' ' + esc(ups.last_transfer) + '</div>';
     h += '</div>';
     h += '</div>';
   }
@@ -814,7 +814,7 @@ sections.backup = function(sn, st) {
   var totalRows = jobsList.length + dupList.length;
   if (backup && backup.available && totalRows > 0) {
     h += '<div>';
-    h += '<div class="section-title">Backup Jobs (' + totalRows + ')</div>';
+    h += '<div class="section-title">' + window.i18n.t('dashboard.section.backup_jobs') + ' (' + totalRows + ')</div>';
     for (var bi = 0; bi < jobsList.length; bi++) {
       var bj = jobsList[bi];
       var isError = !!bj.error;
@@ -848,17 +848,17 @@ sections.backup = function(sn, st) {
            signal; repo path as secondary metadata so the user
            can cross-reference against their settings. */
         h += '<div style="font-size:12px;color:var(--text-tertiary);line-height:1.5">';
-        h += '<div style="color:var(--red,#dc2626);font-weight:500;margin-bottom:4px">' + esc(bj.error || 'Probe failed') + '</div>';
+        h += '<div style="color:var(--red,#dc2626);font-weight:500;margin-bottom:4px">' + esc(bj.error || window.i18n.t('dashboard.status.probe_failed')) + '</div>';
         if (bj.repository) {
           h += '<div style="font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-quaternary);word-break:break-all">' + esc(bj.repository) + '</div>';
         }
         h += '</div>';
       } else {
         h += '<div style="display:flex;gap:16px;font-size:12px;color:var(--text-tertiary);flex-wrap:wrap">';
-        if (bj.snapshot_count) h += '<span>Snapshots: <strong style="color:var(--text-primary)">' + bj.snapshot_count + '</strong></span>';
-        if (bj.size_bytes > 0) h += '<span>Size: <strong style="color:var(--text-primary)">' + fmtBytes(bj.size_bytes) + '</strong></span>';
-        if (bj.last_success) { var age = Math.round((Date.now() - new Date(bj.last_success).getTime()) / 3600000); h += '<span>Last: <strong style="color:var(--text-primary)">' + (age < 1 ? '<1h ago' : age + 'h ago') + '</strong></span>'; }
-        if (bj.encrypted) h += '<span style="color:var(--text-quaternary)">Encrypted</span>';
+        if (bj.snapshot_count) h += '<span>' + window.i18n.t('dashboard.label.snapshots') + ' <strong style="color:var(--text-primary)">' + bj.snapshot_count + '</strong></span>';
+        if (bj.size_bytes > 0) h += '<span>' + window.i18n.t('dashboard.label.size') + ' <strong style="color:var(--text-primary)">' + fmtBytes(bj.size_bytes) + '</strong></span>';
+        if (bj.last_success) { var age = Math.round((Date.now() - new Date(bj.last_success).getTime()) / 3600000); h += '<span>' + window.i18n.t('dashboard.label.last') + ' <strong style="color:var(--text-primary)">' + (age < 1 ? window.i18n.t('dashboard.misc.less_than_1h_ago') : window.i18n.t('dashboard.misc.h_ago', {h: age})) + '</strong></span>'; }
+        if (bj.encrypted) h += '<span style="color:var(--text-quaternary)">' + window.i18n.t('dashboard.label.encrypted') + '</span>';
         h += '</div>';
       }
       h += '</div>';
@@ -920,9 +920,9 @@ sections.backup = function(sn, st) {
         h += '</div>';
       } else {
         h += '<div style="display:flex;gap:16px;font-size:12px;color:var(--text-tertiary);flex-wrap:wrap">';
-        if (de.snapshot_count) h += '<span>Snapshots: <strong style="color:var(--text-primary)">' + de.snapshot_count + '</strong></span>';
-        if (de.latest_backup_size_bytes > 0) h += '<span>Size: <strong style="color:var(--text-primary)">' + fmtBytes(de.latest_backup_size_bytes) + '</strong></span>';
-        if (de.latest_backup_at) { var dupAge = Math.round((Date.now() - new Date(de.latest_backup_at).getTime()) / 3600000); h += '<span>Last: <strong style="color:var(--text-primary)">' + (dupAge < 1 ? '<1h ago' : dupAge + 'h ago') + '</strong></span>'; }
+        if (de.snapshot_count) h += '<span>' + window.i18n.t('dashboard.label.snapshots') + ' <strong style="color:var(--text-primary)">' + de.snapshot_count + '</strong></span>';
+        if (de.latest_backup_size_bytes > 0) h += '<span>' + window.i18n.t('dashboard.label.size') + ' <strong style="color:var(--text-primary)">' + fmtBytes(de.latest_backup_size_bytes) + '</strong></span>';
+        if (de.latest_backup_at) { var dupAge = Math.round((Date.now() - new Date(de.latest_backup_at).getTime()) / 3600000); h += '<span>' + window.i18n.t('dashboard.label.last') + ' <strong style="color:var(--text-primary)">' + (dupAge < 1 ? window.i18n.t('dashboard.misc.less_than_1h_ago') : window.i18n.t('dashboard.misc.h_ago', {h: dupAge})) + '</strong></span>'; }
         if (de.latest_snapshot_id && de.latest_snapshot_revision) h += '<span style="color:var(--text-quaternary)">' + esc(de.latest_snapshot_id) + ' @ rev ' + de.latest_snapshot_revision + '</span>';
         h += '</div>';
       }
@@ -941,20 +941,20 @@ sections.backup = function(sn, st) {
     if (duplicacyConfigured > 0) configuredParts.push(duplicacyConfigured + ' Duplicacy repo' + (duplicacyConfigured === 1 ? '' : 's'));
     var configuredSummary = configuredParts.join(' + ');
     h += '<div>';
-    h += '<div class="section-title">Initial scan pending</div>';
+    h += '<div class="section-title">' + window.i18n.t('dashboard.section.initial_scan_pending') + '</div>';
     h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:14px;font-size:12px;color:var(--text-tertiary);line-height:1.5">';
     h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
     h += '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(34,211,238,0.15);color:#22d3ee;font-weight:600;letter-spacing:0.5px">SYNCING</span>';
     h += '<span style="color:var(--text-secondary)">' + esc(configuredSummary) + ' configured</span>';
     h += '</div>';
-    h += 'First scan in progress. This message will disappear once the initial probe completes — typically within a few seconds. Configure additional repos in <a href="/settings#backup-monitors" style="color:var(--brand)">Settings &rarr; Backup Monitors</a>.';
+    h += window.i18n.t('dashboard.msg.first_scan_in_progress') + ' <a href="/settings#backup-monitors" style="color:var(--brand)">Settings &rarr; Backup Monitors</a>.';
     h += '</div></div>';
   } else {
     h += '<div>';
-    h += '<div class="section-title">Backup Monitoring</div>';
+    h += '<div class="section-title">' + window.i18n.t('dashboard.section.backup_monitoring') + '</div>';
     h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:14px;font-size:12px;color:var(--text-tertiary);line-height:1.5">';
     h += 'No backup provider detected or configured. NAS Doctor <strong>bundles the Borg CLI</strong> and auto-detects local Borg repos. For externally-managed Borg setups (e.g. Unraid User Scripts), configure the repo path in <a href="/settings#backup-monitors" style="color:var(--brand)">Settings &rarr; Backup Monitors &rarr; Borg</a>. For <strong>Duplicacy</strong> repos (CLI or saspus/duplicacy-web layouts), configure the path in <a href="/settings#backup-monitors" style="color:var(--brand)">Settings &rarr; Backup Monitors &rarr; Duplicacy</a> — disk-read, no extra binary required. For <strong>Restic</strong>, <strong>Proxmox Backup Server</strong>, or <strong>Duplicati</strong> monitoring, install those CLIs via a custom Dockerfile or sibling container.';
-    h += '<br><br><span style="font-size:11px;color:var(--text-quaternary)">You can hide this section in <a href="/settings#card-sections" style="color:var(--brand)">Settings → Dashboard Sections</a> if it does not apply to you.</span>';
+    h += '<br><br><span style="font-size:11px;color:var(--text-quaternary)">' + window.i18n.t('dashboard.msg.hide_section_prefix') + ' <a href="/settings#card-sections" style="color:var(--brand)">Settings → Dashboard Sections</a> ' + window.i18n.t('dashboard.msg.if_not_applicable') + '</span>';
     h += '</div></div>';
   }
   h += '</div>';
@@ -1018,10 +1018,10 @@ sections.speedtest = function(sn) {
     +     '<canvas id="speedtest-live-gauge" width="120" height="80"></canvas>'
     +     '<div class="speedtest-live-readout">'
     +       '<div class="speedtest-live-mbps" data-readout="mbps">0</div>'
-    +       '<div class="speedtest-live-mbps-label">Mbps</div>'
+    +     '<div class="speedtest-live-mbps-label">' + window.i18n.t('dashboard.label.mbps') + '</div>'
     +     '</div>'
     +     '<canvas id="speedtest-live-spark" width="80" height="30"></canvas>'
-    +     '<button type="button" id="speedtest-live-cancel" data-action="speedtest-cancel" class="speedtest-live-cancel" disabled>Cancel</button>'
+    +     '<button type="button" id="speedtest-live-cancel" data-action="speedtest-cancel" class="speedtest-live-cancel" disabled>' + window.i18n.t('dashboard.button.cancel') + '</button>'
     +   '</div>'
     + '</div>';
   /* Run-now button is part of the section title row. The button is
@@ -1029,7 +1029,7 @@ sections.speedtest = function(sn) {
      story 7 holds — Disabled-cron does not block the manual button. */
   var runButton = '<button type="button" id="speedtest-run-now" data-action="speedtest-run-now" '
     + 'style="margin-left:8px;padding:4px 10px;background:var(--bg-elevated);border:1px solid var(--border);'
-    + 'border-radius:6px;color:var(--text-secondary);font-size:11px;cursor:pointer">Run now</button>';
+    + 'border-radius:6px;color:var(--text-secondary);font-size:11px;cursor:pointer">' + window.i18n.t('dashboard.button.run_now') + '</button>';
   if (spd && spd.available && spd.latest) {
     var r = spd.latest;
     h += '<div>';
@@ -1039,19 +1039,19 @@ sections.speedtest = function(sn) {
        zero. v0.9.11 UAT bug — without gap the buttons rendered
        touching on the 3-column dashboard layout. */
     h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">';
-    h +=   '<span>Speed Test' + runButton + '</span>';
+    h +=   '<span>' + window.i18n.t('dashboard.section.speed_test') + '' + runButton + '</span>';
     h +=   sections._rangeButtons("st", "loadSpeedTestChart", _chartRange);
     h += '</div>';
     h += stripPlaceholder;
     h += '<div style="' + panelStyle + '">';
     h += '<div style="display:flex;gap:16px;font-size:13px;color:var(--text-tertiary);flex-wrap:wrap;margin-bottom:12px">';
-    h += '<span>Download: <strong style="color:var(--text-primary);font-size:15px">' + r.download_mbps.toFixed(0) + ' Mbps</strong></span>';
-    h += '<span>Upload: <strong style="color:var(--text-primary);font-size:15px">' + r.upload_mbps.toFixed(0) + ' Mbps</strong></span>';
-    h += '<span>Latency: <strong style="color:var(--text-primary)">' + r.latency_ms.toFixed(1) + ' ms</strong></span>';
-    if (r.jitter_ms) h += '<span>Jitter: <strong style="color:var(--text-primary)">' + r.jitter_ms.toFixed(1) + ' ms</strong></span>';
+    h += '<span>' + window.i18n.t('dashboard.label.download') + ' <strong style="color:var(--text-primary);font-size:15px">' + r.download_mbps.toFixed(0) + ' Mbps</strong></span>';
+    h += '<span>' + window.i18n.t('dashboard.label.upload') + ' <strong style="color:var(--text-primary);font-size:15px">' + r.upload_mbps.toFixed(0) + ' Mbps</strong></span>';
+    h += '<span>' + window.i18n.t('dashboard.label.latency') + ' <strong style="color:var(--text-primary)">' + r.latency_ms.toFixed(1) + ' ms</strong></span>';
+    if (r.jitter_ms) h += '<span>' + window.i18n.t('dashboard.label.jitter') + ' <strong style="color:var(--text-primary)">' + r.jitter_ms.toFixed(1) + ' ms</strong></span>';
     h += '</div>';
     h += '<div style="font-size:11px;color:var(--text-quaternary);margin-bottom:8px">';
-    if (r.server_name) h += 'Server: ' + esc(r.server_name) + ' &middot; ';
+    if (r.server_name) h += window.i18n.t('dashboard.label.server') + esc(r.server_name) + ' &middot; ';
     if (r.isp) h += 'ISP: ' + esc(r.isp);
     /* PRD #283 / issue #284: small "via {engine}" caption. Informational
        not promotional — let users see which engine produced the latest
@@ -1075,7 +1075,7 @@ sections.speedtest = function(sn) {
       var ago = util.relativeTimeAgo(r.timestamp);
       if (ago) {
         h += (r.server_name || r.isp || r.engine) ? ' &middot; ' : '';
-        h += '<span data-speedtest-last-test="' + esc(r.timestamp) + '">Last test: ' + esc(ago) + '</span>';
+        h += '<span data-speedtest-last-test="' + esc(r.timestamp) + '">' + window.i18n.t('dashboard.label.last_test') + ' ' + esc(ago) + '</span>';
       }
     }
     h += '</div>';
@@ -1088,7 +1088,7 @@ sections.speedtest = function(sn) {
        tests even though the cron loop is off. */
     h += '<div>';
     h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between">';
-    h +=   '<span>Speed Test' + runButton + '</span>';
+    h +=   '<span>' + window.i18n.t('dashboard.section.speed_test') + '' + runButton + '</span>';
     h += '</div>';
     h += stripPlaceholder;
     h += '<div style="' + panelStyle + ';font-size:13px;color:var(--text-tertiary)" data-speedtest-disabled="true">';
@@ -1102,17 +1102,17 @@ sections.speedtest = function(sn) {
     // something, rather than silently rendering an empty tile.
     h += '<div>';
     h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between">';
-    h +=   '<span>Speed Test' + runButton + '</span>';
+    h +=   '<span>' + window.i18n.t('dashboard.section.speed_test') + '' + runButton + '</span>';
     h += '</div>';
     h += stripPlaceholder;
-    h += '<div style="' + panelStyle + ';font-size:13px;color:var(--text-tertiary);font-style:italic">Running initial speed test&hellip;</div>';
+    h += '<div style="' + panelStyle + ';font-size:13px;color:var(--text-tertiary);font-style:italic">' + window.i18n.t('dashboard.msg.running_initial_speedtest') + '</div>';
     h += '</div>';
   } else {
     /* No latest result + no attempt state. Still render the strip
        placeholder + Run button so the user can kick off the first test. */
     h += '<div>';
     h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between">';
-    h +=   '<span>Speed Test' + runButton + '</span>';
+    h +=   '<span>' + window.i18n.t('dashboard.section.speed_test') + '' + runButton + '</span>';
     h += '</div>';
     h += stripPlaceholder;
     h += '</div>';
@@ -1129,16 +1129,16 @@ sections.serviceChecks = function(sn) {
   var svcChecks = sn ? (sn.service_checks || []) : [];
   if (svcChecks && svcChecks.length > 0) {
     h += '<div>';
-    h += '<div class="section-title">Service Checks (' + svcChecks.length + ')</div>';
+    h += '<div class="section-title">' + window.i18n.t('dashboard.section.service_checks') + ' (' + svcChecks.length + ')</div>';
     h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);overflow:hidden">';
     h += '<table style="width:100%;font-size:12px;border-collapse:collapse">';
     h += '<tr style="color:var(--text-quaternary);font-size:10px;text-transform:uppercase;letter-spacing:0.5px">';
-    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Name</th>';
-    h += '<th style="text-align:center;padding:6px 8px;border-bottom:1px solid var(--border)">Health</th>';
-    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Type</th>';
-    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Status</th>';
-    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Latency</th>';
-    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Failures</th>';
+    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.name') + '</th>';
+    h += '<th style="text-align:center;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.health') + '</th>';
+    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.type') + '</th>';
+    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.status') + '</th>';
+    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.latency') + '</th>';
+    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.failures') + '</th>';
     h += '</tr>';
     for (var svi = 0; svi < svcChecks.length; svi++) {
       var sc = svcChecks[svi];
@@ -1178,7 +1178,7 @@ sections.tunnels = function(sn) {
   var hasTailscale = tunnels && tunnels.tailscale && tunnels.tailscale.installed;
   if (hasCloudflared || hasTailscale) {
     h += '<div>';
-    h += '<div class="section-title">Tunnels</div>';
+    h += '<div class="section-title">' + window.i18n.t('dashboard.section.tunnels') + '</div>';
     h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:12px">';
     if (tunnels.cloudflared && tunnels.cloudflared.tunnels && tunnels.cloudflared.tunnels.length > 0) {
       h += '<div style="font-size:11px;color:var(--text-quaternary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Cloudflared ' + esc(tunnels.cloudflared.version || '') + '</div>';
@@ -1232,7 +1232,7 @@ sections.tunnels = function(sn) {
         // Minimal row so the operator sees detection ran.
         h += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;color:var(--text-tertiary)">';
         h += '<span style="width:8px;height:8px;border-radius:50%;background:var(--text-quaternary);flex-shrink:0"></span>';
-        h += '<span>Tailscale installed, no peers reported.</span>';
+        h += '<span>' + window.i18n.t('dashboard.msg.tailscale_no_peers') + '</span>';
         h += '</div>';
       }
     }
@@ -1256,7 +1256,7 @@ sections.proxmox = function(sn) {
     if (pve.error) {
       h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:12px;color:var(--red);font-size:12px">' + esc(pve.error) + '</div>';
     } else if (!pve.connected) {
-      h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:12px;color:var(--text-tertiary);font-size:12px">Not connected. Configure API credentials in Settings.</div>';
+      h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:12px;color:var(--text-tertiary);font-size:12px">' + window.i18n.t('dashboard.msg.not_connected_pve') + '</div>';
     } else {
       if (pve.nodes && pve.nodes.length > 0) {
         h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">';
@@ -1282,17 +1282,17 @@ sections.proxmox = function(sn) {
         h += '</div>';
       }
       if (pve.guests && pve.guests.length > 0) {
-        h += '<div style="font-size:11px;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Guests (' + pve.guests.length + ')</div>';
+        h += '<div style="font-size:11px;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">' + window.i18n.t('dashboard.group.guests') + ' (' + pve.guests.length + ')</div>';
         h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);overflow:hidden">';
         h += '<table style="width:100%;font-size:12px;border-collapse:collapse">';
         h += '<tr style="color:var(--text-quaternary);font-size:10px;text-transform:uppercase;letter-spacing:0.5px">';
         h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">ID</th>';
-        h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Name</th>';
-        h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Type</th>';
-        h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Node</th>';
-        h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Status</th>';
+        h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.name') + '</th>';
+        h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.type') + '</th>';
+        h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.node') + '</th>';
+        h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.status') + '</th>';
         h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">CPU</th>';
-        h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Memory</th>';
+        h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.memory') + '</th>';
         h += '</tr>';
         for (var gi = 0; gi < pve.guests.length; gi++) {
           var g = pve.guests[gi];
@@ -1313,7 +1313,7 @@ sections.proxmox = function(sn) {
         h += '</table></div>';
       }
       if (pve.storage && pve.storage.length > 0) {
-        h += '<div style="font-size:11px;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 6px">Storage Pools (' + pve.storage.length + ')</div>';
+        h += '<div style="font-size:11px;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 6px">' + window.i18n.t('dashboard.group.storage_pools') + ' (' + pve.storage.length + ')</div>';
         h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px">';
         for (var si = 0; si < pve.storage.length; si++) {
           var pst = pve.storage[si];
@@ -1415,7 +1415,7 @@ sections.kubernetes = function(sn) {
     h += '<div>';
     h += '<div class="section-title">' + k8sTitle + ' Deployments (' + k8s.deployments.length + ')' + (unhealthyDeps.length > 0 ? ' <span style="color:var(--red)">' + unhealthyDeps.length + ' unhealthy</span>' : '') + '</div>';
     h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);overflow:hidden;max-height:250px;overflow-y:auto;scrollbar-width:thin">';
-    h += '<table style="width:100%;font-size:12px;border-collapse:collapse"><tr style="color:var(--text-quaternary);font-size:10px;text-transform:uppercase;letter-spacing:0.5px;position:sticky;top:0;background:var(--bg-panel)"><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Name</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">NS</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Ready</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Strategy</th></tr>';
+    h += '<table style="width:100%;font-size:12px;border-collapse:collapse"><tr style="color:var(--text-quaternary);font-size:10px;text-transform:uppercase;letter-spacing:0.5px;position:sticky;top:0;background:var(--bg-panel)"><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.name') + '</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">NS</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Ready</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Strategy</th></tr>';
     for (var di = 0; di < k8s.deployments.length; di++) { var dep = k8s.deployments[di]; var dOk = dep.unavailable === 0 && dep.ready_replicas >= dep.replicas;
       h += '<tr><td style="padding:5px 8px;border-bottom:1px solid var(--border);font-weight:500;color:'+(dOk?'inherit':'var(--red)')+'">'+esc(dep.name)+'</td><td style="padding:5px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--text-tertiary)">'+esc(dep.namespace)+'</td><td style="padding:5px 8px;border-bottom:1px solid var(--border);color:'+(dOk?'var(--green)':'var(--red)')+'">'+dep.ready_replicas+'/'+dep.replicas+'</td><td style="padding:5px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--text-quaternary)">'+esc(dep.strategy||'')+'</td></tr>';
     }
@@ -1448,16 +1448,16 @@ sections.processes = function(sn) {
   if (procs.length > 0) {
     var showCount = Math.min(procs.length, 10);
     h += '<div>';
-    h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between"><span>Top Processes (' + procs.length + ')</span><a href="/stats#process-history" style="font-size:11px;color:var(--text-quaternary);text-decoration:none;font-weight:400;margin-left:16px;white-space:nowrap">View history &rarr;</a></div>';
+    h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between"><span>' + window.i18n.t('dashboard.section.top_processes') + ' (' + procs.length + ')</span><a href="/stats#process-history" style="font-size:11px;color:var(--text-quaternary);text-decoration:none;font-weight:400;margin-left:16px;white-space:nowrap">' + window.i18n.t('dashboard.button.view_history') + '</a></div>';
     h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);overflow:hidden">';
     h += '<table style="width:100%;font-size:12px;border-collapse:collapse">';
     h += '<tr style="color:var(--text-quaternary);font-size:10px;text-transform:uppercase;letter-spacing:0.5px">';
     h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);width:28px">#</th>';
-    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Process</th>';
-    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">Container</th>';
+    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.process') + '</th>';
+    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.container') + '</th>';
     h += '<th style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--border)">CPU%</th>';
-    h += '<th style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--border)">Mem%</th>';
-    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">User</th>';
+    h += '<th style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.mem_pct') + '</th>';
+    h += '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)">' + window.i18n.t('dashboard.th.user') + '</th>';
     h += '</tr>';
     for (var pi = 0; pi < showCount; pi++) {
       var p = procs[pi];
@@ -1501,7 +1501,7 @@ sections.parity = function(sn) {
   var parity = sn ? sn.parity : null;
   if (parity && parity.history && parity.history.length > 0) {
     h += '<div>';
-    h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between"><span>Parity History</span><a href="/parity" style="font-size:11px;color:var(--text-quaternary);text-decoration:none;font-weight:400;margin-left:16px;white-space:nowrap">View all &rarr;</a></div>';
+    h += '<div class="section-title" style="display:flex;align-items:center;justify-content:space-between"><span>' + window.i18n.t('dashboard.section.parity_history') + '</span><a href="/parity" style="font-size:11px;color:var(--text-quaternary);text-decoration:none;font-weight:400;margin-left:16px;white-space:nowrap">' + window.i18n.t('dashboard.button.view_all') + '</a></div>';
     h += '<div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px">Status: ' + esc(parity.status || "idle") + '</div>';
     h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:12px">';
     h += '<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin">';
@@ -1514,7 +1514,7 @@ sections.parity = function(sn) {
       h += '<div style="background:var(--bg-panel);border:1px solid '+(hasErr?'var(--red)':'var(--border)')+';border-radius:10px;padding:8px 14px;min-width:120px;cursor:pointer;transition:border-color 0.15s">';
       h += '<div style="font-size:12px;font-weight:600;color:var(--text-primary)">' + esc(pc.date) + '</div>';
       h += '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">' + dur + ' &middot; ' + (pc.speed_mb_s||0).toFixed(0) + ' MB/s</div>';
-      h += '<div style="font-size:11px;margin-top:2px;font-weight:600;color:'+(hasErr?'var(--red)':'var(--green)')+'">'+( hasErr ? pc.errors+' errors' : 'Clean' )+'</div>';
+      h += '<div style="font-size:11px;margin-top:2px;font-weight:600;color:'+(hasErr?'var(--red)':'var(--green)')+'">'+( hasErr ? pc.errors+' ' + window.i18n.t('dashboard.misc.errors') : window.i18n.t('dashboard.status.clean') )+'</div>';
       h += '</div></a>';
     }
     h += '</div>';
@@ -1589,7 +1589,7 @@ charts.loadContainers = function(hours, save) {
         var cpuData = data.map(function(p) { return p.cpu_percent; });
         var memData = data.map(function(p) { return p.mem_mb; });
         var labels = data.map(function(p) { var d = new Date(p.timestamp); if (hours <= 1) return d.getHours() + ":" + ("0" + d.getMinutes()).slice(-2); if (hours <= 24) return d.getHours() + ":00"; return (d.getMonth()+1) + "/" + d.getDate(); });
-        try { NasChart.area(el.id, { datasets: [{ data: cpuData, color: "#3b82f6", label: "CPU %" }, { data: memData, color: "#8b5cf6", label: "Mem MB" }], labels: labels, width: el.offsetWidth || 400, height: 60, showDots: false, margins: { top: 4, bottom: 16, left: 30, right: 8 } }); } catch(e) {}
+        try { NasChart.area(el.id, { datasets: [{ data: cpuData, color: "#3b82f6", label: window.i18n.t('dashboard.chart.cpu') }, { data: memData, color: "#8b5cf6", label: window.i18n.t('dashboard.chart.mem') }], labels: labels, width: el.offsetWidth || 400, height: 60, showDots: false, margins: { top: 4, bottom: 16, left: 30, right: 8 } }); } catch(e) {}
       }
     })
     .catch(function() {});
@@ -1777,7 +1777,7 @@ var speedtestLive = (function() {
      "Cancelling..." label so the user sees immediate feedback. */
   function cancel() {
     if (!state.testId) return;
-    setCancelEnabled(false, 'Cancelling...');
+    setCancelEnabled(false, window.i18n.t('dashboard.button.cancelling'));
     fetch('/api/v1/speedtest/cancel/' + state.testId, { method: 'POST' })
       .catch(function() {
         /* If the request itself fails (offline, etc.) re-enable the
@@ -1852,7 +1852,7 @@ charts.loadSpeedTest = function(hours, save) {
       var dlData = points.map(function(p) { return p.download_mbps; });
       var ulData = points.map(function(p) { return p.upload_mbps; });
       var labels = points.map(function(p) { var d = new Date(p.timestamp); if (hours <= 1) return d.getHours() + ":" + ("0" + d.getMinutes()).slice(-2); if (hours <= 24) return d.getHours() + ":00"; return (d.getMonth()+1) + "/" + d.getDate(); });
-      try { NasChart.area("speedtest-chart", { datasets: [{ data: dlData, color: "#3b82f6", label: "Download" }, { data: ulData, color: "#8b5cf6", label: "Upload" }], labels: labels, width: document.getElementById("speedtest-chart").offsetWidth || 400, height: 80, showDots: true, margins: { top: 4, bottom: 16, left: 40, right: 8 } }); } catch(e) {}
+      try { NasChart.area("speedtest-chart", { datasets: [{ data: dlData, color: "#3b82f6", label: window.i18n.t('dashboard.chart.download') }, { data: ulData, color: "#8b5cf6", label: window.i18n.t('dashboard.chart.upload') }], labels: labels, width: document.getElementById("speedtest-chart").offsetWidth || 400, height: 80, showDots: true, margins: { top: 4, bottom: 16, left: 40, right: 8 } }); } catch(e) {}
     }).catch(function() {});
 };
 
@@ -2111,9 +2111,9 @@ function initSortBars() {
     NasSort.renderSortBar({
       container: findingsMount,
       options: [
-        { key: "severity", label: "Severity" },
-        { key: "date", label: "Newest" },
-        { key: "category", label: "Category" }
+        { key: "severity", label: window.i18n.t('dashboard.th.severity') },
+        { key: "date", label: window.i18n.t('dashboard.th.newest') },
+        { key: "category", label: window.i18n.t('dashboard.th.category') }
       ],
       active: prefs.findings || "severity",
       onSort: function(key) { prefs.findings = key; NasSort.savePrefs(prefs); polling.loadAll(); }
@@ -2125,11 +2125,11 @@ function initSortBars() {
     NasSort.renderSortBar({
       container: drivesMount,
       options: [
-        { key: "device", label: "Device" },
-        { key: "temp", label: "Temp" },
+        { key: "device", label: window.i18n.t('dashboard.th.device') },
+        { key: "temp", label: window.i18n.t('dashboard.th.temp') },
         { key: "age", label: "Age" },
-        { key: "size", label: "Size" },
-        { key: "health", label: "Health" }
+        { key: "size", label: window.i18n.t('dashboard.th.size') },
+        { key: "health", label: window.i18n.t('dashboard.th.health') }
       ],
       active: prefs.drives || "device",
       onSort: function(key) { prefs.drives = key; NasSort.savePrefs(prefs); polling.loadAll(); }
@@ -2190,7 +2190,7 @@ function setupGlobals() {
     if (!scanMs || isNaN(scanMs)) { el.textContent = ""; return; }
     var secs = Math.round((Date.now() - scanMs) / 1000);
     if (secs < 0) secs = 0; // clock skew guard
-    if (secs < 5) el.textContent = "just now";
+    if (secs < 5) el.textContent = window.i18n.t('time.just_now');
     else if (secs < 60) el.textContent = secs + "s ago";
     else if (secs < 3600) el.textContent = Math.floor(secs / 60) + "m ago";
     else if (secs < 86400) el.textContent = Math.floor(secs / 3600) + "h ago";

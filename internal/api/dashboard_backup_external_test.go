@@ -62,10 +62,10 @@ func TestDashboardJS_BackupWidget_PrefersLabelOverName(t *testing.T) {
 func TestDashboardJS_BackupWidget_PreservesExistingHealthyRender(t *testing.T) {
 	js := DashboardJS
 	for _, s := range []string{
-		"Snapshots:",
-		"Size:",
-		"Last:",
-		"Encrypted",
+		"label.snapshots",
+		"label.size",
+		"label.last",
+		"label.encrypted",
 		"last_success",
 	} {
 		if !strings.Contains(js, s) {

@@ -102,9 +102,9 @@ func TestDashboardJS_ServiceCheckTypePill(t *testing.T) {
 		// Anchor on the section header so we're certain we're
 		// asserting against the right block (DashboardJS has many
 		// section renderers).
-		idx := strings.Index(DashboardJS, "Service Checks (")
+		idx := strings.Index(DashboardJS, "service_checks")
 		if idx < 0 {
-			t.Fatal("'Service Checks (' header anchor not found in DashboardJS — test can't locate the right section")
+			t.Fatal("'service_checks' header anchor not found in DashboardJS — test can't locate the right section")
 		}
 		// Scan a generous window after the anchor; the current
 		// services renderer is under 2kB.

@@ -145,7 +145,7 @@ func TestThemeTemplates_GracefulFallback(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			cpuGuard := strings.Index(tc.tmpl, "cpuTemp > 0")
-			cpuRender := strings.Index(tc.tmpl, "CPU \\u00b0C")
+			cpuRender := strings.Index(tc.tmpl, "stat_cpu_temp")
 			if cpuGuard < 0 || cpuRender < 0 {
 				t.Fatalf("%s.html: missing CPU temp guard or render — guard=%d render=%d", tc.name, cpuGuard, cpuRender)
 			}
@@ -153,7 +153,7 @@ func TestThemeTemplates_GracefulFallback(t *testing.T) {
 				t.Errorf("%s.html: 'cpuTemp > 0' guard at offset %d must precede the CPU temp render at offset %d", tc.name, cpuGuard, cpuRender)
 			}
 			moboGuard := strings.Index(tc.tmpl, "moboTemp > 0")
-			moboRender := strings.Index(tc.tmpl, "Mobo \\u00b0C")
+			moboRender := strings.Index(tc.tmpl, "stat_mobo_temp")
 			if moboGuard < 0 || moboRender < 0 {
 				t.Fatalf("%s.html: missing Mobo temp guard or render — guard=%d render=%d", tc.name, moboGuard, moboRender)
 			}

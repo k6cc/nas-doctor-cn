@@ -24,7 +24,7 @@ func TestDashboardJS_BackupSection_HasEmptyStateHint(t *testing.T) {
 		{"mentions Restic", "Restic"},
 		{"mentions Proxmox Backup Server", "Proxmox Backup Server"},
 		{"mentions Duplicati", "Duplicati"},
-		{"has Backup Monitoring title in empty state", "Backup Monitoring"},
+		{"has Backup Monitoring title in empty state", "backup_monitoring"},
 		{"acknowledges Borg is bundled", "bundle"},
 		{"points user at Backup Monitors settings", "/settings#backup-monitors"},
 	}
@@ -64,7 +64,7 @@ func TestDashboardJS_BackupSection_PreservesExistingBehavior(t *testing.T) {
 	}{
 		{"sections.backup defined", "sections.backup = function(sn, st)"},
 		{"data-section attribute", `data-section="backup"`},
-		{"renders backup jobs count", "Backup Jobs ("},
+		{"renders backup jobs count", "backup_jobs"},
 		// Combined-guard pattern after issue #314 — total row count
 		// covers both Borg jobs and Duplicacy entries. Borg-only
 		// installs still hit the empty-state branch on
