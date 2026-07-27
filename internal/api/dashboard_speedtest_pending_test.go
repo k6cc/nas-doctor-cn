@@ -30,9 +30,10 @@ func TestDashboardJS_SpeedTestWidget_HasPendingRenderBranch(t *testing.T) {
 
 	// The user-visible copy. If this string changes (e.g. translations),
 	// update the test — but at least the refactor has to touch the test,
-	// not silently disappear.
-	if !strings.Contains(js, "Running initial speed test") {
-		t.Error("DashboardJS: speedtest widget does not render 'Running initial speed test' copy for pending state")
+	// not silently disappear. After i18n refactor, assert on the key
+	// reference instead of the hardcoded English literal.
+	if !strings.Contains(js, "running_initial_speedtest") {
+		t.Error("DashboardJS: speedtest widget does not render 'running_initial_speedtest' i18n key for pending state")
 	}
 }
 

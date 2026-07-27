@@ -22,8 +22,10 @@ import (
 func TestDashboardJS_SpeedTestWidget_RendersLastTestCaption(t *testing.T) {
 	body := extractSpeedtestSection(t)
 
-	if !strings.Contains(body, "Last test:") {
-		t.Error("DashboardJS: speedtest section does not render 'Last test:' caption (issue #290 / Slice A of #261)")
+	// After i18n refactor, assert on the key reference instead of the
+	// hardcoded English literal.
+	if !strings.Contains(body, "last_test") {
+		t.Error("DashboardJS: speedtest section does not render 'last_test' i18n key caption (issue #290 / Slice A of #261)")
 	}
 	if !strings.Contains(body, "r.timestamp") {
 		t.Error("DashboardJS: speedtest section does not reference r.timestamp; caption regression — caption must be gated on the field being present")
@@ -84,8 +86,10 @@ func TestDashboardJS_SpeedTestWidget_EngineCaptionStillPresent(t *testing.T) {
 func TestDashboardJS_SpeedTestWidget_EmptyStateCopyPreserved(t *testing.T) {
 	js := DashboardJS
 
-	if !strings.Contains(js, "Running initial speed test") {
-		t.Error("DashboardJS: pending-state copy 'Running initial speed test…' regression — the v0.9.6 #210 first-boot empty-state was dropped by Slice A")
+	// After i18n refactor, assert on the key reference instead of the
+	// hardcoded English literal.
+	if !strings.Contains(js, "running_initial_speedtest") {
+		t.Error("DashboardJS: pending-state i18n key 'running_initial_speedtest' regression — the v0.9.6 #210 first-boot empty-state was dropped by Slice A")
 	}
 	if !strings.Contains(js, "Scheduled speed tests are disabled. Use Run now for a one-off test.") {
 		t.Error("DashboardJS: disabled empty-state copy regression — Slice 2 (#288) user story 8 broken")
