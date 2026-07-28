@@ -88,6 +88,7 @@ func analyzeSMART(drives []internal.SMARTInfo) []internal.Finding {
 				Action:      "Check if the drive supports SMART passthrough. For USB drives, try enabling SAT passthrough. For HBA controllers, verify smartctl can access the drive directly.",
 				Priority:    "short-term",
 				Cost:        "Free",
+				FindingType: "smart_unavailable",
 				RelatedDisk: d.Serial,
 			})
 			continue
@@ -105,6 +106,7 @@ func analyzeSMART(drives []internal.SMARTInfo) []internal.Finding {
 				Action:      "Replace this drive immediately. Back up any unique data NOW.",
 				Priority:    "immediate",
 				Cost:        estimateDriveCost(d),
+				FindingType: "smart_health_failed",
 				RelatedDisk: d.ArraySlot,
 			})
 		}
@@ -131,6 +133,7 @@ func analyzeSMART(drives []internal.SMARTInfo) []internal.Finding {
 				Action:      "Monitor closely. Plan replacement if count is increasing.",
 				Priority:    priorityFromSeverity(sev),
 				Cost:        estimateDriveCost(d),
+				FindingType: "reallocated_sectors",
 				RelatedDisk: d.ArraySlot,
 			})
 		}
@@ -153,6 +156,7 @@ func analyzeSMART(drives []internal.SMARTInfo) []internal.Finding {
 				Action:      "Run an extended SMART self-test. Plan drive replacement.",
 				Priority:    "immediate",
 				Cost:        estimateDriveCost(d),
+				FindingType: "pending_sectors",
 				RelatedDisk: d.ArraySlot,
 			})
 		}
@@ -179,6 +183,7 @@ func analyzeSMART(drives []internal.SMARTInfo) []internal.Finding {
 				Action:      fmt.Sprintf("Replace the SATA cable on port %s. Use a certified SATA III cable.", d.ATAPort),
 				Priority:    priorityFromSeverity(sev),
 				Cost:        "$5-15 for a new SATA cable",
+				FindingType: "sata_cable",
 				RelatedDisk: d.ArraySlot,
 			})
 		}
@@ -204,6 +209,7 @@ func analyzeSMART(drives []internal.SMARTInfo) []internal.Finding {
 				Action:      "Check SATA cable and power connections. May indicate controller or drive issues.",
 				Priority:    priorityFromSeverity(sev),
 				Cost:        "$5-15 (cable) or " + estimateDriveCost(d) + " (replacement)",
+				FindingType: "command_timeout",
 				RelatedDisk: d.ArraySlot,
 			})
 		}
@@ -231,6 +237,7 @@ func analyzeSMART(drives []internal.SMARTInfo) []internal.Finding {
 				Action:      "Ensure backups are current. Consider proactive replacement.",
 				Priority:    priorityFromSeverity(sev),
 				Cost:        estimateDriveCost(d),
+				FindingType: "drive_aging",
 				RelatedDisk: d.ArraySlot,
 			})
 		}
@@ -251,6 +258,7 @@ func analyzeSMART(drives []internal.SMARTInfo) []internal.Finding {
 				Action:      "Plan replacement. Ensure backups are current and verified.",
 				Priority:    "immediate",
 				Cost:        estimateDriveCost(d),
+				FindingType: "low_health_score",
 				RelatedDisk: d.ArraySlot,
 			})
 		}
@@ -295,6 +303,7 @@ func analyzeThermal(drives []internal.SMARTInfo) []internal.Finding {
 			Action:      "Improve case airflow. Add/replace fans. Check that existing fans are working.",
 			Priority:    priorityFromSeverity(sev),
 			Cost:        "$20-50 for case fans",
+			FindingType: "high_temp",
 			RelatedDisk: d.ArraySlot,
 		})
 
@@ -309,6 +318,7 @@ func analyzeThermal(drives []internal.SMARTInfo) []internal.Finding {
 				Impact:      "Possible latent damage from thermal stress",
 				Action:      "Monitor SMART attributes closely for degradation.",
 				Priority:    "medium-term",
+				FindingType: "hist_overheat",
 				RelatedDisk: d.ArraySlot,
 			})
 		}
@@ -326,6 +336,7 @@ func analyzeThermal(drives []internal.SMARTInfo) []internal.Finding {
 			Action:      "Check all case fans are operational. Consider adding intake/exhaust fans. Clean dust filters.",
 			Priority:    "immediate",
 			Cost:        "$50-100 for fan upgrades",
+			FindingType: "systematic_thermal",
 		})
 	}
 
@@ -348,6 +359,7 @@ func analyzeMemory(sys internal.SystemInfo) []internal.Finding {
 			Action:      "Identify memory-hungry processes. Consider adding RAM or reducing Docker container count.",
 			Priority:    "immediate",
 			Cost:        "$30-100 for RAM upgrade",
+			FindingType: "critical_memory",
 		})
 	} else if sys.MemPercent >= 85 {
 		findings = append(findings, internal.Finding{
@@ -360,6 +372,7 @@ func analyzeMemory(sys internal.SystemInfo) []internal.Finding {
 			Action:      "Review container memory limits. Consider RAM upgrade if usage keeps growing.",
 			Priority:    "short-term",
 			Cost:        "$30-100 for RAM upgrade",
+			FindingType: "high_memory",
 		})
 	}
 
@@ -377,6 +390,7 @@ func analyzeMemory(sys internal.SystemInfo) []internal.Finding {
 				Action:      "Add more RAM. Review which processes are consuming the most memory.",
 				Priority:    "short-term",
 				Cost:        "$30-100 for RAM upgrade",
+				FindingType: "heavy_swap",
 			})
 		}
 	}
@@ -400,6 +414,7 @@ func analyzeIOWait(sys internal.SystemInfo) []internal.Finding {
 			Action:      "Add an SSD cache drive. Check for failing disks or bad SATA cables causing retries.",
 			Priority:    "immediate",
 			Cost:        "$50-150 for SSD cache drive",
+			FindingType: "critical_disk_io",
 		})
 	} else if sys.IOWait >= 15 {
 		findings = append(findings, internal.Finding{
@@ -412,6 +427,7 @@ func analyzeIOWait(sys internal.SystemInfo) []internal.Finding {
 			Action:      "Consider adding an SSD cache for Docker containers and frequently-accessed data.",
 			Priority:    "short-term",
 			Cost:        "$50-150 for SSD cache drive",
+			FindingType: "high_disk_io_wait",
 		})
 	}
 
@@ -426,6 +442,7 @@ func analyzeIOWait(sys internal.SystemInfo) []internal.Finding {
 			Impact:      "Process scheduling delays, overall sluggishness",
 			Action:      "Identify CPU-heavy processes. Reduce concurrent workloads or upgrade CPU.",
 			Priority:    "short-term",
+			FindingType: "high_load",
 		})
 	}
 
@@ -447,6 +464,7 @@ func analyzeDiskSpace(disks []internal.DiskInfo) []internal.Finding {
 				Impact:      "Services may fail if disk fills completely. Write operations will fail.",
 				Action:      "Free space immediately or expand storage.",
 				Priority:    "immediate",
+				FindingType: "disk_nearly_full",
 			})
 		} else if d.UsedPct >= 90 {
 			findings = append(findings, internal.Finding{
@@ -458,6 +476,7 @@ func analyzeDiskSpace(disks []internal.DiskInfo) []internal.Finding {
 				Impact:      "May run out of space soon if growth continues",
 				Action:      "Monitor growth rate. Plan storage expansion or cleanup.",
 				Priority:    "short-term",
+				FindingType: "disk_space_low",
 			})
 		}
 	}
@@ -511,6 +530,7 @@ func analyzeStorageMounts(snap *internal.Snapshot) []internal.Finding {
 		Action:      "Stop the container, add `/volume1:/host/volume1:ro` (and one line per additional volume) to your docker-compose.yml or Container Manager configuration, then restart. See the Synology DSM section of the README for the full mount list.",
 		Priority:    "short-term",
 		Cost:        "Free",
+		FindingType: "synology_unmounted",
 	}}
 }
 
@@ -542,6 +562,7 @@ func analyzeDocker(docker internal.DockerInfo) []internal.Finding {
 				Impact:      "Severely starving other containers and host processes. May cause system instability.",
 				Action:      "Investigate the container workload immediately. Apply CPU limits (--cpus) or restart if stuck.",
 				Priority:    "immediate",
+				FindingType: "container_cpu",
 			})
 		} else if c.CPU > 80 {
 			highCPU++
@@ -554,6 +575,7 @@ func analyzeDocker(docker internal.DockerInfo) []internal.Finding {
 				Impact:      "May starve other containers and system processes",
 				Action:      "Check if the container is healthy. Set CPU limits if needed.",
 				Priority:    "short-term",
+				FindingType: "container_cpu",
 			})
 		}
 		// Memory rules: critical >95%, warning >80%
@@ -568,6 +590,7 @@ func analyzeDocker(docker internal.DockerInfo) []internal.Finding {
 				Impact:      "Imminent OOM kill risk. Container or host may become unresponsive.",
 				Action:      "Set memory limits (--memory). Investigate memory leaks. Restart the container.",
 				Priority:    "immediate",
+				FindingType: "container_mem_exhausted",
 			})
 		} else if c.MemPct > 80 {
 			highMem++
@@ -580,6 +603,7 @@ func analyzeDocker(docker internal.DockerInfo) []internal.Finding {
 				Impact:      "May trigger OOM killer if usage continues to grow.",
 				Action:      "Monitor memory trends. Set memory limits or investigate the workload.",
 				Priority:    "short-term",
+				FindingType: "container_mem_high",
 			})
 		}
 	}
@@ -593,6 +617,7 @@ func analyzeDocker(docker internal.DockerInfo) []internal.Finding {
 			Impact:      "Wasted disk space, potential confusion in management",
 			Action:      "Review stopped containers. Remove ones that aren't needed: docker container prune",
 			Priority:    "medium-term",
+			FindingType: "stopped_containers",
 		})
 	}
 
@@ -613,6 +638,7 @@ func analyzeNetwork(net internal.NetworkInfo) []internal.Finding {
 				Impact:      "Network connectivity may be affected",
 				Action:      "Check cable connection and switch port.",
 				Priority:    "short-term",
+				FindingType: "network_down",
 			})
 		}
 		// Check for 100Mb/s on what should be GbE
@@ -627,6 +653,7 @@ func analyzeNetwork(net internal.NetworkInfo) []internal.Finding {
 				Action:      "Replace Ethernet cable. Check switch port.",
 				Priority:    "short-term",
 				Cost:        "$5-15 for Cat6 cable",
+				FindingType: "slow_link",
 			})
 		}
 	}
@@ -661,6 +688,7 @@ func analyzeLogs(logs internal.LogInfo) []internal.Finding {
 			Impact:      "Data corruption risk, slow I/O, system instability",
 			Action:      "Check SATA cables and connections. Cross-reference with SMART data to identify the affected drive.",
 			Priority:    "immediate",
+			FindingType: "ata_errors",
 		})
 	}
 
@@ -674,6 +702,7 @@ func analyzeLogs(logs internal.LogInfo) []internal.Finding {
 			Impact:      "Data loss risk, application failures",
 			Action:      "Identify the affected drive from the error messages. Check SMART health.",
 			Priority:    "immediate",
+			FindingType: "io_errors",
 		})
 	}
 
@@ -711,10 +740,11 @@ func analyzeServiceChecks(checks []internal.ServiceCheckResult) []internal.Findi
 				fmt.Sprintf("Consecutive failures: %d (threshold %d)", check.ConsecutiveFailures, threshold),
 				fmt.Sprintf("Last check at: %s", check.CheckedAt),
 			},
-			Impact:   "Dependent applications and clients may fail while this service remains unavailable.",
-			Action:   "Verify the service process, endpoint reachability, network path, and authentication/configuration for this target.",
-			Priority: priorityFromSeverity(severity),
-			Cost:     "none",
+			Impact:      "Dependent applications and clients may fail while this service remains unavailable.",
+			Action:      "Verify the service process, endpoint reachability, network path, and authentication/configuration for this target.",
+			Priority:    priorityFromSeverity(severity),
+			Cost:        "none",
+			FindingType: "service_check_failed",
 		})
 	}
 	return findings
@@ -758,6 +788,7 @@ func analyzeParity(parity *internal.ParityInfo) []internal.Finding {
 				Impact:      "Parity checks take much longer, array is unprotected for extended periods",
 				Action:      "Check SATA cables, drive health, and controller. The slowest drive/cable is the bottleneck.",
 				Priority:    "immediate",
+				FindingType: "parity_speed_critical",
 			})
 		} else if degradation > 25 {
 			findings = append(findings, internal.Finding{
@@ -769,6 +800,7 @@ func analyzeParity(parity *internal.ParityInfo) []internal.Finding {
 				Impact:      "Longer parity checks, reduced array performance",
 				Action:      "Monitor trend. Check SATA cables if degradation continues.",
 				Priority:    "short-term",
+				FindingType: "parity_speed_decline",
 			})
 		}
 	}
@@ -785,6 +817,7 @@ func analyzeParity(parity *internal.ParityInfo) []internal.Finding {
 				Impact:      "Parity data is inconsistent. Array protection is compromised.",
 				Action:      "Run a correcting parity check. Investigate which drive has bad data.",
 				Priority:    "immediate",
+				FindingType: "parity_errors",
 			})
 		}
 	}
@@ -839,6 +872,7 @@ func correlate(findings []internal.Finding, snap *internal.Snapshot) []internal.
 			Action:      "Replace the affected SATA cable(s). This is the #1 priority fix.",
 			Priority:    "immediate",
 			Cost:        "$5-15",
+			FindingType: "root_cause_sata",
 		})
 	}
 
@@ -853,6 +887,7 @@ func correlate(findings []internal.Finding, snap *internal.Snapshot) []internal.
 			Action:      "Address cooling before evaluating parity performance further.",
 			Priority:    "immediate",
 			Cost:        "$20-50 for fans",
+			FindingType: "parity_temp",
 		})
 	}
 
@@ -869,6 +904,7 @@ func correlate(findings []internal.Finding, snap *internal.Snapshot) []internal.
 			Action:      "Add an SSD or NVMe cache drive. Move Docker appdata to the cache.",
 			Priority:    "short-term",
 			Cost:        "$50-150 for SSD cache",
+			FindingType: "no_ssd_cache",
 		})
 	}
 
@@ -932,6 +968,7 @@ func analyzeZPool(pool internal.ZPool) []internal.Finding {
 			Impact:      "No redundancy. Another device failure will cause data loss.",
 			Action:      "Replace the failed device immediately with 'zpool replace'. " + pool.Action,
 			Priority:    "immediate",
+			FindingType: "zfs_degraded",
 		})
 	case "FAULTED":
 		findings = append(findings, internal.Finding{
@@ -943,6 +980,7 @@ func analyzeZPool(pool internal.ZPool) []internal.Finding {
 			Impact:      "Pool is offline. Data is inaccessible until repaired.",
 			Action:      "Investigate failed devices. Restore from backup if necessary.",
 			Priority:    "immediate",
+			FindingType: "zfs_faulted",
 		})
 	case "UNAVAIL":
 		findings = append(findings, internal.Finding{
@@ -954,6 +992,7 @@ func analyzeZPool(pool internal.ZPool) []internal.Finding {
 			Impact:      "Complete data unavailability.",
 			Action:      "Check physical connections. Import with 'zpool import -f' if needed.",
 			Priority:    "immediate",
+			FindingType: "zfs_unavailable",
 		})
 	}
 
@@ -968,6 +1007,7 @@ func analyzeZPool(pool internal.ZPool) []internal.Finding {
 			Impact:      "Data integrity compromised. Affected files may be corrupted.",
 			Action:      "Run 'zpool scrub " + pool.Name + "' to repair. Check drive health with SMART.",
 			Priority:    "immediate",
+			FindingType: "zfs_scrub_errors",
 		})
 	}
 
@@ -982,6 +1022,7 @@ func analyzeZPool(pool internal.ZPool) []internal.Finding {
 			Impact:      "Silent data corruption may go undetected.",
 			Action:      "Schedule weekly or monthly scrubs: 'zpool scrub " + pool.Name + "'",
 			Priority:    "short-term",
+			FindingType: "zfs_no_scrub",
 		})
 	}
 
@@ -996,6 +1037,7 @@ func analyzeZPool(pool internal.ZPool) []internal.Finding {
 			Impact:      "Pool is vulnerable during resilver. Avoid heavy I/O.",
 			Action:      "Wait for resilver to complete. Do not remove any other drives.",
 			Priority:    "immediate",
+			FindingType: "zfs_resilver",
 		})
 	}
 
@@ -1014,6 +1056,7 @@ func analyzeZPool(pool internal.ZPool) []internal.Finding {
 			Impact:      "Write performance degradation, potential inability to write.",
 			Action:      "Free space or expand the pool. ZFS recommends keeping usage below 80%.",
 			Priority:    priorityFromSeverity(sev),
+			FindingType: "zfs_high_capacity",
 		})
 	}
 
@@ -1028,6 +1071,7 @@ func analyzeZPool(pool internal.ZPool) []internal.Finding {
 			Impact:      "Reduced write performance.",
 			Action:      "Fragmentation is often caused by high pool usage. Free space to reduce fragmentation.",
 			Priority:    "medium-term",
+			FindingType: "zfs_fragmentation",
 		})
 	}
 
@@ -1050,6 +1094,7 @@ func analyzeZPool(pool internal.ZPool) []internal.Finding {
 			Impact:      "Data corruption detected. Affected files may be unreadable.",
 			Action:      "Run 'zpool scrub' to repair. Restore affected files from backup if needed.",
 			Priority:    "immediate",
+			FindingType: "zfs_data_errors",
 		})
 	}
 
@@ -1087,6 +1132,7 @@ func checkVDevErrors(findings *[]internal.Finding, poolName string, vdev interna
 		Impact:      "Data integrity risk. Drive may be failing.",
 		Action:      "Check SMART health of the underlying drive. Replace if errors are increasing.",
 		Priority:    priorityFromSeverity(sev),
+		FindingType: "zfs_device_errors",
 		RelatedDisk: vdev.Name,
 	})
 }
@@ -1105,6 +1151,7 @@ func analyzeARC(arc *internal.ZFSARCStats) []internal.Finding {
 			Impact:      "Increased disk I/O, slower file access.",
 			Action:      "Add more RAM to increase ARC size, or add an L2ARC (SSD cache).",
 			Priority:    "medium-term",
+			FindingType: "zfs_arc_low",
 		})
 	}
 
@@ -1154,9 +1201,10 @@ func analyzeUPS(ups *internal.UPSInfo) []internal.Finding {
 				fmt.Sprintf("Status: %s", ups.Status),
 				fmt.Sprintf("Battery: %.0f%%, Runtime: %.0f min", ups.BatteryPct, ups.RuntimeMins),
 			},
-			Impact:   "Server will shut down when battery is depleted.",
-			Action:   "Check mains power. If outage is extended, initiate graceful shutdown.",
-			Priority: "immediate",
+			Impact:      "Server will shut down when battery is depleted.",
+			Action:      "Check mains power. If outage is extended, initiate graceful shutdown.",
+			Priority:    "immediate",
+			FindingType: "ups_on_battery",
 		})
 	}
 
@@ -1171,6 +1219,7 @@ func analyzeUPS(ups *internal.UPSInfo) []internal.Finding {
 			Impact:      "Imminent unclean shutdown. Data corruption risk.",
 			Action:      "Initiate graceful shutdown immediately.",
 			Priority:    "immediate",
+			FindingType: "ups_battery_low",
 		})
 	}
 
@@ -1186,6 +1235,7 @@ func analyzeUPS(ups *internal.UPSInfo) []internal.Finding {
 			Action:      "Replace battery if it stays below 80%% after several hours of charging.",
 			Priority:    "short-term",
 			Cost:        "$30-80 for replacement battery",
+			FindingType: "ups_not_charged",
 		})
 	}
 
@@ -1201,6 +1251,7 @@ func analyzeUPS(ups *internal.UPSInfo) []internal.Finding {
 			Action:      "Replace the UPS battery.",
 			Priority:    "short-term",
 			Cost:        "$30-80 for replacement battery",
+			FindingType: "ups_replace_battery",
 		})
 	}
 
@@ -1215,6 +1266,7 @@ func analyzeUPS(ups *internal.UPSInfo) []internal.Finding {
 			Impact:      "UPS may fail to provide backup power.",
 			Action:      "Reduce load or upgrade UPS.",
 			Priority:    "immediate",
+			FindingType: "ups_load_critical",
 		})
 	} else if ups.LoadPct > 75 {
 		findings = append(findings, internal.Finding{
@@ -1226,6 +1278,7 @@ func analyzeUPS(ups *internal.UPSInfo) []internal.Finding {
 			Impact:      "Reduced runtime on battery.",
 			Action:      "Consider upgrading UPS or reducing load.",
 			Priority:    "medium-term",
+			FindingType: "ups_load_high",
 		})
 	}
 
@@ -1241,6 +1294,7 @@ func analyzeUPS(ups *internal.UPSInfo) []internal.Finding {
 			Action:      "Replace battery or reduce load.",
 			Priority:    "immediate",
 			Cost:        "$30-80 for battery",
+			FindingType: "ups_runtime_short",
 		})
 	}
 
@@ -1266,9 +1320,10 @@ func analyzeOSUpdate(update *internal.UpdateInfo) []internal.Finding {
 			fmt.Sprintf("Latest: %s", update.LatestVersion),
 			fmt.Sprintf("Checked: %s", update.CheckedAt),
 		},
-		Impact:   "Missing security patches and bug fixes.",
-		Action:   "Update your NAS OS when convenient. Review release notes before updating.",
-		Priority: "medium-term",
+		Impact:      "Missing security patches and bug fixes.",
+		Action:      "Update your NAS OS when convenient. Review release notes before updating.",
+		Priority:    "medium-term",
+		FindingType: "updates_available",
 	})
 
 	// If major version behind or >=3 minor versions behind, escalate
@@ -1290,9 +1345,10 @@ func analyzeOSUpdate(update *internal.UpdateInfo) []internal.Finding {
 					fmt.Sprintf("Installed: %s %s", update.Platform, update.InstalledVersion),
 					fmt.Sprintf("Latest: %s", update.LatestVersion),
 				},
-				Impact:   "Security vulnerabilities, missing critical fixes.",
-				Action:   "Plan an update soon. Back up your configuration first.",
-				Priority: "short-term",
+				Impact:      "Security vulnerabilities, missing critical fixes.",
+				Action:      "Plan an update soon. Back up your configuration first.",
+				Priority:    "short-term",
+				FindingType: "system_outdated",
 			})
 		}
 	}
@@ -1340,6 +1396,7 @@ func analyzeGPU(gpu *internal.GPUInfo) []internal.Finding {
 				Impact:      "Performance degradation from thermal throttling. Risk of hardware damage.",
 				Action:      "Improve case airflow. Clean heatsink/fans. Check thermal paste. Reduce workload.",
 				Priority:    "immediate",
+				FindingType: "gpu_overheating",
 			})
 		} else if g.Temperature >= 85 {
 			findings = append(findings, internal.Finding{
@@ -1351,6 +1408,7 @@ func analyzeGPU(gpu *internal.GPUInfo) []internal.Finding {
 				Impact:      "May begin thermal throttling under sustained load.",
 				Action:      "Monitor trends. Improve airflow if temperature continues rising.",
 				Priority:    "short-term",
+				FindingType: "gpu_high_temp",
 			})
 		}
 
@@ -1365,6 +1423,7 @@ func analyzeGPU(gpu *internal.GPUInfo) []internal.Finding {
 				Impact:      "Transcoding failures, OOM kills for GPU workloads, degraded performance.",
 				Action:      "Reduce concurrent GPU workloads or upgrade to a GPU with more VRAM.",
 				Priority:    "short-term",
+				FindingType: "gpu_vram_full",
 			})
 		}
 
@@ -1379,6 +1438,7 @@ func analyzeGPU(gpu *internal.GPUInfo) []internal.Finding {
 				Impact:      "Potential instability or PSU stress.",
 				Action:      "Check GPU BIOS settings and PSU capacity.",
 				Priority:    "short-term",
+				FindingType: "gpu_power_limit",
 			})
 		}
 	}
@@ -1409,9 +1469,10 @@ func analyzeBackups(backup *internal.BackupInfo) []internal.Finding {
 					fmt.Sprintf("Repository: %s", job.Repository),
 					fmt.Sprintf("Error: %s", job.ErrorMessage),
 				},
-				Impact:   "No recent backup available. Data loss risk if a failure occurs.",
-				Action:   "Investigate the backup error and re-run the job. Check repository access and disk space.",
-				Priority: "immediate",
+				Impact:      "No recent backup available. Data loss risk if a failure occurs.",
+				Action:      "Investigate the backup error and re-run the job. Check repository access and disk space.",
+				Priority:    "immediate",
+				FindingType: "backup_failed",
 			})
 
 		case "stale":
@@ -1426,9 +1487,10 @@ func analyzeBackups(backup *internal.BackupInfo) []internal.Finding {
 					fmt.Sprintf("Last success: %s", job.LastSuccess.Format("2006-01-02 15:04")),
 					fmt.Sprintf("Snapshots: %d", job.SnapshotCount),
 				},
-				Impact:   "Backup data is stale. Recovery point objective (RPO) exceeded.",
-				Action:   "Check if the backup schedule is running. Verify repository connectivity and credentials.",
-				Priority: "immediate",
+				Impact:      "Backup data is stale. Recovery point objective (RPO) exceeded.",
+				Action:      "Check if the backup schedule is running. Verify repository connectivity and credentials.",
+				Priority:    "immediate",
+				FindingType: "backup_stale",
 			})
 
 		case "warning":
@@ -1443,9 +1505,10 @@ func analyzeBackups(backup *internal.BackupInfo) []internal.Finding {
 					fmt.Sprintf("Last success: %s", job.LastSuccess.Format("2006-01-02 15:04")),
 					fmt.Sprintf("Snapshots: %d", job.SnapshotCount),
 				},
-				Impact:   "Backup freshness degraded. Recovery may be missing recent changes.",
-				Action:   "Monitor the next scheduled run. Check logs for intermittent errors.",
-				Priority: "short-term",
+				Impact:      "Backup freshness degraded. Recovery may be missing recent changes.",
+				Action:      "Monitor the next scheduled run. Check logs for intermittent errors.",
+				Priority:    "short-term",
+				FindingType: "backup_aging",
 			})
 
 		case "ok":
@@ -1461,9 +1524,10 @@ func analyzeBackups(backup *internal.BackupInfo) []internal.Finding {
 					fmt.Sprintf("Total size: %s", sizeStr),
 					fmt.Sprintf("Schedule: %s", job.Schedule),
 				},
-				Impact:   "None — backup is operating normally.",
-				Action:   "No action required.",
-				Priority: "medium-term",
+				Impact:      "None — backup is operating normally.",
+				Action:      "No action required.",
+				Priority:    "medium-term",
+				FindingType: "backup_healthy",
 			})
 		}
 	}

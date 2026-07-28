@@ -20,8 +20,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Description: fmt.Sprintf("Node %s is in '%s' state. Roles: %s, Version: %s", n.Name, n.Status, n.Roles, n.Version),
 				Impact:      "Pods on this node may be evicted or unable to schedule",
 				Action:      "Check node health: kubectl describe node " + n.Name,
-				Priority:    "immediate",
-			})
+			Priority:    "immediate",
+			FindingType: "k8s_node_not_ready",
+		})
 		}
 		if n.Unschedulable {
 			findings = append(findings, internal.Finding{
@@ -31,8 +32,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Description: fmt.Sprintf("Node %s is marked unschedulable (cordoned). No new pods will be placed here.", n.Name),
 				Impact:      "Reduced cluster capacity",
 				Action:      "Uncordon when ready: kubectl uncordon " + n.Name,
-				Priority:    "short-term",
-			})
+			Priority:    "short-term",
+			FindingType: "k8s_node_evicted",
+		})
 		}
 		// Node conditions (MemoryPressure, DiskPressure, PIDPressure)
 		for _, c := range n.Conditions {
@@ -43,8 +45,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Description: fmt.Sprintf("Node %s reports %s condition active", n.Name, c),
 				Impact:      "Pods may be evicted to relieve pressure",
 				Action:      "Investigate resource usage on node " + n.Name,
-				Priority:    "immediate",
-			})
+			Priority:    "immediate",
+			FindingType: "k8s_node_pressure",
+		})
 		}
 		// Pod capacity warning (>90%)
 		if n.PodCapacity > 0 && n.PodCount > 0 {
@@ -57,8 +60,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 					Description: fmt.Sprintf("Node %s has %d/%d pods (%.0f%% capacity)", n.Name, n.PodCount, n.PodCapacity, pct),
 					Impact:      "New pods may fail to schedule on this node",
 					Action:      "Consider adding nodes or migrating workloads",
-					Priority:    "short-term",
-				})
+				Priority:    "short-term",
+				FindingType: "k8s_node_high_pods",
+			})
 			}
 		}
 	}
@@ -74,8 +78,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Description: fmt.Sprintf("Pod %s in namespace %s is in CrashLoopBackOff with %d restarts", p.Name, p.Namespace, p.Restarts),
 				Impact:      "Application is repeatedly crashing and restarting",
 				Action:      "Check logs: kubectl logs " + p.Name + " -n " + p.Namespace + " --previous",
-				Priority:    "immediate",
-			})
+			Priority:    "immediate",
+			FindingType: "k8s_crashloop",
+		})
 		case p.Status == "Failed":
 			findings = append(findings, internal.Finding{
 				Severity:    internal.SeverityWarning,
@@ -83,9 +88,10 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Title:       fmt.Sprintf("K8s pod failed: %s/%s", p.Namespace, p.Name),
 				Description: fmt.Sprintf("Pod %s in namespace %s has failed", p.Name, p.Namespace),
 				Impact:      "Workload is not running",
-				Action:      "Check events: kubectl describe pod " + p.Name + " -n " + p.Namespace,
-				Priority:    "short-term",
-			})
+			Action:      "Check events: kubectl describe pod " + p.Name + " -n " + p.Namespace,
+			Priority:    "short-term",
+			FindingType: "k8s_container_failed",
+		})
 		case p.Status == "Pending" && p.Node == "":
 			findings = append(findings, internal.Finding{
 				Severity:    internal.SeverityWarning,
@@ -93,9 +99,10 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Title:       fmt.Sprintf("K8s pod pending (unscheduled): %s/%s", p.Namespace, p.Name),
 				Description: fmt.Sprintf("Pod %s in namespace %s is pending and not assigned to any node", p.Name, p.Namespace),
 				Impact:      "Workload is not running — may be waiting for resources",
-				Action:      "Check events: kubectl describe pod " + p.Name + " -n " + p.Namespace,
-				Priority:    "short-term",
-			})
+			Action:      "Check events: kubectl describe pod " + p.Name + " -n " + p.Namespace,
+			Priority:    "short-term",
+			FindingType: "k8s_container_pending",
+		})
 		case strings.Contains(p.Status, "OOMKilled"):
 			findings = append(findings, internal.Finding{
 				Severity:    internal.SeverityCritical,
@@ -104,8 +111,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Description: fmt.Sprintf("Pod %s was killed due to out-of-memory. Restarts: %d", p.Name, p.Restarts),
 				Impact:      "Application exceeded memory limits",
 				Action:      "Increase memory limits or optimize application memory usage",
-				Priority:    "immediate",
-			})
+			Priority:    "immediate",
+			FindingType: "k8s_container_oom",
+		})
 		}
 		// Container-level issues
 		for _, c := range p.Containers {
@@ -117,8 +125,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 					Description: fmt.Sprintf("Container %s in pod %s was OOM killed (restarts: %d)", c.Name, p.Name, c.RestartCount),
 					Impact:      "Container exceeded memory limit and was terminated",
 					Action:      "Increase memory limit for container " + c.Name,
-					Priority:    "immediate",
-				})
+				Priority:    "immediate",
+				FindingType: "k8s_container_oom_killed",
+			})
 			}
 			if c.Reason == "ImagePullBackOff" || c.Reason == "ErrImagePull" {
 				findings = append(findings, internal.Finding{
@@ -128,8 +137,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 					Description: fmt.Sprintf("Container %s cannot pull image %s: %s", c.Name, c.Image, c.Reason),
 					Impact:      "Pod cannot start",
 					Action:      "Check image name, registry credentials, and network connectivity",
-					Priority:    "immediate",
-				})
+				Priority:    "immediate",
+				FindingType: "k8s_image_pull_failed",
+			})
 			}
 		}
 		// High restart count warning
@@ -141,8 +151,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Description: fmt.Sprintf("Pod %s has restarted %d times. May indicate instability.", p.Name, p.Restarts),
 				Impact:      "Application may be intermittently failing",
 				Action:      "Check logs for recurring errors",
-				Priority:    "short-term",
-			})
+			Priority:    "short-term",
+			FindingType: "k8s_high_restarts",
+		})
 		}
 	}
 
@@ -156,8 +167,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Description: fmt.Sprintf("Deployment %s has %d unavailable replicas (%d/%d ready)", d.Name, d.Unavailable, d.ReadyReplicas, d.Replicas),
 				Impact:      "Service may be degraded",
 				Action:      "Check pod status: kubectl get pods -l app=" + d.Name + " -n " + d.Namespace,
-				Priority:    "short-term",
-			})
+			Priority:    "short-term",
+			FindingType: "k8s_deployment_unhealthy",
+		})
 		}
 		if d.Replicas > 0 && d.ReadyReplicas == 0 {
 			findings = append(findings, internal.Finding{
@@ -167,8 +179,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Description: fmt.Sprintf("Deployment %s has 0/%d ready replicas", d.Name, d.Replicas),
 				Impact:      "Service is completely unavailable",
 				Action:      "Investigate immediately: kubectl describe deployment " + d.Name + " -n " + d.Namespace,
-				Priority:    "immediate",
-			})
+			Priority:    "immediate",
+			FindingType: "k8s_deployment_stopped",
+		})
 		}
 	}
 
@@ -182,8 +195,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Description: fmt.Sprintf("PersistentVolumeClaim %s (class: %s, capacity: %s) is still pending", pvc.Name, pvc.StorageClass, pvc.Capacity),
 				Impact:      "Pods depending on this PVC cannot start",
 				Action:      "Check storage provisioner and available PVs",
-				Priority:    "short-term",
-			})
+			Priority:    "short-term",
+			FindingType: "k8s_pvc_pending",
+		})
 		}
 		if pvc.Status == "Lost" {
 			findings = append(findings, internal.Finding{
@@ -193,8 +207,9 @@ func analyzeKubernetes(k8s *internal.KubeInfo) []internal.Finding {
 				Description: fmt.Sprintf("PersistentVolumeClaim %s has lost its backing volume", pvc.Name),
 				Impact:      "Data may be inaccessible",
 				Action:      "Investigate PV status and storage backend immediately",
-				Priority:    "immediate",
-			})
+			Priority:    "immediate",
+			FindingType: "k8s_pvc_lost",
+		})
 		}
 	}
 

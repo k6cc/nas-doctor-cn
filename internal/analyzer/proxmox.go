@@ -21,8 +21,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 				Description: fmt.Sprintf("Node %s is reporting status '%s'. This may indicate a hardware failure, network issue, or planned maintenance.", n.Name, n.Status),
 				Impact:      "VMs and containers on this node are unavailable",
 				Action:      "Check physical server power, network connectivity, and PVE cluster logs",
-				Priority:    "immediate",
-			})
+			Priority:    "immediate",
+			FindingType: "pve_node_offline",
+		})
 		}
 		// Node memory high (>90%)
 		if n.MemTotal > 0 {
@@ -35,8 +36,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 					Description: fmt.Sprintf("Node %s is using %.0f%% of %.0f GB RAM. VMs may be killed by the OOM killer.", n.Name, memPct, float64(n.MemTotal)/1073741824),
 					Impact:      "Risk of VM/container termination due to out-of-memory",
 					Action:      "Migrate VMs to other nodes, increase RAM, or reduce VM memory allocations",
-					Priority:    "immediate",
-				})
+				Priority:    "immediate",
+				FindingType: "pve_node_mem_critical",
+			})
 			} else if memPct > 90 {
 				findings = append(findings, internal.Finding{
 					Severity:    internal.SeverityWarning,
@@ -45,8 +47,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 					Description: fmt.Sprintf("Node %s is using %.0f%% of %.0f GB RAM.", n.Name, memPct, float64(n.MemTotal)/1073741824),
 					Impact:      "Performance degradation, risk of OOM if usage increases",
 					Action:      "Consider migrating workloads or adding more RAM",
-					Priority:    "short-term",
-				})
+				Priority:    "short-term",
+				FindingType: "pve_node_mem_high",
+			})
 			}
 		}
 		// Node CPU sustained high (>90%)
@@ -58,8 +61,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 				Description: fmt.Sprintf("Node %s CPU at %.0f%% across %d cores (%s)", n.Name, n.CPUUsage*100, n.CPUCores, n.CPUModel),
 				Impact:      "VM performance degradation",
 				Action:      "Identify high-CPU VMs, consider migrating workloads",
-				Priority:    "short-term",
-			})
+			Priority:    "short-term",
+			FindingType: "pve_node_cpu_high",
+		})
 		}
 	}
 
@@ -74,8 +78,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 				Description: fmt.Sprintf("%s %s on node %s is stopped but configured for HA with state 'started'. This indicates an HA failure.", strings.ToUpper(g.Type), g.Name, g.Node),
 				Impact:      "Service outage for applications running in this guest",
 				Action:      "Check PVE HA logs, verify guest can start, check for resource constraints",
-				Priority:    "immediate",
-			})
+			Priority:    "immediate",
+			FindingType: "pve_ha_guest_stopped",
+		})
 		}
 		// Guest memory high (>95%)
 		if g.Status == "running" && g.MemMax > 0 {
@@ -88,8 +93,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 					Description: fmt.Sprintf("VMID %d (%s) is using %.0f%% of %.1f GB allocated memory", g.VMID, g.Name, memPct, float64(g.MemMax)/1073741824),
 					Impact:      "Application performance issues or crashes inside the guest",
 					Action:      "Increase memory allocation or optimize applications",
-					Priority:    "short-term",
-				})
+				Priority:    "short-term",
+				FindingType: "pve_guest_mem_critical",
+			})
 			}
 		}
 	}
@@ -107,8 +113,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 				Description: fmt.Sprintf("Storage pool '%s' (%s) on node %s is %.0f%% full. Total: %.0f GB", s.Storage, s.Type, s.Node, s.UsedPct, float64(s.Total)/1073741824),
 				Impact:      "Cannot create snapshots, backups, or new VMs. Running VMs may fail on disk writes.",
 				Action:      "Free space immediately: remove old backups, snapshots, or unused disk images",
-				Priority:    "immediate",
-			})
+			Priority:    "immediate",
+			FindingType: "pve_storage_critical",
+		})
 		} else if s.UsedPct > 85 {
 			findings = append(findings, internal.Finding{
 				Severity:    internal.SeverityWarning,
@@ -117,8 +124,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 				Description: fmt.Sprintf("Storage pool '%s' (%s) on node %s is %.0f%% full", s.Storage, s.Type, s.Node, s.UsedPct),
 				Impact:      "May run out of space for backups and snapshots",
 				Action:      "Plan storage cleanup or expansion",
-				Priority:    "short-term",
-			})
+			Priority:    "short-term",
+			FindingType: "pve_storage_high",
+		})
 		}
 	}
 
@@ -140,8 +148,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 					Description: fmt.Sprintf("Last successful backup was %.0f hours ago. Consider verifying your backup schedule.", float64(age)/3600),
 					Impact:      "Data loss risk if a VM fails without recent backup",
 					Action:      "Check Datacenter → Backup in PVE to verify backup jobs are scheduled and running",
-					Priority:    "short-term",
-				})
+			Priority:    "short-term",
+			FindingType: "pve_backup_stale",
+		})
 			}
 		}
 		// Failed tasks
@@ -154,8 +163,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 					Description: fmt.Sprintf("Task %s for VMID %d on node %s finished with status: %s", t.Type, t.VMID, t.Node, t.Status),
 					Impact:      "Backup/migration may not have completed",
 					Action:      "Check task log in PVE for details",
-					Priority:    "short-term",
-				})
+				Priority:    "short-term",
+				FindingType: "pve_task_failed",
+			})
 			}
 		}
 	}
@@ -170,8 +180,9 @@ func analyzeProxmox(pve *internal.ProxmoxInfo) []internal.Finding {
 				Description: fmt.Sprintf("HA service %s on node %s is in state '%s': %s", ha.SID, ha.Node, ha.State, ha.Status),
 				Impact:      "HA-managed service may be unavailable",
 				Action:      "Check HA logs, verify fencing configuration, check node health",
-				Priority:    "immediate",
-			})
+			Priority:    "immediate",
+			FindingType: "pve_ha_error",
+		})
 		}
 	}
 

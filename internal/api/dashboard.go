@@ -204,6 +204,45 @@ util.categoryLabel = function(c) {
   return val === key ? (c || "") : val;
 };
 
+/* Translates a finding field (title/description/action/impact) using
+   the finding_type and parameter extraction from the original text.
+   Falls back to the original text if no translation is available. */
+util.translateFinding = function(f, field) {
+  if (!f || !f.finding_type || !f[field]) return f ? (f[field] || "") : "";
+  var key = 'finding.' + f.finding_type + '.' + field;
+  var tmpl = window.i18n.t(key);
+  if (tmpl === key) return f[field] || "";
+  var orig = f[field];
+  var result = tmpl;
+  /* Type-specific parameter extraction */
+  if (f.finding_type === 'sata_cable') {
+    if (field === 'title') {
+      var m = orig.match(/SATA Cable Issue on (.+) \((.+)\)/);
+      if (m) { result = result.replace('{{device}}', m[1]).replace('{{model}}', m[2]); }
+    } else if (field === 'description') {
+      var m = orig.match(/Drive (.+) has (\d+) UDMA CRC errors\. (.+)\. CRC/);
+      if (m) { result = result.replace('{{device}}', m[1]).replace('{{count}}', m[2]).replace('{{tier}}', m[3]); }
+    } else if (field === 'action') {
+      var m = orig.match(/Replace the SATA cable on port (.+)\. Use/);
+      if (m) { result = result.replace('{{port}}', m[1]); }
+    }
+  } else if (f.finding_type === 'command_timeout') {
+    if (field === 'title') {
+      var m = orig.match(/Command Timeouts on (.+) \((.+)\)/);
+      if (m) { result = result.replace('{{device}}', m[1]).replace('{{model}}', m[2]); }
+    } else if (field === 'description') {
+      var m = orig.match(/Drive (.+) has (\d+) command timeouts\. (.+)\./);
+      if (m) { result = result.replace('{{device}}', m[1]).replace('{{count}}', m[2]).replace('{{tier}}', m[3]); }
+    }
+  } else if (f.finding_type === 'stopped_containers') {
+    if (field === 'title' || field === 'description') {
+      var m = orig.match(/^(\d+)/);
+      if (m) { result = result.replace('{{count}}', m[1]); }
+    }
+  }
+  return result;
+};
+
 /* Issue #227 — render a prominent warning banner when the server
    reports that /data is not a real bind-mount. The server sets
    data_ephemeral=true on /api/v1/status when /data shares a device
@@ -417,11 +456,11 @@ sections.findings = function(sn, st) {
       h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">';
       h += '<span class="sev-dot sev-dot-' + sev + '"></span>';
       h += '<span class="finding-tag sev-' + sev + '">' + esc(util.severityLabel(f.severity)) + '</span>';
-      h += '<span class="finding-title">' + esc(f.title) + '</span>';
+      h += '<span class="finding-title">' + esc(util.translateFinding(f, 'title')) + '</span>';
       h += '</div>';
       h += '<div class="finding-expandable">';
       h += '<div class="finding-details">';
-      h += '<div class="finding-desc">' + esc(f.description) + '</div>';
+      h += '<div class="finding-desc">' + esc(util.translateFinding(f, 'description')) + '</div>';
       if (f.evidence && f.evidence.length > 0) {
         h += '<div class="finding-detail-row"><div class="finding-detail-label">' + window.i18n.t('dashboard.finding.evidence') + '</div><div class="finding-detail-value"><ul class="finding-evidence-list">';
         for (var ei = 0; ei < f.evidence.length; ei++) {
@@ -429,8 +468,8 @@ sections.findings = function(sn, st) {
         }
         h += '</ul></div></div>';
       }
-      if (f.action) h += '<div class="finding-detail-row"><div class="finding-detail-label">' + window.i18n.t('dashboard.finding.action') + '</div><div class="finding-detail-value val-accent">' + esc(f.action) + '</div></div>';
-      if (f.impact) h += '<div class="finding-detail-row"><div class="finding-detail-label">' + window.i18n.t('dashboard.finding.impact') + '</div><div class="finding-detail-value val-italic">' + esc(f.impact) + '</div></div>';
+      if (f.action) h += '<div class="finding-detail-row"><div class="finding-detail-label">' + window.i18n.t('dashboard.finding.action') + '</div><div class="finding-detail-value val-accent">' + esc(util.translateFinding(f, 'action')) + '</div></div>';
+      if (f.impact) h += '<div class="finding-detail-row"><div class="finding-detail-label">' + window.i18n.t('dashboard.finding.impact') + '</div><div class="finding-detail-value val-italic">' + esc(util.translateFinding(f, 'impact')) + '</div></div>';
       h += '<div class="finding-meta">';
       if (f.detected_at) h += '<span><strong>' + window.i18n.t('dashboard.finding.detected') + '</strong> ' + new Date(f.detected_at).toLocaleString() + '</span>';
       if (f.priority) h += '<span><strong>' + window.i18n.t('dashboard.finding.priority') + '</strong> ' + esc(f.priority) + '</span>';

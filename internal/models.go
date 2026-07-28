@@ -863,6 +863,7 @@ type Finding struct {
 	Cost        string   `json:"cost"`                   // "$10-20", "Free", etc.
 	RelatedDisk string   `json:"related_disk,omitempty"` // if disk-specific
 	DetectedAt  string   `json:"detected_at,omitempty"`  // ISO timestamp when first detected
+	FindingType string   `json:"finding_type,omitempty"` // machine-readable type for i18n
 }
 
 // ---------- Configuration ----------
