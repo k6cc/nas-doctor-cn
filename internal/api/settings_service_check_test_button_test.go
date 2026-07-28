@@ -103,7 +103,7 @@ func TestSettingsHTML_TestServiceCheckShowsSpeedWarning(t *testing.T) {
 		end = len(html)
 	}
 	body := html[loc[0]:end]
-	if !strings.Contains(strings.ToLower(body), "60s") && !strings.Contains(strings.ToLower(body), "60 s") {
+	if !strings.Contains(body, "settings.toast.running_speedtest") {
 		t.Fatalf("testServiceCheck should warn users that speed tests can take up to 60s; body window:\n%s", body)
 	}
 }
