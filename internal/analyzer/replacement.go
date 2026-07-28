@@ -34,6 +34,7 @@ type DrivePlan struct {
 	HealthPassed   bool               `json:"health_passed"`
 	Urgency        ReplacementUrgency `json:"urgency"`
 	UrgencyLabel   string             `json:"urgency_label"`
+	UrgencyReasonKey string           `json:"urgency_reason_key,omitempty"`
 	RiskFactors    []string           `json:"risk_factors"`
 	FailureMult    float64            `json:"failure_mult"`    // combined failure multiplier
 	RemainingYears float64            `json:"remaining_years"` // estimated remaining life
@@ -182,7 +183,7 @@ func assessDrive(d internal.SMARTInfo, costPerTB float64) DrivePlan {
 	}
 
 	// Determine urgency
-	dp.Urgency, dp.UrgencyLabel = determineUrgency(dp)
+	dp.Urgency, dp.UrgencyLabel, dp.UrgencyReasonKey = determineUrgency(dp)
 
 	// Cost estimate
 	if costPerTB > 0 {
@@ -193,50 +194,50 @@ func assessDrive(d internal.SMARTInfo, costPerTB float64) DrivePlan {
 	return dp
 }
 
-func determineUrgency(dp DrivePlan) (ReplacementUrgency, string) {
+func determineUrgency(dp DrivePlan) (ReplacementUrgency, string, string) {
 	// Replace Now: SMART failed, critical health, or extreme failure multiplier
 	if !dp.HealthPassed {
-		return UrgencyReplaceNow, "SMART self-test failed — replace immediately"
+		return UrgencyReplaceNow, "SMART self-test failed — replace immediately", "self_test_failed"
 	}
 	if dp.HealthScore < 30 {
-		return UrgencyReplaceNow, "Critical health score — high failure risk"
+		return UrgencyReplaceNow, "Critical health score — high failure risk", "critical_health"
 	}
 	if dp.Pending > 0 && dp.Reallocated > 19 {
-		return UrgencyReplaceNow, "Active media degradation with significant reallocations"
+		return UrgencyReplaceNow, "Active media degradation with significant reallocations", "active_degradation"
 	}
 	if dp.FailureMult >= 15.0 {
-		return UrgencyReplaceNow, fmt.Sprintf("%.0fx failure risk — imminent failure likely", dp.FailureMult)
+		return UrgencyReplaceNow, fmt.Sprintf("%.0fx failure risk — imminent failure likely", dp.FailureMult), "imminent_failure"
 	}
 
 	// Replace Soon: degraded health, aging with issues
 	if dp.HealthScore < 60 {
-		return UrgencyReplaceSoon, "Degraded health — plan replacement within 3 months"
+		return UrgencyReplaceSoon, "Degraded health — plan replacement within 3 months", "degraded_health"
 	}
 	if dp.LifeUsedPct >= 100 {
-		return UrgencyReplaceSoon, fmt.Sprintf("%.0f%% of expected life used — exceeded design lifespan", dp.LifeUsedPct)
+		return UrgencyReplaceSoon, fmt.Sprintf("%.0f%% of expected life used — exceeded design lifespan", dp.LifeUsedPct), "exceeded_lifespan"
 	}
 	if dp.RemainingYears < 0.25 {
-		return UrgencyReplaceSoon, fmt.Sprintf("~%.1f months remaining at current degradation rate", dp.RemainingYears*12)
+		return UrgencyReplaceSoon, fmt.Sprintf("~%.1f months remaining at current degradation rate", dp.RemainingYears*12), "months_remaining"
 	}
 	if dp.RemainingYears < 1.0 && dp.HealthScore < 80 {
-		return UrgencyReplaceSoon, fmt.Sprintf("~%.1f years remaining at current degradation rate", dp.RemainingYears)
+		return UrgencyReplaceSoon, fmt.Sprintf("~%.1f years remaining at current degradation rate", dp.RemainingYears), "years_remaining"
 	}
 	if dp.FailureMult >= 5.0 {
-		return UrgencyReplaceSoon, fmt.Sprintf("%.1fx failure risk — schedule replacement", dp.FailureMult)
+		return UrgencyReplaceSoon, fmt.Sprintf("%.1fx failure risk — schedule replacement", dp.FailureMult), "schedule_replacement"
 	}
 
 	// Monitor: some issues but not urgent
 	if dp.HealthScore < 80 {
-		return UrgencyMonitor, "Minor issues — monitor closely"
+		return UrgencyMonitor, "Minor issues — monitor closely", "minor_issues"
 	}
 	if dp.LifeUsedPct > 80 {
-		return UrgencyMonitor, fmt.Sprintf("%.0f%% of expected life used — entering end-of-life window", dp.LifeUsedPct)
+		return UrgencyMonitor, fmt.Sprintf("%.0f%% of expected life used — entering end-of-life window", dp.LifeUsedPct), "end_of_life"
 	}
 	if dp.FailureMult >= 2.0 {
-		return UrgencyMonitor, "Elevated risk factors — watch for changes"
+		return UrgencyMonitor, "Elevated risk factors — watch for changes", "elevated_risk"
 	}
 
-	return UrgencyHealthy, "No replacement needed"
+	return UrgencyHealthy, "No replacement needed", "healthy"
 }
 
 func urgencyRank(u ReplacementUrgency) int {

@@ -118,6 +118,17 @@ body.theme-clean .life-bar{background:rgba(0,0,0,0.06)}
     if(u==="monitor")return t('planner.monitor');
     return t('planner.healthy');
   }
+  function urgReasonLabel(d){
+    if(!d.urgency_reason_key) return d.urgency_label||'';
+    var key='planner.reason.'+d.urgency_reason_key;
+    var val=t(key);
+    if(val===key) return d.urgency_label||'';
+    if(val.indexOf('{{mult}}')>=0) val=val.replace('{{mult}}', (d.failure_mult||0).toFixed(d.urgency_reason_key==='imminent_failure'?0:1));
+    if(val.indexOf('{{pct}}')>=0) val=val.replace('{{pct}}', (d.life_used_pct||0).toFixed(0));
+    if(val.indexOf('{{months}}')>=0) val=val.replace('{{months}}', ((d.remaining_years||0)*12).toFixed(1));
+    if(val.indexOf('{{years}}')>=0) val=val.replace('{{years}}', (d.remaining_years||0).toFixed(1));
+    return val;
+  }
   function scoreClass(s){return s<30?"crit":s<70?"warn":"ok";}
   function barColor(pct){return pct>100?"var(--red)":pct>80?"var(--amber)":"var(--green)";}
   function fmtSize(gb){return gb>=1000?(gb/1000).toFixed(1)+" TB":gb.toFixed(0)+" GB";}
@@ -200,7 +211,7 @@ body.theme-clean .life-bar{background:rgba(0,0,0,0.06)}
       // Model
       h+='<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(d.model)+'</td>';
       // Urgency
-      h+='<td><span class="urg-badge '+uc+'">'+urgLabel(d.urgency)+'</span><br><span style="font-size:10px;color:var(--text3)">'+esc(d.urgency_label)+'</span></td>';
+      h+='<td><span class="urg-badge '+uc+'">'+urgLabel(d.urgency)+'</span><br><span style="font-size:10px;color:var(--text3)">'+esc(urgReasonLabel(d))+'</span></td>';
       // Life used bar
       var pct=Math.min(d.life_used_pct,100);
       h+='<td><div class="life-bar"><div class="life-fill" style="width:'+pct.toFixed(0)+'%;background:'+barColor(d.life_used_pct)+'"></div></div><span style="font-size:11px;font-family:var(--font-mono)">'+d.life_used_pct.toFixed(0)+'%</span><br><span style="font-size:10px;color:var(--text3)">'+fmtHours(d.power_on_hours)+'</span></td>';
