@@ -516,6 +516,21 @@ function loadAlertSummary() {
 }
 
 /* ========== Alerts ========== */
+function alertSevLabel(s) {
+  var v = (s || "").toLowerCase();
+  if (v === "critical") return window.i18n.t('alerts.enum.severity.critical');
+  if (v === "warning") return window.i18n.t('alerts.enum.severity.warning');
+  if (v === "info") return window.i18n.t('alerts.enum.severity.info');
+  return s || "—";
+}
+function alertStatusLabel(s) {
+  var v = (s || "").toLowerCase();
+  if (v === "open") return window.i18n.t('alerts.enum.status.open');
+  if (v === "acknowledged") return window.i18n.t('alerts.enum.status.acknowledged');
+  if (v === "snoozed") return window.i18n.t('alerts.enum.status.snoozed');
+  if (v === "resolved") return window.i18n.t('alerts.enum.status.resolved');
+  return s || "—";
+}
 function statusClassForAlert(status) {
   var s = (status || "").toLowerCase();
   if (s === "open") return "status-open";
@@ -540,9 +555,9 @@ function loadAlerts() {
       var html = "";
       for (var i = 0; i < alerts.length; i++) {
         var a = alerts[i];
-        var sev = escapeHtml(a.severity || "\u2014");
+        var sev = escapeHtml(alertSevLabel(a.severity));
         var created = a.created_at ? new Date(a.created_at).toLocaleString() : "\u2014";
-        var statusLabel = a.status || "open";
+        var statusLabel = alertStatusLabel(a.status || "open");
         if (a.suppression_reason) statusLabel += " (" + a.suppression_reason + ")";
 
         html += '<tr>';
@@ -808,9 +823,9 @@ function renderSmartTrendTable(drives) {
     html += '<td><strong>' + escapeHtml(d.device || "") + '</strong><div style="font-size:11px;color:var(--text2)">' + escapeHtml(d.model || "") + '</div></td>';
     html += '<td>' + (d.risk_score || 0) + (d.replacement_candidate ? ' <span class="status-badge status-snoozed">' + window.i18n.t('alerts.badge.candidate') + '</span>' : '') + '</td>';
     html += '<td><span class="status-badge ' + urgencyClass(d.urgency || "monitor") + '">' + escapeHtml(d.urgency === "immediate" ? window.i18n.t('alerts.enum.urgency.immediate') : (d.urgency === "short-term" ? window.i18n.t('alerts.enum.urgency.short_term') : window.i18n.t('alerts.enum.urgency.monitor'))) + '</span></td>';
-    html += '<td>' + escapeHtml((!d.confidence || d.confidence === "low") ? window.i18n.t('alerts.enum.confidence.low') : d.confidence) + '</td>';
+    html += '<td>' + escapeHtml((!d.confidence || d.confidence === "low") ? window.i18n.t('alerts.enum.confidence.low') : (d.confidence === "medium" ? window.i18n.t('alerts.enum.confidence.medium') : (d.confidence === "high" ? window.i18n.t('alerts.enum.confidence.high') : d.confidence))) + '</td>';
     html += '<td>' + escapeHtml(deltas) + '</td>';
-    html += '<td>' + escapeHtml(d.recommendation || "") + '</td>';
+    html += '<td>' + escapeHtml(d.recommendation_key ? (window.i18n.t(d.recommendation_key) === d.recommendation_key ? (d.recommendation || "") : window.i18n.t(d.recommendation_key)) : (d.recommendation || "")) + '</td>';
     html += '</tr>';
   }
   tbody.innerHTML = html;
@@ -824,7 +839,7 @@ function renderParityTrend(parity) {
     return;
   }
   var risk = parity.risk || "stable";
-  var riskLabel = risk === "stable" ? window.i18n.t('alerts.enum.parity.stable') : risk;
+  var riskLabel = risk === "stable" ? window.i18n.t('alerts.enum.parity.stable') : (risk === "critical" ? window.i18n.t('alerts.enum.parity.critical') : (risk === "warning" ? window.i18n.t('alerts.enum.parity.warning') : risk));
   var cls = risk === "critical" ? "status-resolved" : (risk === "warning" ? "status-acknowledged" : "status-open");
   var html = '';
   html += '<span class="status-badge ' + cls + '">' + window.i18n.t('alerts.label.parity_risk', {risk: riskLabel}) + '</span>';

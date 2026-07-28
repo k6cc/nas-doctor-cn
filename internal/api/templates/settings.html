@@ -3680,13 +3680,19 @@ var CONDITION_MAP = {
 var NEEDS_VALUE = {free_below:1,above:1,avg_above:1,reallocated_above:1,pending_above:1,crc_above:1,power_hours_above:1,latency_above:1,speed_below:1,battery_below:1,load_above:1,cpu_above:1,mem_above:1,iowait_above:1,usage_above:1,download_below:1,upload_below:1};
 var NEEDS_TARGET = {above:1,health_fails:1,reallocated_above:1,pending_above:1,crc_above:1,power_hours_above:1,down:1,latency_above:1,stopped:1,degraded:1,scrub_errors:1,usage_above:1,cloudflared_down:1,tailscale_offline:1,free_below:1,category:1};
 
+function translateCondLabel(cat, cond, fallback) {
+  var key = 'settings.behavior.rules.condition.' + cat + '.' + cond;
+  var val = i18nT(key);
+  return val === key ? (fallback || cond) : val;
+}
+
 function onRuleCategoryChange() {
   var cat = document.getElementById("nr-category").value;
   var condSel = document.getElementById("nr-condition");
   condSel.innerHTML = "";
   var opts = CONDITION_MAP[cat] || [];
   for (var i = 0; i < opts.length; i++) {
-    var o = document.createElement("option"); o.value = opts[i].v; o.textContent = opts[i].l;
+    var o = document.createElement("option"); o.value = opts[i].v; o.textContent = translateCondLabel(cat, opts[i].v, opts[i].l);
     condSel.appendChild(o);
   }
   populateTargetDropdown(cat);
@@ -3725,7 +3731,7 @@ function filterConditionsForTarget() {
       }
     }
     // "Any/All" (no target): show all conditions
-    var o = document.createElement("option"); o.value = opt.v; o.textContent = opt.l;
+    var o = document.createElement("option"); o.value = opt.v; o.textContent = translateCondLabel(cat, opt.v, opt.l);
     condSel.appendChild(o);
   }
 
@@ -3819,7 +3825,7 @@ function populateTargetDropdown(cat) {
   } else if (cat === "service" && sn.service_checks) {
     for (var i = 0; i < sn.service_checks.length; i++) {
       var sc = sn.service_checks[i];
-      var typeLabel = sc.type ? ' [' + sc.type.toUpperCase() + ']' : '';
+      var typeLabel = sc.type ? ' [' + serviceTypeLabel(sc.type) + ']' : '';
       sel.innerHTML += '<option value="' + escapeHtml(sc.name) + '" data-check-type="' + escapeHtml(sc.type || '') + '">' + escapeHtml(sc.name + typeLabel) + '</option>';
     }
   } else if (cat === "docker" && sn.docker && sn.docker.containers) {
@@ -3867,7 +3873,7 @@ function renderRules() {
     if (catLabel === catKey) catLabel = r.category || '';
     var condLabel = r.condition || '';
     var condOpts = CONDITION_MAP[r.category] || [];
-    for (var ci = 0; ci < condOpts.length; ci++) { if (condOpts[ci].v === r.condition) { condLabel = condOpts[ci].l; break; } }
+    for (var ci = 0; ci < condOpts.length; ci++) { if (condOpts[ci].v === r.condition) { condLabel = translateCondLabel(r.category, r.condition, condOpts[ci].l); break; } }
     var desc = catLabel + " / " + condLabel;
     if (r.target) desc += " " + i18nT('settings.msg.rule_on') + " " + r.target;
     if (r.value) desc += " (" + i18nT('settings.msg.rule_threshold') + ": " + r.value + ")";

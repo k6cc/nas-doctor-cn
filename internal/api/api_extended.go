@@ -2453,6 +2453,7 @@ type smartTrendDrive struct {
 	Worsening            bool    `json:"worsening"`
 	ReplacementCandidate bool    `json:"replacement_candidate"`
 	Recommendation       string  `json:"recommendation"`
+	RecommendationKey    string  `json:"recommendation_key,omitempty"`
 }
 
 // handleSMARTTrends returns predictive trend summaries for drives and parity.
@@ -2521,11 +2522,14 @@ func (s *Server) handleSMARTTrends(w http.ResponseWriter, r *http.Request) {
 		replacementCandidate := urgency == "immediate" || last.Pending > 0 || reallocDelta >= 20
 
 		recommendation := "Continue monitoring trend slope and keep backups verified."
+		recKey := "trend.recommendation.monitor"
 		if urgency == "short-term" {
 			recommendation = "Plan replacement window and inspect cabling/power path to reduce progression risk."
+			recKey = "trend.recommendation.short_term"
 		}
 		if urgency == "immediate" {
 			recommendation = "Prepare immediate drive replacement and verify restore path before failure escalates."
+			recKey = "trend.recommendation.immediate"
 		}
 
 		trends = append(trends, smartTrendDrive{
@@ -2548,6 +2552,7 @@ func (s *Server) handleSMARTTrends(w http.ResponseWriter, r *http.Request) {
 			Worsening:            worsening,
 			ReplacementCandidate: replacementCandidate,
 			Recommendation:       recommendation,
+			RecommendationKey:    recKey,
 		})
 	}
 

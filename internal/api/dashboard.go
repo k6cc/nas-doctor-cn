@@ -239,6 +239,14 @@ util.translateFinding = function(f, field) {
       var m = orig.match(/^(\d+)/);
       if (m) { result = result.replace('{{count}}', m[1]); }
     }
+  } else if (f.finding_type === 'service_check_failed') {
+    if (field === 'title') {
+      var m = orig.match(/Service Check Failed: (.+)/);
+      if (m) { result = result.replace('{{name}}', m[1]); }
+    } else if (field === 'description') {
+      var m = orig.match(/(\w+) check for (.+) is failing \((\d+) consecutive failures\)\./);
+      if (m) { result = result.replace('{{type}}', m[1]).replace('{{target}}', m[2]).replace('{{count}}', m[3]); }
+    }
   }
   return result;
 };
