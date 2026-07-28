@@ -562,16 +562,39 @@ go build -o nas-doctor ./cmd/nas-doctor
 
 ## 国际化 (i18n)
 
-NAS Doctor 支持多语言界面切换，目前已实现设置页的中英文切换，架构设计支持后期轻松添加其他语言。
+NAS Doctor 支持多语言界面切换，已实现全站中英文翻译，架构设计支持后期轻松添加其他语言。
 
 ### 架构
 
 - **后端**：使用 Go `embed` 包嵌入 JSON 字典文件，无需外部资源依赖
-- **字典文件**：位于 `internal/api/i18n/locales/`，`en.json`（英文）和 `zh.json`（中文），各包含 407 个翻译 key
+- **字典文件**：位于 `internal/api/i18n/locales/`，`en.json`（英文）和 `zh.json`（中文），各包含 1560+ 个翻译 key，完全对齐
 - **语言解析优先级**：URL 查询参数 `?lang=` → Cookie `nas-doctor-lang` → `Accept-Language` 请求头 → 默认英文
 - **前端运行时**：通过 `data-i18n`（textContent）、`data-i18n-html`（innerHTML）和 `data-i18n-attr`（属性翻译）三种标记实现 DOM 元素翻译
 - **即时切换**：语言切换无需页面刷新，同时通过 Cookie + localStorage 持久化用户选择
 - **防闪烁 (FOUC)**：内联脚本在 DOM 渲染前从 Cookie 读取语言设置，避免页面闪烁
+
+### 已翻译页面
+
+| 页面 | 翻译范围 |
+|------|----------|
+| 仪表盘 (Dashboard) | 卡片标题、状态标签、按钮、toast 消息、诊断发现（89 种类型）、网络/隧道状态 |
+| 设置 (Settings) | 全部卡片、通知规则、服务检查、表单标签、确认对话框 |
+| 告警 (Alerts) | 活动告警、事件时间线、预测趋势分析、严重性/状态标签 |
+| 统计 (Stats) | 容量预测、趋势图表、健康评分 |
+| 机群 (Fleet) | 节点列表、诊断发现、状态标签 |
+| 磁盘详情 (Disk Detail) | SMART 属性表、诊断发现、维护日志 |
+| 更换计划 (Replacement Planner) | 磁盘评估原因（13 种紧急度类型）、成本估算 |
+| 服务检查 (Service Checks) | 检查类型、状态标签、严重性 |
+| Parity | 奇偶校验分析、速度趋势 |
+
+### 诊断发现翻译
+
+诊断发现（Finding）支持自动翻译，覆盖 89 种类型：
+
+- **后端**：`Finding` 结构体通过 `FindingType` 字段标识发现类型（如 `sata_cable`、`command_timeout`）
+- **前端**：`translateFinding()` 函数从 `dictionaries['en']` 获取英文模板，构建正则提取参数，替换到翻译模板中
+- **通用方案**：无需为每种类型编写单独的正则，自动支持全部 89 种类型
+- **优雅降级**：无 `FindingType` 或无翻译键时，返回原始英文文本
 
 ### 使用方法
 
@@ -590,16 +613,33 @@ NAS Doctor 支持多语言界面切换，目前已实现设置页的中英文切
    <option value="ja">日本語</option>
    ```
 
-无需改动其他任何文件——`go:embed locales/*.json` 会自动拾取新字典文件。
+无需改动其他任何文件——`go:embed locales/*.json` 会自动拾取新字典文件。添加后运行 `python tools/i18n/verify_keys.py` 确认键对齐。
 
 ### Key 命名规范
 
-翻译 key 采用点分层级命名：`settings.<卡片>.<元素>`
+翻译 key 采用点分层级命名：
 
-例如：
-- `settings.general.title` — 常规设置卡片标题
-- `settings.webhooks.add` — Webhooks 卡片的添加按钮
-- `settings.behavior.quiet_hours.start.label` — 通知行为卡片中静默时段的开始标签
+| 前缀 | 用途 | 示例 |
+|------|------|------|
+| `dashboard.*` | 仪表盘 | `dashboard.ups.title` |
+| `finding.*` | 诊断发现 | `finding.sata_cable.title` |
+| `planner.*` | 更换计划 | `planner.reason.healthy` |
+| `alerts.*` | 告警页 | `alerts.enum.severity.critical` |
+| `settings.*` | 设置页 | `settings.severity.warning` |
+| `nav.*` | 导航 | `nav.alerts` |
+| `trend.*` | 趋势预测 | `trend.recommendation.monitor` |
+
+### i18n 开发工具
+
+项目提供可复用的 i18n 工具，位于 `tools/i18n/` 目录：
+
+| 工具 | 作用 |
+|------|------|
+| `verify_keys.py` | 校验 en.json/zh.json 键对齐，按命名空间统计 |
+| `add_keys.py` | 批量添加翻译键的通用工具 |
+| `gen_finding_keys.py` | 生成诊断发现类型的 i18n 键 |
+
+详见 `tools/i18n/README.md`。
 
 ---
 
