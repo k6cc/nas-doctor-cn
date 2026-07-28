@@ -88,9 +88,9 @@ func TestDashboardJS_TunnelsSection_RendersHappyPathUnchanged(t *testing.T) {
 	if !strings.Contains(body, "nd.exit_node") {
 		t.Error("happy-path node rendering does not check nd.exit_node; exit-node badge is missing")
 	}
-	// The "self" badge on the first node: rendered inline as `>self<`.
-	if !strings.Contains(body, ">self<") {
-		t.Error("happy-path first-node 'self' badge is missing from DashboardJS (expected literal >self<)")
+	// The "self" badge on the first node: rendered via i18n key (text produced at runtime).
+	if !strings.Contains(body, "dashboard.tunnels.self") {
+		t.Error("happy-path first-node 'self' badge is missing from DashboardJS (expected i18n key dashboard.tunnels.self)")
 	}
 }
 
