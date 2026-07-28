@@ -71,7 +71,7 @@ func TestDashboardJS_UPSBatteryIcon_RendersSVG(t *testing.T) {
 func TestDashboardJS_UPSBatteryIcon_BatteryTextStillPresent(t *testing.T) {
 	body := upsSection(t)
 
-	if !strings.Contains(body, "Battery:") {
+	if !strings.Contains(body, "dashboard.ups.battery") {
 		t.Error("DashboardJS: sections.ups no longer renders the 'Battery:' text label; battery text must remain alongside the icon, not be replaced")
 	}
 	if !strings.Contains(body, "battery_percent") {

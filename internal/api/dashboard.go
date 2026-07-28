@@ -100,7 +100,7 @@ util.relativeTimeAgo = function(when) {
   if (secs < 86400) return t("time.hours_ago", {h: Math.floor(secs / 3600)});
   var days = Math.floor(secs / 86400);
   if (days < 30) return t("time.days_ago", {d: days});
-  return ">1mo ago";
+  return t("time.over_month_ago");
 };
 
 util.colorForPct = function(pct) {
@@ -764,7 +764,7 @@ sections.ups = function(sn) {
     h += '<span class="' + upsStateClass + '" style="font-weight:600;font-size:11px;text-transform:uppercase">' + esc(ups.status_human) + '</span>';
     h += '</div>';
     h += '<div style="display:flex;gap:16px;font-size:12px;color:var(--text-tertiary);flex-wrap:wrap">';
-    h += '<span style="display:inline-flex;align-items:center">' + batteryIcon(ups.battery_percent || 0, !ups.on_battery) + 'Battery: <strong style="color:var(--text-primary);margin-left:3px">' + (ups.battery_percent || 0).toFixed(0) + '%</strong></span>';
+    h += '<span style="display:inline-flex;align-items:center">' + batteryIcon(ups.battery_percent || 0, !ups.on_battery) + window.i18n.t('dashboard.ups.battery') + ': <strong style="color:var(--text-primary);margin-left:3px">' + (ups.battery_percent || 0).toFixed(0) + '%</strong></span>';
     h += '<span>' + window.i18n.t('dashboard.label.load') + ' <strong style="color:var(--text-primary)">' + (ups.load_percent || 0).toFixed(0) + '%</strong></span>';
     h += '<span>' + window.i18n.t('dashboard.label.runtime') + ' <strong style="color:var(--text-primary)">' + (ups.runtime_minutes || 0).toFixed(0) + ' min</strong></span>';
     if (ups.wattage_watts > 0) h += '<span>' + window.i18n.t('dashboard.label.power') + ' <strong style="color:var(--text-primary)">' + (ups.wattage_watts || 0).toFixed(0) + 'W / ' + (ups.nominal_watts || 0).toFixed(0) + 'W</strong></span>';
@@ -1485,7 +1485,7 @@ sections.processes = function(sn) {
     h += '</table>';
     h += '</div>';
     if (procs.length > showCount) {
-      h += '<div style="text-align:center;padding:6px 0;font-size:11px;color:var(--text-quaternary)">' + (procs.length - showCount) + ' more processes not shown</div>';
+      h += '<div style="text-align:center;padding:6px 0;font-size:11px;color:var(--text-quaternary)">' + window.i18n.t('dashboard.msg.more_processes', {count: (procs.length - showCount)}) + '</div>';
     }
     h += '</div>';
   }
@@ -1522,8 +1522,8 @@ sections.parity = function(sn) {
     h += '</div>';
   } else if (parity && parity.status) {
     h += '<div>';
-    h += '<div class="section-title">Parity</div>';
-    h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:12px;font-size:12px;color:var(--text-tertiary)">Status: ' + esc(parity.status) + ' &middot; No parity check history found</div>';
+    h += '<div class="section-title">' + window.i18n.t('dashboard.parity.title') + '</div>';
+    h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:12px;font-size:12px;color:var(--text-tertiary)">' + window.i18n.t('dashboard.parity.status_idle') + ' &middot; ' + window.i18n.t('dashboard.msg.no_parity_history') + '</div>';
     h += '</div>';
   }
   h += '</div>';
@@ -2191,10 +2191,10 @@ function setupGlobals() {
     var secs = Math.round((Date.now() - scanMs) / 1000);
     if (secs < 0) secs = 0; // clock skew guard
     if (secs < 5) el.textContent = window.i18n.t('time.just_now');
-    else if (secs < 60) el.textContent = secs + "s ago";
-    else if (secs < 3600) el.textContent = Math.floor(secs / 60) + "m ago";
-    else if (secs < 86400) el.textContent = Math.floor(secs / 3600) + "h ago";
-    else el.textContent = Math.floor(secs / 86400) + "d ago";
+    else if (secs < 60) el.textContent = window.i18n.t('time.secs_ago', {s: secs});
+    else if (secs < 3600) el.textContent = window.i18n.t('time.mins_ago', {m: Math.floor(secs / 60)});
+    else if (secs < 86400) el.textContent = window.i18n.t('time.hours_ago', {h: Math.floor(secs / 3600)});
+    else el.textContent = window.i18n.t('time.days_ago', {d: Math.floor(secs / 86400)});
   }, 1000);
 }
 

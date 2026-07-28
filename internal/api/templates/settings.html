@@ -1212,7 +1212,7 @@ function updateSpeedTestPreview() {
   var labels = {"30m":"every 30 minutes","1h":"every hour","2h":"every 2 hours","4h":"every 4 hours","6h":"every 6 hours","12h":"every 12 hours"};
   if (labels[freq]) { el.textContent = "Speed tests run " + labels[freq] + ". First test runs 2 minutes after startup."; return; }
   var time = (document.getElementById("st-time").value || "03:00").trim();
-  if (freq === "24h") { el.textContent = "Speed test runs once a day at " + time + "."; return; }
+  if (freq === "24h") { el.textContent = i18nT('settings.msg.speedtest_schedule', {time: time}); return; }
   var day = document.getElementById("st-day").value;
   if (freq === "weekly") { el.textContent = "Speed test runs every " + day.charAt(0).toUpperCase() + day.slice(1) + " at " + time + "."; return; }
   if (freq === "monthly") { var suffix = day === "1" ? "st" : "th"; el.textContent = "Speed test runs on the " + day + suffix + " of every month at " + time + "."; return; }
@@ -2259,7 +2259,7 @@ function maskUrl(url) {
 function renderWebhooks() {
   var container = document.getElementById("webhook-list");
   if (!webhooks || webhooks.length === 0) {
-    container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">No webhooks configured yet.</div>';
+    container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">' + i18nT('settings.msg.no_webhooks') + '</div>';
     return;
   }
   var html = "";
@@ -2276,8 +2276,8 @@ function renderWebhooks() {
     html += '    <div class="toggle-wrap" onclick="toggleWebhookEnabled(' + i + ')">';
     html += '      <div class="toggle' + (wh.enabled ? " on" : "") + '"><div class="toggle-knob"></div></div>';
     html += '    </div>';
-    html += '    <button class="btn btn-secondary btn-sm" onclick="editWebhook(' + i + ')">Edit</button>';
-    html += '    <button class="btn btn-danger btn-sm" onclick="removeWebhook(' + i + ')">Remove</button>';
+    html += '    <button class="btn btn-secondary btn-sm" onclick="editWebhook(' + i + ')">' + i18nT('common.button.edit') + '</button>';
+    html += '    <button class="btn btn-danger btn-sm" onclick="removeWebhook(' + i + ')">' + i18nT('common.button.remove') + '</button>';
     html += '  </div>';
     html += '</div>';
   }
@@ -2528,7 +2528,7 @@ function renderServiceChecks() {
   var container = document.getElementById("service-check-list");
   if (!container) return;
   if (!serviceChecks || serviceChecks.length === 0) {
-    container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">No service checks configured yet.</div>';
+    container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">' + i18nT('settings.msg.no_service_checks') + '</div>';
     return;
   }
   var html = "";
@@ -2539,12 +2539,12 @@ function renderServiceChecks() {
     html += '  <div class="mini-list-main">';
     html += '    <div class="mini-list-title">' + escapeHtml(sc.name) + ' <span class="pill ' + serviceTypePillClass(sc.type) + '">' + escapeHtml(t) + '</span></div>';
     html += '    <div class="mini-list-sub">' + escapeHtml(sc.target) + (sc.port ? (':' + sc.port) : '') + '</div>';
-    html += '    <div class="inline-muted">Every ' + formatInterval(sc.interval_sec) + ' &middot; Threshold: ' + sc.failure_threshold + ' &middot; Severity: ' + escapeHtml(sc.failure_severity) + ' &middot; Timeout: ' + sc.timeout_sec + 's</div>';
+    html += '    <div class="inline-muted">' + i18nT('settings.msg.sc_summary', {interval: formatInterval(sc.interval_sec), threshold: sc.failure_threshold, severity: escapeHtml(sc.failure_severity), timeout: sc.timeout_sec}) + '</div>';
     html += '  </div>';
     html += '  <div class="webhook-actions">';
     html += '    <div class="toggle-wrap" onclick="toggleServiceCheckEnabled(' + i + ')"><div class="toggle' + (sc.enabled ? ' on' : '') + '"><div class="toggle-knob"></div></div></div>';
-    html += '    <button class="btn btn-secondary btn-sm" onclick="editServiceCheck(' + i + ')">Edit</button>';
-    html += '    <button class="btn btn-danger btn-sm" onclick="removeServiceCheck(' + i + ')">Remove</button>';
+    html += '    <button class="btn btn-secondary btn-sm" onclick="editServiceCheck(' + i + ')">' + i18nT('common.button.edit') + '</button>';
+    html += '    <button class="btn btn-danger btn-sm" onclick="removeServiceCheck(' + i + ')">' + i18nT('common.button.remove') + '</button>';
     html += '  </div>';
     html += '</div>';
   }
@@ -3122,12 +3122,12 @@ function renderLogFwdDests() {
     h += '<div class="webhook-info">';
     h += '<div class="webhook-name">' + escapeHtml(d.name || "Unnamed") + ' <span class="badge" style="font-size:10px">' + t + '</span></div>';
     h += '<div class="webhook-url">' + escapeHtml(d.url || "") + '</div>';
-    if (d.format && d.format !== "full") h += '<div class="inline-muted">Format: ' + escapeHtml(d.format) + '</div>';
+    if (d.format && d.format !== "full") h += '<div class="inline-muted">' + i18nT('settings.msg.format', {format: escapeHtml(d.format)}) + '</div>';
     h += '</div><div class="webhook-actions">';
     h += '<div class="toggle-wrap" onclick="toggleLogFwdEnabled(' + i + ')">';
     h += '<div class="toggle' + (d.enabled ? " on" : "") + '"><div class="toggle-knob"></div></div></div>';
-    h += '<button class="btn btn-secondary btn-sm" onclick="editLogFwdDest(' + i + ')">Edit</button>';
-    h += '<button class="btn btn-danger btn-sm" onclick="removeLogFwdDest(' + i + ')">Remove</button>';
+    h += '<button class="btn btn-secondary btn-sm" onclick="editLogFwdDest(' + i + ')">' + i18nT('common.button.edit') + '</button>';
+    h += '<button class="btn btn-danger btn-sm" onclick="removeLogFwdDest(' + i + ')">' + i18nT('common.button.remove') + '</button>';
     h += '</div></div>';
   }
   c.innerHTML = h;
@@ -3233,7 +3233,7 @@ function loadFleetServers() {
 function renderFleetList() {
   var el = document.getElementById("fleet-list");
   if (!fleetServers || fleetServers.length === 0) {
-    el.innerHTML = '<div style="font-size:13px;color:var(--text2);padding:8px 0">No remote servers configured.</div>';
+    el.innerHTML = '<div style="font-size:13px;color:var(--text2);padding:8px 0">' + i18nT('settings.msg.no_remote_servers') + '</div>';
     return;
   }
   var h = '';
@@ -3251,8 +3251,8 @@ function renderFleetList() {
     h += '</div>';
     h += '<div class="webhook-actions">';
     h += '<button class="btn btn-secondary btn-sm" onclick="testFleetServer(' + i + ')">Test</button>';
-    h += '<button class="btn btn-secondary btn-sm" onclick="editFleetServer(' + i + ')">Edit</button>';
-    h += '<button class="btn btn-danger btn-sm" onclick="removeFleetServer(' + i + ')">Remove</button>';
+    h += '<button class="btn btn-secondary btn-sm" onclick="editFleetServer(' + i + ')">' + i18nT('common.button.edit') + '</button>';
+    h += '<button class="btn btn-danger btn-sm" onclick="removeFleetServer(' + i + ')">' + i18nT('common.button.remove') + '</button>';
     h += '</div>';
     h += '</div>';
   }
@@ -3485,9 +3485,9 @@ function loadBackupInfo() {
         el.textContent = "No backups yet";
       } else {
         var lines = [];
-        lines.push("<strong>" + backups.length + "</strong> backup(s) stored");
-        lines.push("Latest: " + backups[0].timestamp.substring(0, 10));
-        lines.push("Size: " + backups[0].size_mb.toFixed(1) + " MB");
+        lines.push(i18nT('settings.msg.backups_stored', {count: '<strong>' + backups.length + '</strong>'}));
+        lines.push(i18nT('settings.msg.latest_backup', {date: backups[0].timestamp.substring(0, 10)}));
+        lines.push(i18nT('settings.msg.backup_size', {size: backups[0].size_mb.toFixed(1)}));
         el.innerHTML = lines.join("<br>");
       }
     })
@@ -3578,8 +3578,8 @@ function renderMaintenanceWindows() {
     html += '  </div>';
     html += '  <div class="webhook-actions">';
     html += '    <div class="toggle-wrap" onclick="toggleMaintenanceEnabled(' + i + ')"><div class="toggle' + (mw.enabled ? ' on' : '') + '"><div class="toggle-knob"></div></div></div>';
-    html += '    <button class="btn btn-secondary btn-sm" onclick="editMaintenanceWindow(' + i + ')">Edit</button>';
-    html += '    <button class="btn btn-danger btn-sm" onclick="removeMaintenanceWindow(' + i + ')">Remove</button>';
+    html += '    <button class="btn btn-secondary btn-sm" onclick="editMaintenanceWindow(' + i + ')">' + i18nT('common.button.edit') + '</button>';
+    html += '    <button class="btn btn-danger btn-sm" onclick="removeMaintenanceWindow(' + i + ')">' + i18nT('common.button.remove') + '</button>';
     html += '  </div>';
     html += '</div>';
   }
@@ -3850,7 +3850,7 @@ function renderRules() {
   var whSel = document.getElementById("nr-webhook");
   if (whSel) { var cv = whSel.value; whSel.innerHTML = ""; for (var w = 0; w < webhooks.length; w++) { var o = document.createElement("option"); o.value = webhooks[w].name; o.textContent = webhooks[w].name; whSel.appendChild(o); } if (cv) whSel.value = cv; }
   if (!notifRules || notifRules.length === 0) {
-    container.innerHTML = '<div style="font-size:13px;color:var(--text2);padding:8px 0">No notification rules. All findings will be sent to all enabled webhooks.</div>';
+    container.innerHTML = '<div style="font-size:13px;color:var(--text2);padding:8px 0">' + i18nT('settings.msg.no_notification_rules') + '</div>';
     return;
   }
   var html = "";
@@ -3865,8 +3865,8 @@ function renderRules() {
     html += '<div class="webhook-url">' + escapeHtml(desc) + ' &rarr; ' + escapeHtml(r.webhook || "—") + ' &middot; cooldown ' + (r.cooldown_sec || 900) + 's</div>';
     html += '</div><div class="webhook-actions">';
     html += '<div class="toggle-wrap" onclick="toggleRuleEnabled(' + i + ')"><div class="toggle' + (r.enabled ? " on" : "") + '"><div class="toggle-knob"></div></div></div>';
-    html += '<button class="btn btn-secondary btn-sm" onclick="editRule(' + i + ')">Edit</button>';
-    html += '<button class="btn btn-danger btn-sm" onclick="removeRule(' + i + ')">Remove</button>';
+    html += '<button class="btn btn-secondary btn-sm" onclick="editRule(' + i + ')">' + i18nT('common.button.edit') + '</button>';
+    html += '<button class="btn btn-danger btn-sm" onclick="removeRule(' + i + ')">' + i18nT('common.button.remove') + '</button>';
     html += '</div></div>';
   }
   container.innerHTML = html;
@@ -3887,7 +3887,7 @@ function toggleRuleForm() {
   var whHint = document.getElementById("nr-webhook-hint");
   var whSel = document.getElementById("nr-webhook");
   if (whHint && whSel && whSel.options.length === 0) {
-    whHint.innerHTML = '<span style="color:var(--amber,#f59e0b)">No webhooks configured yet. Add one above first.</span>';
+    whHint.innerHTML = '<span style="color:var(--amber,#f59e0b)">' + i18nT('settings.msg.no_webhooks_hint') + '</span>';
   }
   renderRules();
   form.classList.add("visible");
@@ -4155,7 +4155,7 @@ function renderBorgRepoForm(i, r) {
   h += '<div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">';
   h += '<div class="toggle-wrap"><div class="' + escapeHtml(enabledCls) + '" id="borg-enabled-' + i + '" onclick="this.classList.toggle(\'on\');markChanged()"><div class="toggle-knob"></div></div><span class="toggle-label">Enabled</span></div>';
   h += '<input type="text" id="borg-label-' + i + '" value="' + escapeHtml(r.label || '') + '" placeholder="Label (e.g. Offsite Backup)" style="flex:1;max-width:260px">';
-  h += '<button class="btn btn-danger btn-sm" onclick="removeBorgMonitorRepo(' + i + ')" style="margin-left:auto">Remove</button>';
+  h += '<button class="btn btn-danger btn-sm" onclick="removeBorgMonitorRepo(' + i + ')" style="margin-left:auto">' + i18nT('common.button.remove') + '</button>';
   h += '</div>';
   h += '<div class="form-row">';
   h += '<div><label for="borg-repo-path-' + i + '">Repo path</label>';
@@ -4300,7 +4300,7 @@ function renderDuplicacyEntryForm(i, d) {
   h += '<div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">';
   h += '<div class="toggle-wrap"><div class="' + escapeHtml(enabledCls) + '" id="duplicacy-enabled-' + i + '" onclick="this.classList.toggle(\'on\');markChanged()"><div class="toggle-knob"></div></div><span class="toggle-label">Enabled</span></div>';
   h += '<input type="text" id="duplicacy-label-' + i + '" value="' + escapeHtml(d.label || '') + '" placeholder="Label (e.g. Documents)" style="flex:1;max-width:260px">';
-  h += '<button class="btn btn-danger btn-sm" onclick="removeDuplicacyMonitorEntry(' + i + ')" style="margin-left:auto">Remove</button>';
+  h += '<button class="btn btn-danger btn-sm" onclick="removeDuplicacyMonitorEntry(' + i + ')" style="margin-left:auto">' + i18nT('common.button.remove') + '</button>';
   h += '</div>';
   h += '<div class="form-row">';
   // Kind dropdown — drives the storage_id visibility.
