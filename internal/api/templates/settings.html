@@ -2512,6 +2512,12 @@ function serviceTypePillClass(t) {
   if (type === "traceroute") return "pill-trace";
   return "pill-http";
 }
+function serviceTypeLabel(t) {
+  var type = (t || "").toLowerCase();
+  if (type === "speed") return i18nT('dashboard.sc.type_speed');
+  if (type === "traceroute") return i18nT('dashboard.sc.type_traceroute');
+  return (t || "").toUpperCase();
+}
 
 function populateInstanceSelector() {
   var sel = document.getElementById("sc-instance");
@@ -2537,7 +2543,7 @@ function renderServiceChecks() {
     var t = (sc.type || "http").toUpperCase();
     html += '<div class="mini-list-item">';
     html += '  <div class="mini-list-main">';
-    html += '    <div class="mini-list-title">' + escapeHtml(sc.name) + ' <span class="pill ' + serviceTypePillClass(sc.type) + '">' + escapeHtml(t) + '</span></div>';
+    html += '    <div class="mini-list-title">' + escapeHtml(sc.name) + ' <span class="pill ' + serviceTypePillClass(sc.type) + '">' + escapeHtml(serviceTypeLabel(sc.type)) + '</span></div>';
     html += '    <div class="mini-list-sub">' + escapeHtml(sc.target) + (sc.port ? (':' + sc.port) : '') + '</div>';
     html += '    <div class="inline-muted">' + i18nT('settings.msg.sc_summary', {interval: formatInterval(sc.interval_sec), threshold: sc.failure_threshold, severity: escapeHtml(sc.failure_severity), timeout: sc.timeout_sec}) + '</div>';
     html += '  </div>';

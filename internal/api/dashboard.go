@@ -155,6 +155,25 @@ util.pillClass = function(t) {
   return "pill-http";
 };
 
+/* Maps a service-check type to a localized label. Protocol names
+   (HTTP/TCP/DNS/PING/SMB/NFS) stay as-is; speed and traceroute
+   are translated. */
+util.scTypeLabel = function(t) {
+  var type = (t || "").toLowerCase();
+  if (type === "speed") return window.i18n.t('dashboard.sc.type_speed');
+  if (type === "traceroute") return window.i18n.t('dashboard.sc.type_traceroute');
+  return (t || "").toUpperCase();
+};
+
+/* Maps a service-check status to a localized label. */
+util.scStatusLabel = function(s) {
+  var st = (s || "unknown").toLowerCase();
+  if (st === "up") return window.i18n.t('dashboard.status.up');
+  if (st === "down") return window.i18n.t('dashboard.sc.status.down');
+  if (st === "degraded") return window.i18n.t('dashboard.sc.status.degraded');
+  return window.i18n.t('dashboard.sc.status.unknown');
+};
+
 /* Issue #227 — render a prominent warning banner when the server
    reports that /data is not a real bind-mount. The server sets
    data_ephemeral=true on /api/v1/status when /data shares a device
@@ -1149,8 +1168,8 @@ sections.serviceChecks = function(sn) {
       h += '<tr style="cursor:pointer" data-sc-filter="' + esc(sc.name || '') + '">';
       h += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)"><div style="font-weight:500">' + esc(sc.name || 'Service') + '</div><div style="font-size:11px;color:var(--text-quaternary)">' + esc(sc.target || '') + '</div></td>';
       h += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:center"><div style="display:inline-flex;align-items:center;gap:0">' + dots + '</div></td>';
-      h += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)"><span class="pill ' + util.pillClass(sc.type) + '">' + esc((sc.type || '').toUpperCase()) + '</span></td>';
-      h += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)" class="' + scClass + '">' + esc(sc.status || 'unknown') + '</td>';
+      h += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)"><span class="pill ' + util.pillClass(sc.type) + '">' + esc(util.scTypeLabel(sc.type)) + '</span></td>';
+      h += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)" class="' + scClass + '">' + esc(util.scStatusLabel(sc.status)) + '</td>';
       h += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + ((sc.response_ms != null) ? (sc.response_ms + ' ms') : '\u2014') + '</td>';
       h += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + (sc.consecutive_failures || 0) + ' / ' + (sc.failure_threshold || 1) + '</td>';
       h += '</tr>';

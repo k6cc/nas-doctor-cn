@@ -306,6 +306,7 @@
     return out;
   }
   function pillClass(t){t=(t||"").toLowerCase();if(t==="http")return"pill-http";if(t==="tcp")return"pill-tcp";if(t==="dns")return"pill-dns";if(t==="ping")return"pill-ping";if(t==="smb")return"pill-smb";if(t==="nfs")return"pill-nfs";if(t==="speed")return"pill-speed";if(t==="traceroute")return"pill-trace";return"pill-http";}
+  function scTypeLabel(t){t=(t||"").toLowerCase();if(t==="speed")return window.i18n.t('dashboard.sc.type_speed');if(t==="traceroute")return window.i18n.t('dashboard.sc.type_traceroute');return(t||"").toUpperCase();}
   function fmtInterval(sec){if(sec<60)return window.i18n.t('service_checks.interval.seconds', {s: sec});if(sec<3600)return window.i18n.t('service_checks.interval.minutes', {m: Math.floor(sec/60)});return window.i18n.t('service_checks.interval.hours', {h: Math.floor(sec/3600)});}
   function faviconHTML(type,target){
     if((type||"").toLowerCase()!=="http")return"";
@@ -352,7 +353,7 @@
       h+='<div class="badge-dot '+(isUp?"up":isDegraded?"degraded":"down")+'"></div>';
       h+=faviconHTML(c.type,c.target);
       h+='<div class="badge-name">'+esc(c.name)+'</div>';
-      h+='<span class="pill '+pillClass(c.type)+'" style="font-size:9px;padding:1px 5px">'+esc((c.type||"").toUpperCase())+'</span>';
+      h+='<span class="pill '+pillClass(c.type)+'" style="font-size:9px;padding:1px 5px">'+esc(scTypeLabel(c.type))+'</span>';
       h+='</div>';
       h+=buildHeartbeat(hist);
       var isOrphan = !configuredKeys[c.key] && !configuredKeys[(c.name||"").toLowerCase()];
@@ -425,7 +426,7 @@
       h+='<tr onclick="toggleLogDetail(\''+rid+'\')">';
       h+='<td>'+esc(ts)+'</td>';
       h+='<td>'+faviconHTML(e.type,e.target)+esc(e.name||"—")+'</td>';
-      h+='<td><span class="pill '+pillClass(e.type)+'" style="font-size:9px;padding:1px 5px">'+esc((e.type||"").toUpperCase())+'</span></td>';
+      h+='<td><span class="pill '+pillClass(e.type)+'" style="font-size:9px;padding:1px 5px">'+esc(scTypeLabel(e.type))+'</span></td>';
       h+='<td class="status-'+e.status+'">'+esc(e.status)+'</td>';
       h+='<td>'+(e.response_ms!=null?e.response_ms+' ms':'—')+'</td>';
       h+='<td style="color:var(--text3);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(e.error||"—")+'</td>';
@@ -434,7 +435,7 @@
       h+='<tr class="log-detail-row"><td colspan="6"><div class="log-detail" id="'+rid+'">';
       h+='<div class="log-detail-grid">';
       h+='<div class="log-detail-item"><div class="ld-label">'+window.i18n.t('service_checks.detail.check_name')+'</div><div class="ld-val">'+esc(e.name||"—")+'</div></div>';
-      h+='<div class="log-detail-item"><div class="ld-label">'+window.i18n.t('service_checks.detail.type')+'</div><div class="ld-val">'+esc((e.type||"").toUpperCase())+'</div></div>';
+      h+='<div class="log-detail-item"><div class="ld-label">'+window.i18n.t('service_checks.detail.type')+'</div><div class="ld-val">'+esc(scTypeLabel(e.type))+'</div></div>';
       h+='<div class="log-detail-item"><div class="ld-label">'+window.i18n.t('service_checks.detail.target')+'</div><div class="ld-val" style="font-size:11px;font-family:var(--font-mono);word-break:break-all">'+esc(e.target||"—")+'</div></div>';
       h+='<div class="log-detail-item"><div class="ld-label">'+window.i18n.t('service_checks.detail.status')+'</div><div class="ld-val" style="color:'+(e.status==="up"?"var(--green)":e.status==="degraded"?"var(--amber)":"var(--red)")+'">'+esc(e.status||"—")+'</div></div>';
       h+='<div class="log-detail-item"><div class="ld-label">'+window.i18n.t('service_checks.detail.response_time')+'</div><div class="ld-val">'+(e.response_ms!=null?e.response_ms+' ms':'—')+'</div></div>';

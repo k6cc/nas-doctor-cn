@@ -168,6 +168,9 @@ select {
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238a8f98'%3E%3Cpath d='M6 8.5L1 3.5h10z'/%3E%3C/svg%3E");
   background-repeat:no-repeat; background-position:right 10px center;
 }
+select option {
+  background-color:var(--surface); color:var(--text);
+}
 input:disabled,select:disabled { opacity:var(--disabled-opacity); cursor:not-allowed }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px }
 .form-group { margin-bottom:16px }
