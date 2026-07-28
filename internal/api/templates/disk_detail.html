@@ -167,7 +167,7 @@ a:hover{color:var(--accent-hover)}
 <div class="container" id="app">
   <div class="loading" id="loadingState">
     <div class="loading-spinner"></div>
-    <div style="color:var(--text-tertiary);font-size:13px">Loading disk data...</div>
+    <div style="color:var(--text-tertiary);font-size:13px" data-i18n="disk_detail.label.loading">Loading disk data...</div>
   </div>
 </div>
 
@@ -181,6 +181,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
 })();
 (function(){
   "use strict";
+  var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k,p){return k;};
 
   /* ── Extract serial from URL path ─────────────────────────────── */
   var pathParts = window.location.pathname.split("/");
@@ -193,7 +194,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
   }
 
   if (!serial) {
-    showError("No disk serial found in URL.");
+    showError(t('disk_detail.error.no_serial'));
     return;
   }
 
@@ -218,7 +219,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
       renderPage(data);
     })
     .catch(function(err) {
-      showError("Failed to load disk data: " + err.message);
+      showError(t('disk_detail.error.load_failed', {message: err.message}));
     });
 
   /* ── Range selector handler ────────────────────────────────────
@@ -232,16 +233,16 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     diskHistoryHours = hours;
     fetchAndRender(hours)
       .then(function(data) { renderPage(data); })
-      .catch(function(err) { showError("Failed to load disk data: " + err.message); });
+      .catch(function(err) { showError(t('disk_detail.error.load_failed', {message: err.message})); });
   };
 
   /* ── Error state ──────────────────────────────────────────────── */
   function showError(msg) {
     var app = document.getElementById("app");
     app.innerHTML = "<div class=\"error-state\">" +
-      "<h2>Error</h2>" +
+      "<h2>" + t('disk_detail.error.title') + "</h2>" +
       "<p>" + escHtml(msg) + "</p>" +
-      "<p style=\"margin-top:16px\"><a href=\"/\">Back to Dashboard</a></p>" +
+      "<p style=\"margin-top:16px\"><a href=\"/\">" + t('disk_detail.button.back_to_dashboard') + "</a></p>" +
       "</div>";
   }
 
@@ -293,31 +294,31 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     return gb + " GB";
   }
 
-  function tempStatus(t) {
-    if (t < 40) return { cls: "status-good", label: "Normal" };
-    if (t < 50) return { cls: "status-warn", label: "Warm" };
-    return { cls: "status-bad", label: "Hot" };
+  function tempStatus(temp) {
+    if (temp < 40) return { cls: "status-good", label: t('stats.temp_tier.normal') };
+    if (temp < 50) return { cls: "status-warn", label: t('stats.temp_tier.warm') };
+    return { cls: "status-bad", label: t('stats.temp_tier.hot') };
   }
 
   function reallocStatus(v) {
-    if (v === 0) return { cls: "status-good", label: "OK" };
-    return { cls: "status-bad", label: "Bad" };
+    if (v === 0) return { cls: "status-good", label: t('disk_detail.status.ok') };
+    return { cls: "status-bad", label: t('disk_detail.status.bad') };
   }
 
   function pendingStatus(v) {
-    if (v === 0) return { cls: "status-good", label: "OK" };
-    return { cls: "status-warn", label: "Warning" };
+    if (v === 0) return { cls: "status-good", label: t('disk_detail.status.ok') };
+    return { cls: "status-warn", label: t('stats.label.warning') };
   }
 
   function crcStatus(v) {
-    if (v === 0) return { cls: "status-good", label: "OK" };
-    return { cls: "status-warn", label: "Warning" };
+    if (v === 0) return { cls: "status-good", label: t('disk_detail.status.ok') };
+    return { cls: "status-warn", label: t('stats.label.warning') };
   }
 
   function ctStatus(v) {
-    if (v <= 5) return { cls: "status-good", label: "OK" };
-    if (v <= 20) return { cls: "status-warn", label: "Warning" };
-    return { cls: "status-bad", label: "Bad" };
+    if (v <= 5) return { cls: "status-good", label: t('disk_detail.status.ok') };
+    if (v <= 20) return { cls: "status-warn", label: t('stats.label.warning') };
+    return { cls: "status-bad", label: t('disk_detail.status.bad') };
   }
 
   function formatTimestamp(ts) {
@@ -368,17 +369,17 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     html += "<div class=\"page-header\">";
     html += "<div class=\"header-left\">";
     html += "<div style=\"display:flex;gap:8px;margin-bottom:8px\">";
-    html += "<a href=\"/\" class=\"back-link\">Dashboard</a>";
-    html += "<a href=\"/alerts\" class=\"back-link\">Alerts</a>";
-    html += "<a href=\"/stats\" class=\"back-link\">Stats</a>";
-    html += "<a href=\"/settings\" class=\"back-link\" title=\"Settings\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:middle\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z\"/></svg></a>";
+    html += "<a href=\"/\" class=\"back-link\">" + t('nav.dashboard') + "</a>";
+    html += "<a href=\"/alerts\" class=\"back-link\">" + t('nav.alerts') + "</a>";
+    html += "<a href=\"/stats\" class=\"back-link\">" + t('nav.stats') + "</a>";
+    html += "<a href=\"/settings\" class=\"back-link\" title=\"" + t('settings.icon_title') + "\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:middle\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z\"/></svg></a>";
     html += "</div>";
-    html += "<h1 class=\"drive-title\">" + escHtml(disk.model || "Unknown Drive") + "</h1>";
+    html += "<h1 class=\"drive-title\">" + escHtml(disk.model || t('disk_detail.label.unknown_drive')) + "</h1>";
     html += "<div class=\"badge-row\">";
     html += "<span class=\"badge\">" + escHtml(disk.serial || serial) + "</span>";
     if (disk.device) html += "<span class=\"badge\">" + escHtml(disk.device) + "</span>";
     if (disk.array_slot) html += "<span class=\"badge badge-accent\">" + escHtml(disk.array_slot) + "</span>";
-    if (disk.firmware) html += "<span class=\"badge\">FW: " + escHtml(disk.firmware) + "</span>";
+    if (disk.firmware) html += "<span class=\"badge\">" + t('disk_detail.label.fw_prefix') + escHtml(disk.firmware) + "</span>";
     if (disk.size_gb) html += "<span class=\"badge\">" + formatSize(disk.size_gb) + "</span>";
     html += "</div>";
     html += "</div>";
@@ -387,11 +388,11 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     html += "<div class=\"health-score-card\">";
     html += "<div class=\"health-gauge-wrap\"><canvas id=\"healthGauge\" width=\"160\" height=\"100\"></canvas></div>";
     var passed = disk.health_passed !== false;
-    html += "<div class=\"health-status " + (passed ? "passed" : "failed") + "\">" + (passed ? "PASSED" : "FAILED") + "</div>";
+    html += "<div class=\"health-status " + (passed ? "passed" : "failed") + "\">" + (passed ? t('stats.label.smart_passed') : t('stats.label.smart_failed')) + "</div>";
     html += "<div class=\"health-meta\">";
     if (disk.power_on_hours !== undefined && disk.power_on_hours !== null) {
       var ageYears = (disk.power_on_hours / 8766).toFixed(1);
-      html += "Age: " + ageYears + " years<br>";
+      html += t('disk_detail.label.age', {years: ageYears}) + "<br>";
     }
     html += "</div>";
     html += "<div class=\"drive-type-badge\">" + driveTypeLabel(disk.disk_type) + "</div>";
@@ -399,18 +400,18 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     html += "</div>"; /* end page-header */
 
     /* ── SMART Attributes Table ────────────────────────────────── */
-    html += "<div class=\"section-heading\">SMART Attributes</div>";
+    html += "<div class=\"section-heading\">" + t('disk_detail.section.smart_attributes') + "</div>";
     html += "<div class=\"smart-table-wrap\">";
     html += "<table class=\"smart-table\">";
     html += "<thead><tr>";
-    html += "<th>Attribute</th><th>Current Value</th><th>Status</th><th>Trend</th>";
+    html += "<th>" + t('disk_detail.th.attribute') + "</th><th>" + t('disk_detail.th.current_value') + "</th><th>" + t('disk_detail.th.status') + "</th><th>" + t('disk_detail.th.trend') + "</th>";
     html += "</tr></thead>";
     html += "<tbody>";
 
     var tempVal = disk.temperature_c || 0;
     var tempSt = tempStatus(tempVal);
     html += "<tr>";
-    html += "<td class=\"attr-name\">Temperature</td>";
+    html += "<td class=\"attr-name\">" + t('stats.detail.temperature') + "</td>";
     html += "<td class=\"attr-value\">" + tempVal + "&deg;C</td>";
     html += "<td><span class=\"status-pill " + tempSt.cls + "\">" + tempSt.label + "</span></td>";
     html += "<td class=\"sparkline-cell\"><canvas id=\"sparkTemp\"></canvas></td>";
@@ -419,7 +420,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     var reallocVal = disk.reallocated_sectors || 0;
     var reallocSt = reallocStatus(reallocVal);
     html += "<tr>";
-    html += "<td class=\"attr-name\">Reallocated Sectors</td>";
+    html += "<td class=\"attr-name\">" + t('stats.detail.reallocated_sectors') + "</td>";
     html += "<td class=\"attr-value\">" + reallocVal.toLocaleString() + "</td>";
     html += "<td><span class=\"status-pill " + reallocSt.cls + "\">" + reallocSt.label + "</span></td>";
     html += "<td class=\"sparkline-cell\"><canvas id=\"sparkRealloc\"></canvas></td>";
@@ -428,7 +429,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     var pendingVal = disk.pending_sectors || 0;
     var pendingSt = pendingStatus(pendingVal);
     html += "<tr>";
-    html += "<td class=\"attr-name\">Pending Sectors</td>";
+    html += "<td class=\"attr-name\">" + t('stats.detail.pending_sectors') + "</td>";
     html += "<td class=\"attr-value\">" + pendingVal.toLocaleString() + "</td>";
     html += "<td><span class=\"status-pill " + pendingSt.cls + "\">" + pendingSt.label + "</span></td>";
     html += "<td class=\"sparkline-cell\"><canvas id=\"sparkPending\"></canvas></td>";
@@ -437,7 +438,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     var crcVal = disk.udma_crc_errors || 0;
     var crcSt = crcStatus(crcVal);
     html += "<tr>";
-    html += "<td class=\"attr-name\">UDMA CRC Errors</td>";
+    html += "<td class=\"attr-name\">" + t('stats.detail.udma_crc_errors') + "</td>";
     html += "<td class=\"attr-value\">" + crcVal.toLocaleString() + "</td>";
     html += "<td><span class=\"status-pill " + crcSt.cls + "\">" + crcSt.label + "</span></td>";
     html += "<td class=\"sparkline-cell\"><canvas id=\"sparkCrc\"></canvas></td>";
@@ -446,16 +447,16 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     var ctVal = disk.command_timeout || 0;
     var ctSt = ctStatus(ctVal);
     html += "<tr>";
-    html += "<td class=\"attr-name\">Command Timeout</td>";
+    html += "<td class=\"attr-name\">" + t('stats.detail.command_timeout') + "</td>";
     html += "<td class=\"attr-value\">" + ctVal.toLocaleString() + "</td>";
     html += "<td><span class=\"status-pill " + ctSt.cls + "\">" + ctSt.label + "</span></td>";
     html += "<td class=\"sparkline-cell\"><canvas id=\"sparkCt\"></canvas></td>";
     html += "</tr>";
 
     var offlineVal = disk.offline_uncorrectable || 0;
-    var offlineSt = offlineVal === 0 ? { cls: "status-good", label: "OK" } : { cls: "status-bad", label: "Bad" };
+    var offlineSt = offlineVal === 0 ? { cls: "status-good", label: t('disk_detail.status.ok') } : { cls: "status-bad", label: t('disk_detail.status.bad') };
     html += "<tr>";
-    html += "<td class=\"attr-name\">Offline Uncorrectable</td>";
+    html += "<td class=\"attr-name\">" + t('stats.detail.offline_uncorrectable') + "</td>";
     html += "<td class=\"attr-value\">" + offlineVal.toLocaleString() + "</td>";
     html += "<td><span class=\"status-pill " + offlineSt.cls + "\">" + offlineSt.label + "</span></td>";
     html += "<td class=\"sparkline-cell\">—</td>";
@@ -464,9 +465,9 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     var pohVal = disk.power_on_hours || 0;
     var pohYears = (pohVal / 8766).toFixed(1);
     html += "<tr>";
-    html += "<td class=\"attr-name\">Power On Hours</td>";
+    html += "<td class=\"attr-name\">" + t('stats.detail.power_on_hours') + "</td>";
     html += "<td class=\"attr-value\">" + pohVal.toLocaleString() + "</td>";
-    html += "<td><span class=\"status-pill status-info\">" + pohYears + " years</span></td>";
+    html += "<td><span class=\"status-pill status-info\">" + t('disk_detail.label.years', {years: pohYears}) + "</span></td>";
     html += "<td class=\"sparkline-cell\">—</td>";
     html += "</tr>";
 
@@ -477,7 +478,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
        the right. Drives both the Temperature History and the SMART
        Trends charts below it — single fetch, single state, per #166. */
     html += "<div style=\"display:flex;align-items:center;justify-content:space-between;margin-top:calc(var(--sp)*5);margin-bottom:calc(var(--sp)*2)\">";
-    html += "<div class=\"section-heading\" style=\"margin-top:0;margin-bottom:0\">Temperature History</div>";
+    html += "<div class=\"section-heading\" style=\"margin-top:0;margin-bottom:0\">" + t('stats.label.temperature_history') + "</div>";
     html += "<div style=\"display:flex;gap:4px\">";
     var diskRanges = [{h:24,l:"1D"},{h:168,l:"1W"},{h:720,l:"1M"},{h:8760,l:"1Y"}];
     for (var dri = 0; dri < diskRanges.length; dri++) {
@@ -491,37 +492,37 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
       html += "<div class=\"chart-wrap\"><canvas id=\"chartTemp\" height=\"220\"></canvas></div>";
       html += "</div>";
     } else {
-      html += "<div class=\"chart-card\"><div class=\"no-data\">Not enough history data for temperature chart</div></div>";
+      html += "<div class=\"chart-card\"><div class=\"no-data\">" + t('disk_detail.msg.no_temp_history') + "</div></div>";
     }
 
     /* ── SMART Trend Charts (2-col grid) ───────────────────────── */
-    html += "<div class=\"section-heading\">SMART Trends</div>";
+    html += "<div class=\"section-heading\">" + t('disk_detail.section.smart_trends') + "</div>";
     if (history.length > 1) {
       html += "<div class=\"chart-grid-2\">";
       html += "<div class=\"chart-card\">";
-      html += "<div class=\"chart-card-title\">Reallocated Sectors</div>";
+      html += "<div class=\"chart-card-title\">" + t('stats.detail.reallocated_sectors') + "</div>";
       html += "<div class=\"chart-wrap\"><canvas id=\"chartRealloc\" height=\"180\"></canvas></div>";
       html += "</div>";
       html += "<div class=\"chart-card\">";
-      html += "<div class=\"chart-card-title\">Pending Sectors</div>";
+      html += "<div class=\"chart-card-title\">" + t('stats.detail.pending_sectors') + "</div>";
       html += "<div class=\"chart-wrap\"><canvas id=\"chartPending\" height=\"180\"></canvas></div>";
       html += "</div>";
       html += "<div class=\"chart-card\">";
-      html += "<div class=\"chart-card-title\">UDMA CRC Errors</div>";
+      html += "<div class=\"chart-card-title\">" + t('stats.detail.udma_crc_errors') + "</div>";
       html += "<div class=\"chart-wrap\"><canvas id=\"chartCrc\" height=\"180\"></canvas></div>";
       html += "</div>";
       html += "<div class=\"chart-card\">";
-      html += "<div class=\"chart-card-title\">Command Timeout</div>";
+      html += "<div class=\"chart-card-title\">" + t('stats.detail.command_timeout') + "</div>";
       html += "<div class=\"chart-wrap\"><canvas id=\"chartCt\" height=\"180\"></canvas></div>";
       html += "</div>";
       html += "</div>";
     } else {
-      html += "<div class=\"chart-card\"><div class=\"no-data\">Not enough history data for trend charts</div></div>";
+      html += "<div class=\"chart-card\"><div class=\"no-data\">" + t('disk_detail.msg.no_trend_history') + "</div></div>";
     }
 
     /* ── Findings ──────────────────────────────────────────────── */
     if (findings.length > 0) {
-      html += "<div class=\"section-heading\">Related Findings</div>";
+      html += "<div class=\"section-heading\">" + t('disk_detail.section.related_findings') + "</div>";
       html += "<div class=\"findings-section\">";
       for (var fi = 0; fi < findings.length; fi++) {
         var f = findings[fi];
@@ -535,7 +536,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
         html += "<span class=\"finding-title\">" + escHtml(f.title || "") + "</span>";
         html += "<span class=\"" + tagCls + "\">" + escHtml(sev) + "</span>";
         html += "</div>";
-        if (f.detected_at) html += "<div class=\"finding-meta\"><span><strong>Detected:</strong> " + new Date(f.detected_at).toLocaleString() + "</span></div>";
+        if (f.detected_at) html += "<div class=\"finding-meta\"><span><strong>" + t('dashboard.finding.detected') + "</strong> " + new Date(f.detected_at).toLocaleString() + "</span></div>";
         if (f.description) html += "<div class=\"finding-desc\">" + escHtml(f.description) + "</div>";
         if (f.action) html += "<div class=\"finding-action-text\">" + escHtml(f.action) + "</div>";
         html += "</div>";
@@ -544,39 +545,39 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     }
 
     /* ── Maintenance Log (issue #130) ──────────────────────────── */
-    html += "<div class=\"section-heading\">Maintenance Log</div>";
+    html += "<div class=\"section-heading\">" + t('disk_detail.section.maintenance_log') + "</div>";
     html += "<div class=\"maintenance-log-card\">";
-    html += "  <div id=\"maintenanceLogList\"><div class=\"maintenance-log-empty\">Loading\u2026</div></div>";
+    html += "  <div id=\"maintenanceLogList\"><div class=\"maintenance-log-empty\">" + t('disk_detail.msg.loading_entries') + "</div></div>";
     html += "  <form class=\"maintenance-log-form\" id=\"maintenanceLogForm\" autocomplete=\"off\" onsubmit=\"return false\">";
     html += "    <div class=\"maintenance-log-form-row\">";
-    html += "      <div><label for=\"maintenanceLogTime\">When</label>";
+    html += "      <div><label for=\"maintenanceLogTime\">" + t('disk_detail.label.when') + "</label>";
     html += "        <input type=\"datetime-local\" id=\"maintenanceLogTime\">";
     html += "      </div>";
-    html += "      <div><label for=\"maintenanceLogContent\">What happened</label>";
-    html += "        <textarea id=\"maintenanceLogContent\" placeholder=\"e.g. SATA cable replaced, drive moved to new bay\u2026\"></textarea>";
+    html += "      <div><label for=\"maintenanceLogContent\">" + t('disk_detail.label.what_happened') + "</label>";
+    html += "        <textarea id=\"maintenanceLogContent\" placeholder=\"" + t('disk_detail.placeholder.maintenance_note') + "\"></textarea>";
     html += "      </div>";
     html += "    </div>";
     html += "    <div class=\"maintenance-log-error\" id=\"maintenanceLogError\" style=\"display:none\"></div>";
-    html += "    <button type=\"submit\" id=\"maintenanceLogSave\">Add Entry</button>";
+    html += "    <button type=\"submit\" id=\"maintenanceLogSave\">" + t('disk_detail.button.add_entry') + "</button>";
     html += "  </form>";
     html += "</div>";
 
     /* ── Drive Identification ──────────────────────────────────── */
-    html += "<div class=\"section-heading\">Drive Identification</div>";
+    html += "<div class=\"section-heading\">" + t('disk_detail.section.drive_identification') + "</div>";
     html += "<div class=\"info-table-wrap\"><table class=\"info-table\">";
     var rows = [
-      ["Device", disk.device || "—"],
-      ["Model", disk.model || "—"],
-      ["Serial Number", disk.serial || serial],
-      ["Firmware", disk.firmware || "—"],
-      ["Size", formatSize(disk.size_gb)],
-      ["Type", driveTypeLabel(disk.disk_type)],
-      ["ATA Port", disk.ata_port || "—"],
-      ["Array Slot", disk.array_slot || "—"],
-      ["Power On Hours", pohVal.toLocaleString()],
-      ["Age", pohYears + " years"],
-      ["Temperature", tempVal + "\u00B0C"],
-      ["Max Temperature", (disk.temperature_max_c || "—") + (disk.temperature_max_c ? "\u00B0C" : "")]
+      [t('stats.th.device'), disk.device || "—"],
+      [t('stats.detail.model'), disk.model || "—"],
+      [t('disk_detail.info.serial_number'), disk.serial || serial],
+      [t('stats.detail.firmware'), disk.firmware || "—"],
+      [t('disk_detail.info.size'), formatSize(disk.size_gb)],
+      [t('stats.detail.type'), driveTypeLabel(disk.disk_type)],
+      [t('stats.detail.ata_port'), disk.ata_port || "—"],
+      [t('stats.detail.array_slot'), disk.array_slot || "—"],
+      [t('stats.detail.power_on_hours'), pohVal.toLocaleString()],
+      [t('stats.th.age'), t('disk_detail.label.years', {years: pohYears})],
+      [t('stats.detail.temperature'), tempVal + "\u00B0C"],
+      [t('disk_detail.info.max_temp'), (disk.temperature_max_c || "—") + (disk.temperature_max_c ? "\u00B0C" : "")]
     ];
     for (var ri = 0; ri < rows.length; ri++) {
       html += "<tr><td class=\"label-cell\">" + escHtml(rows[ri][0]) + "</td><td class=\"value-cell\">" + escHtml(String(rows[ri][1])) + "</td></tr>";
@@ -585,7 +586,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
 
     /* ── Inject ────────────────────────────────────────────────── */
     document.getElementById("app").innerHTML = html;
-    document.title = (disk.model || "Disk") + " — NAS Doctor";
+    document.title = (disk.model || t('disk_detail.label.disk')) + " — NAS Doctor";
 
     /* ── Render charts after DOM update ────────────────────────── */
     setTimeout(function() { renderCharts(disk, history); }, 50);
@@ -633,7 +634,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
       .then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
       .then(function(events){
         if (!events || events.length === 0) {
-          listEl.innerHTML = "<div class=\"maintenance-log-empty\">No entries yet. Add one below to start the log.</div>";
+          listEl.innerHTML = "<div class=\"maintenance-log-empty\">" + t('disk_detail.msg.no_entries') + "</div>";
           return;
         }
         var html = "";
@@ -643,7 +644,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
         listEl.innerHTML = html;
       })
       .catch(function(err){
-        listEl.innerHTML = "<div class=\"maintenance-log-empty\">Failed to load entries: " + escHtml(err.message) + "</div>";
+        listEl.innerHTML = "<div class=\"maintenance-log-empty\">" + t('disk_detail.msg.load_entries_failed', {message: err.message}) + "</div>";
       });
   }
 
@@ -659,16 +660,16 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     out += "<div class=\"ml-time\">" + escHtml(when) + "</div>";
     out += "<div class=\"ml-body\">" + body;
     if (ev.is_auto) {
-      out += "<span class=\"ml-badge\">System</span>";
+      out += "<span class=\"ml-badge\">" + t('disk_detail.badge.system') + "</span>";
     }
     if (ev.updated_at) {
-      out += "<span class=\"ml-updated\">(edited)</span>";
+      out += "<span class=\"ml-updated\">" + t('disk_detail.label.edited') + "</span>";
     }
     out += "</div>";
     if (!ev.is_auto) {
       out += "<div class=\"ml-actions\">";
-      out += "<button type=\"button\" onclick=\"editMaintenanceEntry(" + ev.id + ")\">Edit</button>";
-      out += "<button type=\"button\" onclick=\"deleteMaintenanceEntry(" + ev.id + ")\">Delete</button>";
+      out += "<button type=\"button\" onclick=\"editMaintenanceEntry(" + ev.id + ")\">" + t('disk_detail.button.edit') + "</button>";
+      out += "<button type=\"button\" onclick=\"deleteMaintenanceEntry(" + ev.id + ")\">" + t('disk_detail.button.delete') + "</button>";
       out += "</div>";
     }
     out += "</div>";
@@ -691,12 +692,12 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
   }
 
   function formatReplacementContent(raw) {
-    if (!raw) return escHtml("Drive replaced");
+    if (!raw) return escHtml(t('disk_detail.msg.drive_replaced'));
     try {
       var p = JSON.parse(raw);
       var oldSide = escHtml((p.old_serial || "?")) + (p.old_model ? " (" + escHtml(p.old_model) + ")" : "");
       var newSide = escHtml((p.new_serial || "?")) + (p.new_model ? " (" + escHtml(p.new_model) + ")" : "");
-      return "Drive replaced: " + oldSide + " \u2192 " + newSide;
+      return t('disk_detail.msg.drive_replaced_with', {old: oldSide, new: newSide});
     } catch (e) {
       return escHtml(raw);
     }
@@ -710,7 +711,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     if (!contentEl) return;
     var content = (contentEl.value || "").trim();
     if (!content) {
-      if (errEl) { errEl.textContent = "Please enter what happened."; errEl.style.display = "block"; }
+      if (errEl) { errEl.textContent = t('disk_detail.error.enter_content'); errEl.style.display = "block"; }
       return;
     }
     var body = { content: content };
@@ -749,7 +750,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
       var bodyEl = row.querySelector(".ml-body");
       if (bodyEl) current = (bodyEl.textContent || "").replace(/\s*System\s*$/, "").replace(/\s*\(edited\)\s*$/, "").trim();
     }
-    var next = window.prompt("Edit maintenance note:", current);
+    var next = window.prompt(t('disk_detail.prompt.edit_note'), current);
     if (next === null) return; // cancelled
     next = next.trim();
     if (!next) return;
@@ -761,19 +762,19 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
       if (!r.ok) return r.text().then(function(t){ throw new Error("HTTP " + r.status + ": " + t); });
       renderMaintenanceLog();
     }).catch(function(err){
-      window.alert("Update failed: " + err.message);
+      window.alert(t('disk_detail.error.update_failed', {message: err.message}));
     });
   }
 
   function deleteMaintenanceEntry(id) {
-    if (!window.confirm("Delete this maintenance log entry?")) return;
+    if (!window.confirm(t('disk_detail.confirm.delete'))) return;
     fetch("/api/v1/drives/" + encodeURIComponent(_currentSlotKey) + "/events/" + id, {
       method: "DELETE"
     }).then(function(r){
       if (!r.ok && r.status !== 204) return r.text().then(function(t){ throw new Error("HTTP " + r.status + ": " + t); });
       renderMaintenanceLog();
     }).catch(function(err){
-      window.alert("Delete failed: " + err.message);
+      window.alert(t('disk_detail.error.delete_failed', {message: err.message}));
     });
   }
 
@@ -789,7 +790,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
     NasChart.gauge("healthGauge", {
       value: score,
       max: 100,
-      label: "Health Score",
+      label: t('stats.label.health_score'),
       width: 160,
       height: 100,
       thresholds: { good: 80, warn: 50 }
@@ -828,38 +829,38 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
 
       NasChart.line("chartTemp", {
         datasets: [
-          { data: tempData, color: "#5e6ad2", label: "Temperature" },
-          { data: warnLine, color: "#d97706", label: "Warning (45\u00B0C)", dashed: true },
-          { data: critLine, color: "#dc2626", label: "Critical (55\u00B0C)", dashed: true }
+          { data: tempData, color: "#5e6ad2", label: t('disk_detail.chart.temperature') },
+          { data: warnLine, color: "#d97706", label: t('disk_detail.chart.warning_45'), dashed: true },
+          { data: critLine, color: "#dc2626", label: t('disk_detail.chart.critical_55'), dashed: true }
         ],
         labels: labels,
-        yLabel: "\u00B0C"
+        yLabel: t('disk_detail.chart.y.celsius')
       });
 
       /* ── Trend Charts ──────────────────────────────────────── */
       var hasNonZeroRealloc = Math.max.apply(null, reallocData) > 0;
       NasChart.area("chartRealloc", {
-        datasets: [{ data: reallocData, color: hasNonZeroRealloc ? "#dc2626" : "#27a644", label: "Reallocated" }],
+        datasets: [{ data: reallocData, color: hasNonZeroRealloc ? "#dc2626" : "#27a644", label: t('disk_detail.chart.reallocated') }],
         labels: labels,
-        yLabel: "Sectors"
+        yLabel: t('disk_detail.chart.y.sectors')
       });
 
       NasChart.area("chartPending", {
-        datasets: [{ data: pendingData, color: Math.max.apply(null, pendingData) > 0 ? "#d97706" : "#27a644", label: "Pending" }],
+        datasets: [{ data: pendingData, color: Math.max.apply(null, pendingData) > 0 ? "#d97706" : "#27a644", label: t('disk_detail.chart.pending') }],
         labels: labels,
-        yLabel: "Sectors"
+        yLabel: t('disk_detail.chart.y.sectors')
       });
 
       NasChart.line("chartCrc", {
-        datasets: [{ data: crcData, color: "#d97706", label: "UDMA CRC Errors" }],
+        datasets: [{ data: crcData, color: "#d97706", label: t('stats.detail.udma_crc_errors') }],
         labels: labels,
-        yLabel: "Errors"
+        yLabel: t('disk_detail.chart.y.errors')
       });
 
       NasChart.line("chartCt", {
-        datasets: [{ data: ctData, color: "#d97706", label: "Command Timeout" }],
+        datasets: [{ data: ctData, color: "#d97706", label: t('stats.detail.command_timeout') }],
         labels: labels,
-        yLabel: "Count"
+        yLabel: t('disk_detail.chart.y.count')
       });
     }
   }

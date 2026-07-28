@@ -100,7 +100,7 @@ func TestDiskDetailHTMLRelatedFindingsRendersDetectedAt(t *testing.T) {
 		substr string
 	}{
 		{"reads detected_at", "f.detected_at"},
-		{"renders Detected label", "Detected:"},
+		{"renders Detected label", "dashboard.finding.detected"},
 		{"formats detected_at as local string", "new Date(f.detected_at).toLocaleString()"},
 	}
 	for _, tc := range checks {

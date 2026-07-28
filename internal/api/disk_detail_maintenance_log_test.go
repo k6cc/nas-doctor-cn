@@ -31,7 +31,7 @@ func TestDiskDetailTemplate_HasMaintenanceLogSection(t *testing.T) {
 		name   string
 		substr string
 	}{
-		{"section heading", "Maintenance Log"},
+		{"section heading", "disk_detail.section.maintenance_log"},
 		{"list container id", "maintenanceLogList"},
 		{"add-entry form id", "maintenanceLogForm"},
 		{"content textarea id", "maintenanceLogContent"},
@@ -43,7 +43,7 @@ func TestDiskDetailTemplate_HasMaintenanceLogSection(t *testing.T) {
 		{"create handler", "createMaintenanceEntry"},
 		{"edit action", "editMaintenanceEntry"},
 		{"delete action", "deleteMaintenanceEntry"},
-		{"system badge label", "System"},
+		{"system badge label", "disk_detail.badge.system"},
 	}
 	for _, c := range checks {
 		if !strings.Contains(src, c.substr) {
