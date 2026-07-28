@@ -174,6 +174,18 @@ util.scStatusLabel = function(s) {
   return window.i18n.t('dashboard.sc.status.unknown');
 };
 
+/* Maps a UPS status_human string to a localized label. Falls back
+   to the original value for unrecognized statuses. */
+util.upsStatusLabel = function(s) {
+  var st = (s || "").toLowerCase();
+  if (st === "online") return window.i18n.t('dashboard.ups.status_online');
+  if (st === "on battery" || st === "on_battery") return window.i18n.t('dashboard.ups.status_on_battery');
+  if (st === "charging") return window.i18n.t('dashboard.ups.status_charging');
+  if (st === "low battery" || st === "low_battery") return window.i18n.t('dashboard.ups.status_low_battery');
+  if (st === "offline") return window.i18n.t('dashboard.ups.status_offline');
+  return s || "";
+};
+
 /* Issue #227 — render a prominent warning banner when the server
    reports that /data is not a real bind-mount. The server sets
    data_ephemeral=true on /api/v1/status when /data shares a device
@@ -444,9 +456,9 @@ sections.drives = function(sn, st) {
     }
     h += '<div class="section-title" style="display:flex;align-items:center;gap:12px">' + window.i18n.t('dashboard.section.drives') + ' (' + ((smart.length + standbyDevices.length) || disks.length) + ')';
     h += '<span class="health-summary" style="display:inline-flex;gap:8px;font-size:11px;color:var(--text-quaternary);font-weight:400;text-transform:none;letter-spacing:0">';
-    if (healthOk > 0) h += '<span style="display:flex;align-items:center;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:var(--green)"></span>' + healthOk + ' ok</span>';
-    if (healthWarn > 0) h += '<span style="display:flex;align-items:center;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:var(--amber)"></span>' + healthWarn + ' warn</span>';
-    if (healthCrit > 0) h += '<span style="display:flex;align-items:center;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:var(--red)"></span>' + healthCrit + ' fail</span>';
+    if (healthOk > 0) h += '<span style="display:flex;align-items:center;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:var(--green)"></span>' + healthOk + ' ' + window.i18n.t('dashboard.status.ok') + '</span>';
+    if (healthWarn > 0) h += '<span style="display:flex;align-items:center;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:var(--amber)"></span>' + healthWarn + ' ' + window.i18n.t('dashboard.status.warn') + '</span>';
+    if (healthCrit > 0) h += '<span style="display:flex;align-items:center;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:var(--red)"></span>' + healthCrit + ' ' + window.i18n.t('dashboard.status.fail') + '</span>';
     h += '</span></div>';
 
     var driveSortPref = (window.NasSort ? NasSort.getPrefs().drives : null) || "device";
@@ -780,7 +792,7 @@ sections.ups = function(sn) {
     h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:12px">';
     h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
     h += '<span style="font-weight:600;font-size:13px;color:var(--text-primary)">' + esc(ups.name || ups.model) + '</span>';
-    h += '<span class="' + upsStateClass + '" style="font-weight:600;font-size:11px;text-transform:uppercase">' + esc(ups.status_human) + '</span>';
+    h += '<span class="' + upsStateClass + '" style="font-weight:600;font-size:11px;text-transform:uppercase">' + esc(util.upsStatusLabel(ups.status_human)) + '</span>';
     h += '</div>';
     h += '<div style="display:flex;gap:16px;font-size:12px;color:var(--text-tertiary);flex-wrap:wrap">';
     h += '<span style="display:inline-flex;align-items:center">' + batteryIcon(ups.battery_percent || 0, !ups.on_battery) + window.i18n.t('dashboard.ups.battery') + ': <strong style="color:var(--text-primary);margin-left:3px">' + (ups.battery_percent || 0).toFixed(0) + '%</strong></span>';
