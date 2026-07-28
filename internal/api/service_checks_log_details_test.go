@@ -60,17 +60,19 @@ func TestServiceChecksHTML_LogDetail_RendersPerTypeDetails(t *testing.T) {
 // Time, Checked At, etc.); they must still appear.
 func TestServiceChecksHTML_LogDetail_ExistingFieldsStillRendered(t *testing.T) {
 	html := loadServiceChecksHTML(t)
+	// After i18n refactor, assert on the key references instead of the
+	// hardcoded English labels.
 	required := []string{
-		"Check Name",
-		"Target",
-		"Response Time",
-		"Checked At",
-		"Consecutive Failures",
-		"Check Key",
+		"check_name",
+		"target",
+		"response_time",
+		"checked_at",
+		"consecutive_failures",
+		"check_key",
 	}
 	for _, label := range required {
 		if !strings.Contains(html, label) {
-			t.Errorf("service_checks.html lost legacy detail-panel label %q during #182 wiring", label)
+			t.Errorf("service_checks.html lost legacy detail-panel i18n key %q during #182 wiring", label)
 		}
 	}
 }

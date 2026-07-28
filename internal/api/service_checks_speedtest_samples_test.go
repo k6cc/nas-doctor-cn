@@ -72,8 +72,10 @@ func TestServiceChecksHTML_RendersSpeedTestSamplesContainer(t *testing.T) {
 // acceptance criterion.
 func TestServiceChecksHTML_EmptyStateCopyForLegacyEntries(t *testing.T) {
 	html := loadServiceChecksHTML(t)
-	if !strings.Contains(html, "No per-sample data available — run a new test to populate.") {
-		t.Error("service_checks.html missing the canonical empty-state copy 'No per-sample data available — run a new test to populate.'")
+	// After i18n refactor, assert on the key reference instead of the
+	// hardcoded English literal.
+	if !strings.Contains(html, "no_per_sample_data") {
+		t.Error("service_checks.html missing the canonical empty-state i18n key 'no_per_sample_data'")
 	}
 }
 
