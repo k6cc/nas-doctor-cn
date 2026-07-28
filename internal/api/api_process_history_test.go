@@ -141,16 +141,17 @@ func TestStatsHTMLContainsProcessHistorySection(t *testing.T) {
 		name   string
 		substr string
 	}{
-		{"section title", "Process CPU Load"},
+		{"section title", "process_cpu_load_top"},
 		{"API fetch", "/api/v1/history/processes"},
 		{"chart canvas", "chart-process-cpu"},
 		{"NasChart.line call", "NasChart.line"},
 		// Per-core disambiguation — see issue #140. The chart plots `ps aux %CPU`
 		// which is a per-core value (N cores busy ≈ N×100%), so the label must
-		// not imply a normalized 0-100 scale.
-		{"per-core chart label", "% of 1 core"},
-		{"per-core y-axis label", "% / core"},
-		{"explanatory caption", "100% = one CPU core fully busy"},
+		// not imply a normalized 0-100 scale. After i18n refactor, assert on
+		// the key references instead of the hardcoded English literals.
+		{"per-core chart label", "cpu_load_per_process"},
+		{"per-core y-axis label", "pct_per_core"},
+		{"explanatory caption", "cpu_load_explanation"},
 	}
 	for _, tc := range checks {
 		t.Run(tc.name, func(t *testing.T) {
