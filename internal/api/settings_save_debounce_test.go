@@ -98,10 +98,10 @@ func TestSettingsHTML_SaveSettingsIsDebounced(t *testing.T) {
 	if !strings.Contains(body, `method: "PUT"`) {
 		t.Error("saveSettingsImmediate must issue a PUT request")
 	}
-	if !strings.Contains(body, `showToast("Error: " + e.message, "error")`) {
+	if !strings.Contains(body, `settings.toast.error_prefix`) {
 		t.Error("saveSettingsImmediate must preserve the .catch error-toast path so debouncing does not swallow failures")
 	}
-	if !strings.Contains(body, `showToast("Settings saved", "success")`) {
+	if !strings.Contains(body, `settings.toast.settings_saved`) {
 		t.Error("saveSettingsImmediate must preserve the success toast")
 	}
 	if !strings.Contains(body, "markSaved()") {
