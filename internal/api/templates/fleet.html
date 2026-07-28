@@ -156,6 +156,24 @@ body.theme-clean .mini-stat{background:rgba(0,0,0,0.04)}
   "use strict";
   var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k){return k;};
   function esc(s){var d=document.createElement("div");d.textContent=s||"";return d.innerHTML;}
+  function tFinding(f, field) {
+    if (!f || !f.finding_type || !f[field]) return f ? (f[field] || "") : "";
+    var key = 'finding.' + f.finding_type + '.' + field;
+    var tmpl = t(key);
+    if (tmpl === key) return f[field] || "";
+    var orig = f[field];
+    var result = tmpl;
+    if (f.finding_type === 'sata_cable') {
+      if (field === 'title') { var m = orig.match(/SATA Cable Issue on (.+) \((.+)\)/); if (m) { result = result.replace('{{device}}', m[1]).replace('{{model}}', m[2]); } }
+      else if (field === 'description') { var m = orig.match(/Drive (.+) has (\d+) UDMA CRC errors\. (.+)\. CRC/); if (m) { result = result.replace('{{device}}', m[1]).replace('{{count}}', m[2]).replace('{{tier}}', m[3]); } }
+    } else if (f.finding_type === 'command_timeout') {
+      if (field === 'title') { var m = orig.match(/Command Timeouts on (.+) \((.+)\)/); if (m) { result = result.replace('{{device}}', m[1]).replace('{{model}}', m[2]); } }
+      else if (field === 'description') { var m = orig.match(/Drive (.+) has (\d+) command timeouts\. (.+)\./); if (m) { result = result.replace('{{device}}', m[1]).replace('{{count}}', m[2]).replace('{{tier}}', m[3]); } }
+    } else if (f.finding_type === 'stopped_containers') {
+      if (field === 'title' || field === 'description') { var m = orig.match(/^(\d+)/); if (m) { result = result.replace('{{count}}', m[1]); } }
+    }
+    return result;
+  }
 
   function platformIcon(p){
     p=(p||"").toLowerCase();
@@ -321,7 +339,7 @@ body.theme-clean .mini-stat{background:rgba(0,0,0,0.04)}
       for(var c=0;c<ctrs.length;c++){if(ctrs[c].state==="running")n.summary.containers_running++;}
       for(var s=0;s<sc.length;s++){if(sc[s].status==="up")n.summary.service_checks_up++;else n.summary.service_checks_down++;}
       for(var f=0;f<findings.length;f++){
-        n.summary.findings.push({severity:findings[f].severity,title:findings[f].title,category:findings[f].category});
+        n.summary.findings.push({severity:findings[f].severity,title:findings[f].title,category:findings[f].category,finding_type:findings[f].finding_type});
       }
     }
     return n;
@@ -482,7 +500,7 @@ body.theme-clean .mini-stat{background:rgba(0,0,0,0.04)}
       h+='<div class="finding-row">';
       h+='<span class="finding-sev '+esc(f.severity)+'"></span>';
       h+='<span class="finding-server">'+esc(f.server)+'</span>';
-      h+='<span class="finding-title">'+esc(f.title)+'</span>';
+      h+='<span class="finding-title">'+esc(tFinding(f, 'title'))+'</span>';
       var catKey = 'dashboard.category.' + (f.category || '').toLowerCase();
       var catLabel = t(catKey);
       if (catLabel === catKey) catLabel = f.category || '';

@@ -844,7 +844,7 @@ sections.ups = function(sn) {
   var ups = sn ? sn.ups : null;
   if (ups && ups.available) {
     h += '<div>';
-    h += '<div class="section-title">UPS / Power</div>';
+    h += '<div class="section-title">' + window.i18n.t('dashboard.ups.title') + '</div>';
     var upsStateClass = ups.on_battery ? "td-crit" : "td-healthy";
     h += '<div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:calc(var(--radius)*1.5);padding:12px">';
     h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
@@ -854,7 +854,7 @@ sections.ups = function(sn) {
     h += '<div style="display:flex;gap:16px;font-size:12px;color:var(--text-tertiary);flex-wrap:wrap">';
     h += '<span style="display:inline-flex;align-items:center">' + batteryIcon(ups.battery_percent || 0, !ups.on_battery) + window.i18n.t('dashboard.ups.battery') + ': <strong style="color:var(--text-primary);margin-left:3px">' + (ups.battery_percent || 0).toFixed(0) + '%</strong></span>';
     h += '<span>' + window.i18n.t('dashboard.label.load') + ' <strong style="color:var(--text-primary)">' + (ups.load_percent || 0).toFixed(0) + '%</strong></span>';
-    h += '<span>' + window.i18n.t('dashboard.label.runtime') + ' <strong style="color:var(--text-primary)">' + (ups.runtime_minutes || 0).toFixed(0) + ' min</strong></span>';
+    h += '<span>' + window.i18n.t('dashboard.label.runtime') + ' <strong style="color:var(--text-primary)">' + (ups.runtime_minutes || 0).toFixed(0) + ' ' + window.i18n.t('dashboard.ups.min') + '</strong></span>';
     if (ups.wattage_watts > 0) h += '<span>' + window.i18n.t('dashboard.label.power') + ' <strong style="color:var(--text-primary)">' + (ups.wattage_watts || 0).toFixed(0) + 'W / ' + (ups.nominal_watts || 0).toFixed(0) + 'W</strong></span>';
     if (ups.input_voltage > 0) h += '<span>' + window.i18n.t('dashboard.label.input') + ' ' + (ups.input_voltage || 0).toFixed(0) + 'V</span>';
     h += '</div>';
@@ -1070,8 +1070,9 @@ sections.network = function(sn) {
     for (var ni = 0; ni < net.interfaces.length; ni++) {
       var iface = net.interfaces[ni];
       var stateColor = iface.state === "UP" ? "td-healthy" : "td-warn";
+      var stateLabel = iface.state === "UP" ? t("dashboard.network.state.up") : esc(iface.state);
       h += '<tr><td style="padding:6px 12px;border-bottom:1px solid var(--border)">' + esc(iface.name) + '</td>';
-      h += '<td style="padding:6px 12px;border-bottom:1px solid var(--border)" class="' + stateColor + '">' + esc(iface.state) + '</td>';
+      h += '<td style="padding:6px 12px;border-bottom:1px solid var(--border)" class="' + stateColor + '">' + stateLabel + '</td>';
       h += '<td style="padding:6px 12px;border-bottom:1px solid var(--border)">' + esc(iface.speed || "\u2014") + '</td>';
       h += '<td style="padding:6px 12px;border-bottom:1px solid var(--border)">' + (iface.mtu || 0) + '</td>';
       h += '<td style="padding:6px 12px;border-bottom:1px solid var(--border)">' + esc(iface.ipv4 || "\u2014") + '</td></tr>';
@@ -1303,8 +1304,8 @@ sections.tunnels = function(sn) {
           h += '<span style="font-weight:600;min-width:80px">' + esc(nd.name) + '</span>';
           h += '<span style="font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary);min-width:90px">' + esc(nd.ip || '') + '</span>';
           h += '<span style="font-size:11px;color:var(--text-quaternary)">' + esc(nd.os || '') + '</span>';
-          if (ni === 0) h += '<span style="font-size:10px;padding:1px 6px;border-radius:999px;background:rgba(94,106,210,0.15);color:var(--accent)">self</span>';
-          if (nd.exit_node) h += '<span style="font-size:10px;padding:1px 6px;border-radius:999px;background:rgba(217,119,6,0.15);color:var(--amber)">exit node</span>';
+          if (ni === 0) h += '<span style="font-size:10px;padding:1px 6px;border-radius:999px;background:rgba(94,106,210,0.15);color:var(--accent)">' + window.i18n.t('dashboard.tunnels.self') + '</span>';
+          if (nd.exit_node) h += '<span style="font-size:10px;padding:1px 6px;border-radius:999px;background:rgba(217,119,6,0.15);color:var(--amber)">' + window.i18n.t('dashboard.tunnels.exit_node') + '</span>';
           h += '</div>';
         }
       } else if (ts.hint) {

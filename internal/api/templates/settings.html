@@ -1208,14 +1208,14 @@ function updateSpeedTestPreview() {
   var freq = document.getElementById("speedtest-interval").value;
   var el = document.getElementById("st-preview");
   if (!el) return;
-  if (freq === "disabled") { el.textContent = "Speed tests are disabled. The dashboard widget will stop updating. The Test button on speed-type service checks continues to work on-demand."; return; }
-  var labels = {"30m":"every 30 minutes","1h":"every hour","2h":"every 2 hours","4h":"every 4 hours","6h":"every 6 hours","12h":"every 12 hours"};
-  if (labels[freq]) { el.textContent = "Speed tests run " + labels[freq] + ". First test runs 2 minutes after startup."; return; }
+  if (freq === "disabled") { el.textContent = i18nT('settings.msg.speedtest_disabled'); return; }
+  var labels = {"30m":i18nT('settings.msg.speedtest_every_30m'),"1h":i18nT('settings.msg.speedtest_every_1h'),"2h":i18nT('settings.msg.speedtest_every_2h'),"4h":i18nT('settings.msg.speedtest_every_4h'),"6h":i18nT('settings.msg.speedtest_every_6h'),"12h":i18nT('settings.msg.speedtest_every_12h')};
+  if (labels[freq]) { el.textContent = i18nT('settings.msg.speedtest_run', {schedule: labels[freq]}); return; }
   var time = (document.getElementById("st-time").value || "03:00").trim();
   if (freq === "24h") { el.textContent = i18nT('settings.msg.speedtest_schedule', {time: time}); return; }
   var day = document.getElementById("st-day").value;
-  if (freq === "weekly") { el.textContent = "Speed test runs every " + day.charAt(0).toUpperCase() + day.slice(1) + " at " + time + "."; return; }
-  if (freq === "monthly") { var suffix = day === "1" ? "st" : "th"; el.textContent = "Speed test runs on the " + day + suffix + " of every month at " + time + "."; return; }
+  if (freq === "weekly") { el.textContent = i18nT('settings.msg.speedtest_weekly', {day: day.charAt(0).toUpperCase() + day.slice(1), time: time}); return; }
+  if (freq === "monthly") { var suffix = day === "1" ? "st" : "th"; el.textContent = i18nT('settings.msg.speedtest_monthly', {day: day + suffix, time: time}); return; }
   el.textContent = "";
 }
 
@@ -3568,7 +3568,7 @@ function renderMaintenanceWindows() {
   var container = document.getElementById("maintenance-list");
   if (!container) return;
   if (!maintenanceWindows || maintenanceWindows.length === 0) {
-    container.innerHTML = '<div style="font-size:13px;color:var(--text2);padding:8px 0">No maintenance windows configured.</div>';
+    container.innerHTML = '<div style="font-size:13px;color:var(--text2);padding:8px 0">'+i18nT('settings.msg.no_maintenance_windows')+'</div>';
     return;
   }
   var html = "";
@@ -3862,13 +3862,19 @@ function renderRules() {
   var html = "";
   for (var i = 0; i < notifRules.length; i++) {
     var r = notifRules[i];
-    var desc = r.category + " / " + r.condition;
-    if (r.target) desc += " on " + r.target;
-    if (r.value) desc += " (threshold: " + r.value + ")";
+    var catKey = 'settings.behavior.rules.category.' + (r.category || '');
+    var catLabel = i18nT(catKey);
+    if (catLabel === catKey) catLabel = r.category || '';
+    var condLabel = r.condition || '';
+    var condOpts = CONDITION_MAP[r.category] || [];
+    for (var ci = 0; ci < condOpts.length; ci++) { if (condOpts[ci].v === r.condition) { condLabel = condOpts[ci].l; break; } }
+    var desc = catLabel + " / " + condLabel;
+    if (r.target) desc += " " + i18nT('settings.msg.rule_on') + " " + r.target;
+    if (r.value) desc += " (" + i18nT('settings.msg.rule_threshold') + ": " + r.value + ")";
     html += '<div class="webhook-item">';
     html += '<div class="webhook-info">';
-    html += '<div class="webhook-name">' + escapeHtml(r.name || "Unnamed") + '</div>';
-    html += '<div class="webhook-url">' + escapeHtml(desc) + ' &rarr; ' + escapeHtml(r.webhook || "—") + ' &middot; cooldown ' + (r.cooldown_sec || 900) + 's</div>';
+    html += '<div class="webhook-name">' + escapeHtml(r.name || i18nT('settings.msg.unnamed_rule')) + '</div>';
+    html += '<div class="webhook-url">' + escapeHtml(desc) + ' &rarr; ' + escapeHtml(r.webhook || "—") + ' &middot; ' + i18nT('settings.msg.cooldown') + ' ' + (r.cooldown_sec || 900) + 's</div>';
     html += '</div><div class="webhook-actions">';
     html += '<div class="toggle-wrap" onclick="toggleRuleEnabled(' + i + ')"><div class="toggle' + (r.enabled ? " on" : "") + '"><div class="toggle-knob"></div></div></div>';
     html += '<button class="btn btn-secondary btn-sm" onclick="editRule(' + i + ')">' + i18nT('common.button.edit') + '</button>';

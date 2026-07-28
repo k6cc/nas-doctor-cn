@@ -590,7 +590,7 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
       h+='<div class="forecast-card">';
       h+='<div class="fc-header">';
       h+='<div><div class="fc-mount">'+esc(v.mount_point)+'</div><div class="fc-label">'+esc(v.label||v.device)+'</div></div>';
-      var urgKey = 'planner.' + v.urgency;
+      var urgKey = 'stats.forecast.urgency.' + v.urgency;
       var urgLabel = window.i18n.t(urgKey);
       if (urgLabel === urgKey) urgLabel = v.urgency.toUpperCase();
       h+='<span class="fc-urg '+v.urgency+'">'+esc(urgLabel)+'</span>';
