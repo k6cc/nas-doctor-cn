@@ -11,7 +11,8 @@ var ChartJS = `
 /* ── helpers ─────────────────────────────────────────────────────── */
 function isDarkMode(){
   if(window.matchMedia && window.matchMedia("(prefers-color-scheme:dark)").matches) return true;
-  var bg=getComputedStyle(document.body).backgroundColor;
+  if(document.body && document.body.classList && document.body.classList.contains('theme-midnight')) return true;
+  var bg=getComputedStyle(document.documentElement||document.body).backgroundColor;
   var m=bg.match(/^rgb\((\d+)/);
   if(m&&parseInt(m[1],10)<50) return true;
   return false;

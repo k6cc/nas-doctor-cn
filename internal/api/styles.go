@@ -19,6 +19,7 @@ const SharedCSS = `
 
 /* Midnight (default) */
 :root, body.theme-midnight {
+  color-scheme: dark;
   --bg:#0f1011; --surface:#191a1b; --elevated:#242526;
   --text:#f7f8f8; --text2:#8a8f98; --text3:#5a5f6a;
   --accent:#5e6ad2; --accent-hover:#7170ff;
@@ -36,6 +37,7 @@ const SharedCSS = `
 
 /* Clean */
 body.theme-clean {
+  color-scheme: light;
   --bg:#ffffff; --surface:#ffffff; --elevated:#fafafa;
   --text:#171717; --text2:#808080; --text3:#b3b3b3;
   --accent:#171717; --accent-hover:#404040;
