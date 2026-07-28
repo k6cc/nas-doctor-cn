@@ -214,40 +214,28 @@ util.translateFinding = function(f, field) {
   if (tmpl === key) return f[field] || "";
   var orig = f[field];
   var result = tmpl;
-  /* Type-specific parameter extraction */
-  if (f.finding_type === 'sata_cable') {
-    if (field === 'title') {
-      var m = orig.match(/SATA Cable Issue on (.+) \((.+)\)/);
-      if (m) { result = result.replace('{{device}}', m[1]).replace('{{model}}', m[2]); }
-    } else if (field === 'description') {
-      var m = orig.match(/Drive (.+) has (\d+) UDMA CRC errors\. (.+)\. CRC/);
-      if (m) { result = result.replace('{{device}}', m[1]).replace('{{count}}', m[2]).replace('{{tier}}', m[3]); }
-    } else if (field === 'action') {
-      var m = orig.match(/Replace the SATA cable on port (.+)\. Use/);
-      if (m) { result = result.replace('{{port}}', m[1]); }
-    }
-  } else if (f.finding_type === 'command_timeout') {
-    if (field === 'title') {
-      var m = orig.match(/Command Timeouts on (.+) \((.+)\)/);
-      if (m) { result = result.replace('{{device}}', m[1]).replace('{{model}}', m[2]); }
-    } else if (field === 'description') {
-      var m = orig.match(/Drive (.+) has (\d+) command timeouts\. (.+)\./);
-      if (m) { result = result.replace('{{device}}', m[1]).replace('{{count}}', m[2]).replace('{{tier}}', m[3]); }
-    }
-  } else if (f.finding_type === 'stopped_containers') {
-    if (field === 'title' || field === 'description') {
-      var m = orig.match(/^(\d+)/);
-      if (m) { result = result.replace('{{count}}', m[1]); }
-    }
-  } else if (f.finding_type === 'service_check_failed') {
-    if (field === 'title') {
-      var m = orig.match(/Service Check Failed: (.+)/);
-      if (m) { result = result.replace('{{name}}', m[1]); }
-    } else if (field === 'description') {
-      var m = orig.match(/(\w+) check for (.+) is failing \((\d+) consecutive failures\)\./);
-      if (m) { result = result.replace('{{type}}', m[1]).replace('{{target}}', m[2]).replace('{{count}}', m[3]); }
-    }
+  /* Generic parameter extraction: build regex from English template,
+     match original text, substitute params into translated template. */
+  var enTmpl = (typeof dictionaries !== 'undefined' && dictionaries['en']) ? dictionaries['en'][key] : null;
+  if (!enTmpl) return result;
+  var paramMatches = enTmpl.match(/\{\{(\w+)\}\}/g);
+  if (!paramMatches || paramMatches.length === 0) return result;
+  /* Build regex: split template by {{param}}, escape literal parts, join with capture groups */
+  var parts = enTmpl.split(/(\{\{\w+\}\})/);
+  var regexStr = '';
+  for (var pi = 0; pi < parts.length; pi++) {
+    if (/^\{\{\w+\}\}$/.test(parts[pi])) { regexStr += '([\\s\\S]*?)'; }
+    else if (parts[pi]) { regexStr += parts[pi].replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
   }
+  try {
+    var m = orig.match(new RegExp('^' + regexStr));
+    if (m) {
+      for (var pi2 = 0; pi2 < paramMatches.length && pi2 < m.length - 1; pi2++) {
+        var pname = paramMatches[pi2].replace(/\{\{|\}\}/g, '');
+        result = result.replace('{{' + pname + '}}', m[pi2 + 1]);
+      }
+    }
+  } catch(e) { /* regex error, return template as-is */ }
   return result;
 };
 
