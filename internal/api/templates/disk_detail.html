@@ -534,7 +534,10 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
         html += "<div class=\"finding-title-row\">";
         html += "<span class=\"" + dotCls + "\"></span>";
         html += "<span class=\"finding-title\">" + escHtml(f.title || "") + "</span>";
-        html += "<span class=\"" + tagCls + "\">" + escHtml(sev) + "</span>";
+        var sevKey = 'dashboard.severity.' + sev;
+        var sevLabel = t(sevKey);
+        if (sevLabel === sevKey) sevLabel = sev;
+        html += "<span class=\"" + tagCls + "\">" + escHtml(sevLabel) + "</span>";
         html += "</div>";
         if (f.detected_at) html += "<div class=\"finding-meta\"><span><strong>" + t('dashboard.finding.detected') + "</strong> " + new Date(f.detected_at).toLocaleString() + "</span></div>";
         if (f.description) html += "<div class=\"finding-desc\">" + escHtml(f.description) + "</div>";

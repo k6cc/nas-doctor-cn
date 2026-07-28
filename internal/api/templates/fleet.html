@@ -483,7 +483,10 @@ body.theme-clean .mini-stat{background:rgba(0,0,0,0.04)}
       h+='<span class="finding-sev '+esc(f.severity)+'"></span>';
       h+='<span class="finding-server">'+esc(f.server)+'</span>';
       h+='<span class="finding-title">'+esc(f.title)+'</span>';
-      h+='<span class="finding-cat">'+esc(f.category)+'</span>';
+      var catKey = 'dashboard.category.' + (f.category || '').toLowerCase();
+      var catLabel = t(catKey);
+      if (catLabel === catKey) catLabel = f.category || '';
+      h+='<span class="finding-cat">'+esc(catLabel)+'</span>';
       h+='</div>';
     }
     h+='</div>';

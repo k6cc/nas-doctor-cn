@@ -590,7 +590,10 @@ fetch("/api/v1/status").then(function(r){return r.json()}).then(function(d){if(d
       h+='<div class="forecast-card">';
       h+='<div class="fc-header">';
       h+='<div><div class="fc-mount">'+esc(v.mount_point)+'</div><div class="fc-label">'+esc(v.label||v.device)+'</div></div>';
-      h+='<span class="fc-urg '+v.urgency+'">'+v.urgency.toUpperCase()+'</span>';
+      var urgKey = 'planner.' + v.urgency;
+      var urgLabel = window.i18n.t(urgKey);
+      if (urgLabel === urgKey) urgLabel = v.urgency.toUpperCase();
+      h+='<span class="fc-urg '+v.urgency+'">'+esc(urgLabel)+'</span>';
       h+='</div>';
       // Usage bar
       h+='<div class="fc-bar-track"><div class="fc-bar-fill" style="width:'+pct.toFixed(0)+'%;background:'+barCol+'"></div></div>';

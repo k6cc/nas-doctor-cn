@@ -186,6 +186,24 @@ util.upsStatusLabel = function(s) {
   return s || "";
 };
 
+/* Maps a finding severity to a localized label. */
+util.severityLabel = function(s) {
+  var st = (s || "").toLowerCase();
+  if (st === "critical") return window.i18n.t('dashboard.severity.critical');
+  if (st === "warning") return window.i18n.t('dashboard.severity.warning');
+  if (st === "info") return window.i18n.t('dashboard.severity.info');
+  if (st === "ok") return window.i18n.t('dashboard.severity.ok');
+  return s || "";
+};
+
+/* Maps a finding category to a localized label. */
+util.categoryLabel = function(c) {
+  var cat = (c || "").toLowerCase();
+  var key = 'dashboard.category.' + cat;
+  var val = window.i18n.t(key);
+  return val === key ? (c || "") : val;
+};
+
 /* Issue #227 — render a prominent warning banner when the server
    reports that /data is not a real bind-mount. The server sets
    data_ephemeral=true on /api/v1/status when /data shares a device
@@ -398,7 +416,7 @@ sections.findings = function(sn, st) {
       h += '<div class="finding finding-' + sev + '" onclick="window._toggleFinding(this)">';
       h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">';
       h += '<span class="sev-dot sev-dot-' + sev + '"></span>';
-      h += '<span class="finding-tag sev-' + sev + '">' + sev + '</span>';
+      h += '<span class="finding-tag sev-' + sev + '">' + esc(util.severityLabel(f.severity)) + '</span>';
       h += '<span class="finding-title">' + esc(f.title) + '</span>';
       h += '</div>';
       h += '<div class="finding-expandable">';
@@ -417,7 +435,7 @@ sections.findings = function(sn, st) {
       if (f.detected_at) h += '<span><strong>' + window.i18n.t('dashboard.finding.detected') + '</strong> ' + new Date(f.detected_at).toLocaleString() + '</span>';
       if (f.priority) h += '<span><strong>' + window.i18n.t('dashboard.finding.priority') + '</strong> ' + esc(f.priority) + '</span>';
       if (f.cost) h += '<span><strong>' + window.i18n.t('dashboard.finding.cost') + '</strong> ' + esc(f.cost) + '</span>';
-      if (f.category) h += '<span><strong>' + window.i18n.t('dashboard.finding.category') + '</strong> ' + esc(f.category) + '</span>';
+      if (f.category) h += '<span><strong>' + window.i18n.t('dashboard.finding.category') + '</strong> ' + esc(util.categoryLabel(f.category)) + '</span>';
       h += '<span style="margin-left:auto"><a href="#" onclick="event.stopPropagation();window._dismissFinding(\'' + esc(f.title).replace(/'/g, "\\'") + '\');return false" style="font-size:11px;color:var(--text-quaternary);text-decoration:none">' + window.i18n.t('dashboard.button.dismiss') + '</a></span>';
       h += '</div>';
       h += '</div>';
