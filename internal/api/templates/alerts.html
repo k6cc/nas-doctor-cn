@@ -531,6 +531,19 @@ function alertStatusLabel(s) {
   if (v === "resolved") return window.i18n.t('alerts.enum.status.resolved');
   return s || "—";
 }
+function translateAlertTitle(title) {
+  if (!title) return "";
+  var m;
+  m = title.match(/^(\d+) Stopped Containers$/);
+  if (m) return window.i18n.t('finding.stopped_containers.title', {count: m[1]});
+  m = title.match(/^Service Check Failed: (.+)$/);
+  if (m) return window.i18n.t('finding.service_check_failed.title', {name: m[1]});
+  m = title.match(/^SATA Cable Issue on (.+) \((.+)\)$/);
+  if (m) return window.i18n.t('finding.sata_cable.title', {device: m[1], model: m[2]});
+  m = title.match(/^Command Timeouts on (.+) \((.+)\)$/);
+  if (m) return window.i18n.t('finding.command_timeout.title', {device: m[1], model: m[2]});
+  return title;
+}
 function statusClassForAlert(status) {
   var s = (status || "").toLowerCase();
   if (s === "open") return "status-open";
@@ -563,7 +576,7 @@ function loadAlerts() {
         html += '<tr>';
         html += '<td>#' + a.id + '</td>';
         html += '<td>' + sev + '</td>';
-        html += '<td>' + escapeHtml(a.title || "") + '</td>';
+        html += '<td>' + escapeHtml(translateAlertTitle(a.title || "")) + '</td>';
         html += '<td><span class="status-badge ' + statusClassForAlert(a.status) + '">' + escapeHtml(statusLabel) + '</span></td>';
         html += '<td>' + escapeHtml(created) + '</td>';
         html += '<td style="display:flex;gap:6px;flex-wrap:wrap">';
@@ -709,9 +722,9 @@ function renderIncidentTimelineTable(events) {
     html += "<tr>";
     html += "<td>" + escapeHtml(ts) + "</td>";
     html += "<td>" + escapeHtml(e.type || "") + "</td>";
-    html += "<td>" + escapeHtml(e.severity || "\u2014") + "</td>";
-    html += "<td>" + escapeHtml(e.title || e.source || "\u2014") + "</td>";
-    html += "<td>" + escapeHtml(e.status || "\u2014") + "</td>";
+    html += "<td>" + escapeHtml(alertSevLabel(e.severity)) + "</td>";
+    html += "<td>" + escapeHtml(translateAlertTitle(e.title || e.source) || "\u2014") + "</td>";
+    html += "<td>" + escapeHtml(alertStatusLabel(e.status)) + "</td>";
     html += "<td>";
     if (e.alert_id) {
       html += '<button class="btn btn-secondary btn-sm" onclick="loadAlertCorrelation(' + e.alert_id + ')">' + window.i18n.t('alerts.button.correlation') + '</button>';

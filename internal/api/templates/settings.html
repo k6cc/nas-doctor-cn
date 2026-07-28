@@ -2518,6 +2518,13 @@ function serviceTypeLabel(t) {
   if (type === "traceroute") return i18nT('dashboard.sc.type_traceroute');
   return (t || "").toUpperCase();
 }
+function sevLabel(s) {
+  var v = (s || "").toLowerCase();
+  if (v === "critical") return i18nT('settings.severity.critical');
+  if (v === "warning") return i18nT('settings.severity.warning');
+  if (v === "info") return i18nT('settings.severity.info');
+  return s || "";
+}
 
 function populateInstanceSelector() {
   var sel = document.getElementById("sc-instance");
@@ -2544,8 +2551,8 @@ function renderServiceChecks() {
     html += '<div class="mini-list-item">';
     html += '  <div class="mini-list-main">';
     html += '    <div class="mini-list-title">' + escapeHtml(sc.name) + ' <span class="pill ' + serviceTypePillClass(sc.type) + '">' + escapeHtml(serviceTypeLabel(sc.type)) + '</span></div>';
-    html += '    <div class="mini-list-sub">' + escapeHtml(sc.target) + (sc.port ? (':' + sc.port) : '') + '</div>';
-    html += '    <div class="inline-muted">' + i18nT('settings.msg.sc_summary', {interval: formatInterval(sc.interval_sec), threshold: sc.failure_threshold, severity: escapeHtml(sc.failure_severity), timeout: sc.timeout_sec}) + '</div>';
+    html += '    <div class="mini-list-sub">' + (sc.type === "speed" ? i18nT('settings.msg.speedtest_auto') : (escapeHtml(sc.target) + (sc.port ? (':' + sc.port) : ''))) + '</div>';
+    html += '    <div class="inline-muted">' + i18nT('settings.msg.sc_summary', {interval: formatInterval(sc.interval_sec), threshold: sc.failure_threshold, severity: sevLabel(sc.failure_severity), timeout: sc.timeout_sec}) + '</div>';
     html += '  </div>';
     html += '  <div class="webhook-actions">';
     html += '    <div class="toggle-wrap" onclick="toggleServiceCheckEnabled(' + i + ')"><div class="toggle' + (sc.enabled ? ' on' : '') + '"><div class="toggle-knob"></div></div></div>';
