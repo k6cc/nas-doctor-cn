@@ -54,12 +54,12 @@ body.theme-clean .webhook-form{border-color:var(--accent);background:rgba(0,0,0,
       <span class="page-title" data-i18n="settings.page_title">Settings</span>
     </div>
     <div class="nav-links">
-      <a href="/" class="nav-link">Dashboard</a>
-      <a href="/alerts" class="nav-link">Alerts</a>
-      <a href="/service-checks" class="nav-link">Services</a>
-      <a href="/stats" class="nav-link">Stats</a>
-      <a href="/fleet" class="nav-link">Fleet</a>
-      <a href="/replacement-planner" class="nav-link">Planner</a>
+      <a href="/" class="nav-link" data-i18n="nav.dashboard">Dashboard</a>
+      <a href="/alerts" class="nav-link" data-i18n="nav.alerts">Alerts</a>
+      <a href="/service-checks" class="nav-link" data-i18n="nav.services">Services</a>
+      <a href="/stats" class="nav-link" data-i18n="nav.stats">Stats</a>
+      <a href="/fleet" class="nav-link" data-i18n="nav.fleet">Fleet</a>
+      <a href="/replacement-planner" class="nav-link" data-i18n="nav.planner">Planner</a>
       <a href="/settings" class="nav-link active" title="Settings" data-i18n-attr="title:settings.icon_title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
     </div>
   </div>
@@ -1052,7 +1052,7 @@ body.theme-clean .webhook-form{border-color:var(--accent);background:rgba(0,0,0,
 
 <script src="/js/charts.js"></script>
 <script>
-var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k,p){return k;};
+var i18nT = window.i18n ? window.i18n.t.bind(window.i18n) : function(k,p){return k;};
 /* ---------- State ---------- */
 var settings = null;
 var webhooks = [];
@@ -1911,7 +1911,7 @@ function loadSettings() {
       notifRules = (data.notifications && data.notifications.rules) ? data.notifications.rules : [];
       renderRules();
     })
-    .catch(function(e) { showToast(t('settings.toast.failed_to_load_settings', {error: e}), "error"); });
+    .catch(function(e) { showToast(i18nT('settings.toast.failed_to_load_settings', {error: e}), "error"); });
 }
 
 /* ---------- Save settings ---------- */
@@ -2188,7 +2188,7 @@ function saveSettingsImmediate() {
   }
   var payload = buildSettingsPayload();
   if (!smartMaxAgeConflictConfirm(payload)) {
-    showToast(t('settings.toast.save_aborted'), "info");
+    showToast(i18nT('settings.toast.save_aborted'), "info");
     return;
   }
   fetch("/api/v1/settings", {
@@ -2206,7 +2206,7 @@ function saveSettingsImmediate() {
     notifRules = (saved.notifications && saved.notifications.rules) ? saved.notifications.rules : notifRules;
     maintenanceWindows = (saved.notifications && saved.notifications.maintenance_windows) ? saved.notifications.maintenance_windows : maintenanceWindows;
     serviceChecks = (saved.service_checks && saved.service_checks.checks) ? saved.service_checks.checks : serviceChecks;
-    showToast(t('settings.toast.settings_saved'), "success");
+    showToast(i18nT('settings.toast.settings_saved'), "success");
     markSaved();
     /* Apply theme live */
     applyTheme(payload.theme);
@@ -2216,7 +2216,7 @@ function saveSettingsImmediate() {
     renderMaintenanceWindows();
     renderServiceChecks();
   })
-  .catch(function(e) { showToast(t('settings.toast.error_prefix', {message: e.message}), "error"); });
+  .catch(function(e) { showToast(i18nT('settings.toast.error_prefix', {message: e.message}), "error"); });
 }
 
 // Debounce window for auto-save flows (#258). 300ms collapses the
@@ -2322,7 +2322,7 @@ function saveWebhook() {
   var name = document.getElementById("wh-name").value.trim();
   var url = document.getElementById("wh-url").value.trim();
   if (!name || !url) {
-    showToast(t('settings.toast.name_url_required'), "error");
+    showToast(i18nT('settings.toast.name_url_required'), "error");
     return;
   }
   var wh = {
@@ -2345,7 +2345,7 @@ function saveWebhook() {
 }
 
 function removeWebhook(idx) {
-  if (!confirm(t('settings.confirm.remove_webhook', {name: (webhooks[idx].name || "Unnamed")}))) return;
+  if (!confirm(i18nT('settings.confirm.remove_webhook', {name: (webhooks[idx].name || "Unnamed")}))) return;
   webhooks.splice(idx, 1);
   renderWebhooks();
   saveSettings();
@@ -2355,7 +2355,7 @@ function testWebhook() {
   var url = (document.getElementById("wh-url") || {}).value || "";
   url = url.trim();
   if (!url) {
-    showToast(t('settings.toast.enter_webhook_url'), "error");
+    showToast(i18nT('settings.toast.enter_webhook_url'), "error");
     return;
   }
   var wh = {
@@ -2365,7 +2365,7 @@ function testWebhook() {
     enabled: true,
     secret: ((document.getElementById("wh-secret") || {}).value || "").trim()
   };
-  showToast(t('settings.toast.sending_test'), "info");
+  showToast(i18nT('settings.toast.sending_test'), "info");
   fetch("/api/v1/settings/test-webhook", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -2375,18 +2375,18 @@ function testWebhook() {
     if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || "Test failed"); });
     return r.json();
   })
-  .then(function(data) { showToast(data.message || t('settings.toast.test_sent'), "success"); })
-  .catch(function(e) { showToast(t('settings.toast.error_prefix', {message: e.message}), "error"); });
+  .then(function(data) { showToast(data.message || i18nT('settings.toast.test_sent'), "success"); })
+  .catch(function(e) { showToast(i18nT('settings.toast.error_prefix', {message: e.message}), "error"); });
 }
 
 function testRule() {
   var webhookName = (document.getElementById("nr-webhook") || {}).value;
-  if (!webhookName) { showToast(t('settings.toast.select_webhook'), "error"); return; }
+  if (!webhookName) { showToast(i18nT('settings.toast.select_webhook'), "error"); return; }
   var wh = null;
   for (var i = 0; i < webhooks.length; i++) {
     if (webhooks[i].name === webhookName) { wh = webhooks[i]; break; }
   }
-  if (!wh || !wh.url) { showToast(t('settings.toast.webhook_not_found'), "error"); return; }
+  if (!wh || !wh.url) { showToast(i18nT('settings.toast.webhook_not_found'), "error"); return; }
 
   var cat = (document.getElementById("nr-category") || {}).value || "system";
   var cond = (document.getElementById("nr-condition") || {}).value || "any";
@@ -2445,7 +2445,7 @@ function testRule() {
   var title = titles[cond] || condLabel + " on " + targetLabel;
   var description = "TEST — This simulates what the notification rule \"" + ruleName + "\" would send when triggered. Condition: " + condLabel + " on " + targetLabel + (val ? " (threshold: " + val + ")" : "") + ".";
 
-  showToast(t('settings.toast.sending_test_via', {name: webhookName}), "info");
+  showToast(i18nT('settings.toast.sending_test_via', {name: webhookName}), "info");
   fetch("/api/v1/settings/test-webhook", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -2469,7 +2469,7 @@ function testRule() {
     return r.json();
   })
   .then(function(data) { showToast(data.message || "Test sent! Check " + webhookName + ".", "success"); })
-  .catch(function(e) { showToast(t('settings.toast.error_prefix', {message: e.message}), "error"); });
+  .catch(function(e) { showToast(i18nT('settings.toast.error_prefix', {message: e.message}), "error"); });
 }
 
 /* ---------- Service checks ---------- */
@@ -2713,7 +2713,7 @@ function readServiceCheckForm() {
   // Speed checks don't need a target — auto-set it
   if (type === "speed") { target = "speedtest"; }
   if (!name || (!target && type !== "speed")) {
-    showToast(t('settings.toast.name_target_required'), "error");
+    showToast(i18nT('settings.toast.name_target_required'), "error");
     return null;
   }
   var sc = {
@@ -2770,7 +2770,7 @@ function saveServiceCheck() {
   for (var i = 0; i < serviceChecks.length; i++) {
     if (i === parseInt(document.getElementById("sc-edit-index").value, 10)) continue;
     if ((serviceChecks[i].name || "").toLowerCase() === name.toLowerCase()) {
-      showToast(t('settings.toast.sc_name_unique'), "error");
+      showToast(i18nT('settings.toast.sc_name_unique'), "error");
       return;
     }
   }
@@ -2881,9 +2881,9 @@ function testServiceCheck() {
   }
 
   if (sc.type === "speed") {
-    showToast(t('settings.toast.running_speedtest'), "info");
+    showToast(i18nT('settings.toast.running_speedtest'), "info");
   } else {
-    showToast(t('settings.toast.testing_check', {type: sc.type}), "info");
+    showToast(i18nT('settings.toast.testing_check', {type: sc.type}), "info");
   }
 
   fetch("/api/v1/service-checks/test", {
@@ -2896,7 +2896,7 @@ function testServiceCheck() {
     })
     .then(function(res) {
       if (!res.ok) {
-        showToast(t('settings.toast.test_failed', {error: (res.data && res.data.error ? res.data.error : t('settings.toast.server_error'))}), "error");
+        showToast(i18nT('settings.toast.test_failed', {error: (res.data && res.data.error ? res.data.error : i18nT('settings.toast.server_error'))}), "error");
         return;
       }
       var result = res.data || {};
@@ -2905,13 +2905,13 @@ function testServiceCheck() {
       var headline;
       var toastKind = "info";
       if (status === "up") {
-        headline = (typeof ms === "number" ? t('settings.toast.check_up_ms', {ms: ms}) : t('settings.toast.check_up'));
+        headline = (typeof ms === "number" ? i18nT('settings.toast.check_up_ms', {ms: ms}) : i18nT('settings.toast.check_up'));
         toastKind = "success";
       } else if (status === "degraded") {
-        headline = t('settings.toast.check_degraded');
+        headline = i18nT('settings.toast.check_degraded');
         toastKind = "warning";
       } else {
-        headline = t('settings.toast.check_down');
+        headline = i18nT('settings.toast.check_down');
         toastKind = "error";
       }
 
@@ -2929,7 +2929,7 @@ function testServiceCheck() {
       showToast(msg, toastKind);
     })
     .catch(function(e) {
-      showToast(t('settings.toast.test_failed', {error: (e && e.message ? e.message : t('settings.toast.network_error'))}), "error");
+      showToast(i18nT('settings.toast.test_failed', {error: (e && e.message ? e.message : i18nT('settings.toast.network_error'))}), "error");
     })
     .finally(function() {
       if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
@@ -2949,7 +2949,7 @@ function testServiceCheck() {
 // closing/refreshing the page promptly aborts the HTTP request and
 // the server-side runner subprocess (issue #224).
 function runTraceTestStream(sc, btn, originalLabel) {
-  showToast(t('settings.toast.running_traceroute'), "info");
+  showToast(i18nT('settings.toast.running_traceroute'), "info");
 
   var controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
   var signal = controller ? controller.signal : undefined;
@@ -3004,7 +3004,7 @@ function runTraceTestStream(sc, btn, originalLabel) {
     })
     .catch(function(e) {
       if (e && e.name === "AbortError") return;
-      showToast(t('settings.toast.test_failed', {error: (e && e.message ? e.message : t('settings.toast.network_error'))}), "error");
+      showToast(i18nT('settings.toast.test_failed', {error: (e && e.message ? e.message : i18nT('settings.toast.network_error'))}), "error");
     })
     .finally(function() {
       if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
@@ -3039,13 +3039,13 @@ function handleTraceEvent(ev, data, sc) {
     var headline;
     var toastKind = "info";
     if (status === "up") {
-      headline = (typeof ms === "number" ? t('settings.toast.check_up_ms', {ms: ms}) : t('settings.toast.check_up'));
+      headline = (typeof ms === "number" ? i18nT('settings.toast.check_up_ms', {ms: ms}) : i18nT('settings.toast.check_up'));
       toastKind = "success";
     } else if (status === "degraded") {
-      headline = t('settings.toast.check_degraded');
+      headline = i18nT('settings.toast.check_degraded');
       toastKind = "warning";
     } else {
-      headline = t('settings.toast.check_down');
+      headline = i18nT('settings.toast.check_down');
       toastKind = "error";
     }
     var msg = headline;
@@ -3069,17 +3069,17 @@ function removeServiceCheck(idx) {
 }
 
 function runServiceChecksNow() {
-  showToast(t('settings.toast.running_checks'), "info");
+  showToast(i18nT('settings.toast.running_checks'), "info");
   fetch("/api/v1/service-checks/run", { method: "POST" })
     .then(function(r) {
       if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || "Run failed"); });
       return r.json();
     })
     .then(function() {
-      showToast(t('settings.toast.checks_completed'), "success");
+      showToast(i18nT('settings.toast.checks_completed'), "success");
     })
     .catch(function(e) {
-      showToast(t('settings.toast.run_failed', {message: e.message}), "error");
+      showToast(i18nT('settings.toast.run_failed', {message: e.message}), "error");
     });
 }
 
@@ -3111,7 +3111,7 @@ var logFwdDests = [];
 function renderLogFwdDests() {
   var c = document.getElementById("logfwd-dest-list");
   if (!logFwdDests || logFwdDests.length === 0) {
-    c.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0">' + t('settings.misc.no_destinations') + '</div>';
+    c.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0">' + i18nT('settings.misc.no_destinations') + '</div>';
     return;
   }
   var h = "";
@@ -3174,7 +3174,7 @@ function onLogFwdTypeChange() {
 function saveLogFwdDest() {
   var name = document.getElementById("lf-name").value.trim();
   var url = document.getElementById("lf-url").value.trim();
-  if (!name || !url) { showToast(t('settings.toast.name_url_required'), "error"); return; }
+  if (!name || !url) { showToast(i18nT('settings.toast.name_url_required'), "error"); return; }
   var d = { name: name, type: document.getElementById("lf-type").value, url: url, enabled: true,
     format: document.getElementById("lf-format").value };
   var labelsRaw = document.getElementById("lf-labels").value.trim();
@@ -3302,7 +3302,7 @@ function cancelFleetForm() {
 function saveFleetServerForm() {
   var name = document.getElementById("fleet-name").value.trim();
   var url = document.getElementById("fleet-url").value.trim();
-  if (!name || !url) { showToast(t('settings.toast.name_url_required'), "error"); return; }
+  if (!name || !url) { showToast(i18nT('settings.toast.name_url_required'), "error"); return; }
   var server = { id: "", name: name, url: url, enabled: true };
   var apikey = document.getElementById("fleet-apikey").value.trim();
   if (apikey) server.api_key = apikey;
@@ -3334,7 +3334,7 @@ function saveFleetServerForm() {
     if (apikey) newCheck.headers = Object.assign(newCheck.headers || {}, {"Authorization": "Bearer " + apikey});
     serviceChecks.push(newCheck);
     renderServiceChecks();
-    showToast(t('settings.toast.sc_auto_created', {name: name}), "success");
+    showToast(i18nT('settings.toast.sc_auto_created', {name: name}), "success");
   }
   saveFleetServers();
   saveSettings();
@@ -3394,7 +3394,7 @@ function _doFleetTest(url, apikey, headers, resultEl) {
 }
 
 function removeFleetServer(idx) {
-  if (!confirm(t('settings.confirm.remove_server'))) return;
+  if (!confirm(i18nT('settings.confirm.remove_server'))) return;
   fleetServers.splice(idx, 1);
   saveFleetServers();
 }
@@ -3409,9 +3409,9 @@ function saveFleetServers() {
   .then(function(data) {
     fleetServers = data;
     renderFleetList();
-    showToast(t('settings.toast.fleet_updated'), "success");
+    showToast(i18nT('settings.toast.fleet_updated'), "success");
   })
-  .catch(function(e) { showToast(t('settings.toast.error_prefix', {message: e.message}), "error"); });
+  .catch(function(e) { showToast(i18nT('settings.toast.error_prefix', {message: e.message}), "error"); });
 }
 
 /* ---------- Backup ---------- */
@@ -3492,20 +3492,20 @@ function loadBackupInfo() {
       }
     })
     .catch(function() {
-      document.getElementById("backup-info").textContent = t('settings.toast.backup_load_failed');
+      document.getElementById("backup-info").textContent = i18nT('settings.toast.backup_load_failed');
     });
 }
 
 function triggerBackup() {
-  showToast(t('settings.toast.creating_backup'), "success");
+  showToast(i18nT('settings.toast.creating_backup'), "success");
   fetch("/api/v1/backup", { method: "POST" })
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      if (d.error) { showToast(t('settings.toast.backup_failed', {error: d.error}), "error"); return; }
-      showToast(t('settings.toast.backup_created', {size: d.size_mb.toFixed(1)}), "success");
+      if (d.error) { showToast(i18nT('settings.toast.backup_failed', {error: d.error}), "error"); return; }
+      showToast(i18nT('settings.toast.backup_created', {size: d.size_mb.toFixed(1)}), "success");
       loadBackupInfo();
     })
-    .catch(function(e) { showToast(t('settings.toast.backup_error', {message: e.message}), "error"); });
+    .catch(function(e) { showToast(i18nT('settings.toast.backup_error', {message: e.message}), "error"); });
 }
 
 /* ---------- Webhook Custom Headers ---------- */
@@ -3618,7 +3618,7 @@ function saveMaintenanceWindow() {
   var name = document.getElementById("mw-name").value.trim();
   var start = document.getElementById("mw-start").value.trim();
   var end = document.getElementById("mw-end").value.trim();
-  if (!name || !start || !end) { showToast(t('settings.toast.name_start_end_required'), "error"); return; }
+  if (!name || !start || !end) { showToast(i18nT('settings.toast.name_start_end_required'), "error"); return; }
   var hostnames = document.getElementById("mw-hostnames").value.trim();
   var hostnameArr = hostnames ? hostnames.split(",").map(function(h) { return h.trim(); }).filter(Boolean) : [];
   var mw = {
@@ -3640,7 +3640,7 @@ function saveMaintenanceWindow() {
 }
 
 function removeMaintenanceWindow(idx) {
-  if (!confirm(t('settings.confirm.remove_maintenance_window'))) return;
+  if (!confirm(i18nT('settings.confirm.remove_maintenance_window'))) return;
   maintenanceWindows.splice(idx, 1);
   renderMaintenanceWindows();
   markChanged();
@@ -3915,8 +3915,8 @@ function editRule(idx) {
 function saveRule() {
   var name = document.getElementById("nr-name").value.trim();
   var wh = document.getElementById("nr-webhook").value;
-  if (!name) { showToast(t('settings.toast.rule_name_required'), "error"); return; }
-  if (!wh) { showToast(t('settings.toast.select_webhook'), "error"); return; }
+  if (!name) { showToast(i18nT('settings.toast.rule_name_required'), "error"); return; }
+  if (!wh) { showToast(i18nT('settings.toast.select_webhook'), "error"); return; }
   var rule = {
     id: "rule-" + Date.now() + "-" + Math.random().toString(36).substr(2,6),
     name: name, enabled: document.getElementById("nr-enabled").checked,
@@ -3931,12 +3931,12 @@ function saveRule() {
   else notifRules.push(rule);
   renderRules(); cancelRuleForm(); saveSettings();
 }
-function removeRule(idx) { if (!confirm(t('settings.confirm.remove_rule'))) return; notifRules.splice(idx, 1); renderRules(); saveSettings(); }
+function removeRule(idx) { if (!confirm(i18nT('settings.confirm.remove_rule'))) return; notifRules.splice(idx, 1); renderRules(); saveSettings(); }
 function toggleRuleEnabled(idx) { notifRules[idx].enabled = !notifRules[idx].enabled; renderRules(); saveSettings(); }
 
 function addPreset(preset) {
   var wh = webhooks.length > 0 ? webhooks[0].name : "";
-  if (!wh) { showToast(t('settings.toast.add_webhook_first'), "error"); return; }
+  if (!wh) { showToast(i18nT('settings.toast.add_webhook_first'), "error"); return; }
   var rules = [];
   switch(preset) {
     case "critical": rules = [{name:"Critical alerts",category:"findings",condition:"critical",cooldown_sec:900}]; break;
@@ -3960,7 +3960,7 @@ function addPreset(preset) {
     notifRules.push(rules[i]);
   }
   renderRules(); saveSettings();
-  showToast(t('settings.toast.preset_rules_added', {count: rules.length}), "success");
+  showToast(i18nT('settings.toast.preset_rules_added', {count: rules.length}), "success");
 }
 
 // Load snapshot for target dropdowns
@@ -3987,21 +3987,21 @@ function generateAPIKey() {
     key = 'nd-' + hex;
   }
   if (!key) {
-    showToast(t('settings.toast.no_secure_random'), "error");
+    showToast(i18nT('settings.toast.no_secure_random'), "error");
     return;
   }
   document.getElementById("api-key-display").value = key;
   saveSettings();
-  showToast(t('settings.toast.api_key_generated'), "success");
+  showToast(i18nT('settings.toast.api_key_generated'), "success");
 }
 function copyAPIKey() {
   var el = document.getElementById("api-key-display");
-  if (!el.value) { showToast(t('settings.toast.no_api_key'), "error"); return; }
+  if (!el.value) { showToast(i18nT('settings.toast.no_api_key'), "error"); return; }
   // navigator.clipboard also requires a secure context; fall back to the
   // legacy execCommand('copy') path when it's unavailable. See issue #126.
   if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
     navigator.clipboard.writeText(el.value).then(function() {
-      showToast(t('settings.toast.copied'), "success");
+      showToast(i18nT('settings.toast.copied'), "success");
     }, function() {
       fallbackCopyAPIKey(el);
     });
@@ -4019,9 +4019,9 @@ function fallbackCopyAPIKey(el) {
     var ok = false;
     try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
     if (ok) {
-      showToast(t('settings.toast.copied'), "success");
+      showToast(i18nT('settings.toast.copied'), "success");
     } else {
-      showToast(t('settings.toast.copy_failed'), "error");
+      showToast(i18nT('settings.toast.copy_failed'), "error");
     }
   } finally {
     el.type = prevType;
@@ -4029,15 +4029,15 @@ function fallbackCopyAPIKey(el) {
   }
 }
 function revokeAPIKey() {
-  if (!confirm(t('settings.confirm.revoke_api_key'))) return;
+  if (!confirm(i18nT('settings.confirm.revoke_api_key'))) return;
   document.getElementById("api-key-display").value = "";
   saveSettings();
-  showToast(t('settings.toast.api_key_revoked'), "success");
+  showToast(i18nT('settings.toast.api_key_revoked'), "success");
 }
 
 function testKubernetesConnection() {
   var result = document.getElementById("k8s-test-result");
-  result.textContent = t('settings.misc.testing'); result.style.color = "var(--text2)";
+  result.textContent = i18nT('settings.misc.testing'); result.style.color = "var(--text2)";
   fetch("/api/v1/kubernetes/test", {
     method: "POST", headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ url: document.getElementById("k8s-url").value.trim(), token: document.getElementById("k8s-token").value.trim(), in_cluster: document.getElementById("k8s-incluster").checked })
@@ -4049,7 +4049,7 @@ function testKubernetesConnection() {
 
 function testProxmoxConnection() {
   var result = document.getElementById("pve-test-result");
-  result.textContent = t('settings.misc.testing');
+  result.textContent = i18nT('settings.misc.testing');
   result.style.color = "var(--text2)";
   fetch("/api/v1/proxmox/test", {
     method: "POST",
