@@ -204,6 +204,13 @@ util.categoryLabel = function(c) {
   return val === key ? (c || "") : val;
 };
 
+/* Maps a finding priority to a localized label. */
+util.priorityLabel = function(p) {
+  var key = 'dashboard.priority.' + (p || "").replace(/-/g, '_');
+  var val = window.i18n.t(key);
+  return val === key ? (p || "") : val;
+};
+
 /* Translates a finding field (title/description/action/impact) using
    the finding_type and parameter extraction from the original text.
    Falls back to the original text if no translation is available. */
@@ -433,12 +440,12 @@ sections.findings = function(sn, st) {
       var style = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;cursor:pointer;transition:all 0.12s;border:1px solid transparent;';
       if (isActive) style += 'color:#fff;background:' + color + ';border-color:' + color + ';';
       else style += 'color:' + color + ';background:' + bg + ';';
-      return '<span style="' + style + '" onclick="window._toggleSevFilter(\'' + sev + '\')">' + count + ' ' + sev + '</span>';
+      return '<span style="' + style + '" onclick="window._toggleSevFilter(\'' + sev + '\')">' + count + ' ' + esc(util.severityLabel(sev)) + '</span>';
     }
     h += sevBadge('critical', sevCounts.critical, 'var(--red)', 'var(--red-bg)');
     h += sevBadge('warning', sevCounts.warning, 'var(--amber)', 'var(--amber-bg)');
     h += sevBadge('info', sevCounts.info, 'var(--accent)', 'rgba(94,106,210,0.1)');
-    if (hasFilter) h += '<span style="font-size:10px;color:var(--text-quaternary);cursor:pointer;padding:2px 6px" onclick="window._clearSevFilters()">&times; Clear</span>';
+    if (hasFilter) h += '<span style="font-size:10px;color:var(--text-quaternary);cursor:pointer;padding:2px 6px" onclick="window._clearSevFilters()">&times; ' + window.i18n.t('dashboard.button.clear') + '</span>';
     h += '<div id="findings-sort-mount" style="margin-left:auto"></div>';
     h += '</div>';
     if (hasFilter) {
@@ -468,8 +475,8 @@ sections.findings = function(sn, st) {
       if (f.impact) h += '<div class="finding-detail-row"><div class="finding-detail-label">' + window.i18n.t('dashboard.finding.impact') + '</div><div class="finding-detail-value val-italic">' + esc(util.translateFinding(f, 'impact')) + '</div></div>';
       h += '<div class="finding-meta">';
       if (f.detected_at) h += '<span><strong>' + window.i18n.t('dashboard.finding.detected') + '</strong> ' + new Date(f.detected_at).toLocaleString() + '</span>';
-      if (f.priority) h += '<span><strong>' + window.i18n.t('dashboard.finding.priority') + '</strong> ' + esc(f.priority) + '</span>';
-      if (f.cost) h += '<span><strong>' + window.i18n.t('dashboard.finding.cost') + '</strong> ' + esc(f.cost) + '</span>';
+      if (f.priority) h += '<span><strong>' + window.i18n.t('dashboard.finding.priority') + '</strong> ' + esc(util.priorityLabel(f.priority)) + '</span>';
+      if (f.cost) h += '<span><strong>' + window.i18n.t('dashboard.finding.cost') + '</strong> ' + esc(util.translateFinding(f, 'cost')) + '</span>';
       if (f.category) h += '<span><strong>' + window.i18n.t('dashboard.finding.category') + '</strong> ' + esc(util.categoryLabel(f.category)) + '</span>';
       h += '<span style="margin-left:auto"><a href="#" onclick="event.stopPropagation();window._dismissFinding(\'' + esc(f.title).replace(/'/g, "\\'") + '\');return false" style="font-size:11px;color:var(--text-quaternary);text-decoration:none">' + window.i18n.t('dashboard.button.dismiss') + '</a></span>';
       h += '</div>';

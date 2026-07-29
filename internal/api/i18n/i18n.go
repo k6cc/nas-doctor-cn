@@ -170,6 +170,7 @@ func ServeI18nJS(lang string) ([]byte, error) {
 //     (comma-separated for multiple: data-i18n-attr="title:foo,placeholder:bar")
 const runtimeBody = `function lookup(dict,key){return dict&&Object.prototype.hasOwnProperty.call(dict,key)?dict[key]:null;}
 function notifyListeners(lang){for(var i=0;i<listeners.length;i++){try{listeners[i](lang);}catch(e){if(console&&console.error)console.error(e);}}}
+global.dictionaries=dictionaries;
 global.i18n={
 getLanguage:function(){return currentLang;},
 setLanguage:function(lang){

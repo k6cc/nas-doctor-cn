@@ -886,7 +886,7 @@ function onStart(e) {
   if (!finding.querySelector(".swipe-dismiss-bg")) {
     var bg = document.createElement("div");
     bg.className = "swipe-dismiss-bg";
-    bg.textContent = "Dismiss";
+    bg.textContent = window.i18n.t('dashboard.button.dismiss');
     finding.appendChild(bg);
   }
   finding.style.transition = "none";
