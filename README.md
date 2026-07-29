@@ -567,7 +567,7 @@ NAS Doctor 支持多语言界面切换，已实现全站中英文翻译，架构
 ### 架构
 
 - **后端**：使用 Go `embed` 包嵌入 JSON 字典文件，无需外部资源依赖
-- **字典文件**：位于 `internal/api/i18n/locales/`，`en.json`（英文）和 `zh.json`（中文），各包含 1560+ 个翻译 key，完全对齐
+- **字典文件**：位于 `internal/api/i18n/locales/`，`en.json`（英文）和 `zh.json`（中文），各包含 1567+ 个翻译 key，完全对齐
 - **语言解析优先级**：URL 查询参数 `?lang=` → Cookie `nas-doctor-lang` → `Accept-Language` 请求头 → 默认英文
 - **前端运行时**：通过 `data-i18n`（textContent）、`data-i18n-html`（innerHTML）和 `data-i18n-attr`（属性翻译）三种标记实现 DOM 元素翻译
 - **即时切换**：语言切换无需页面刷新，同时通过 Cookie + localStorage 持久化用户选择
@@ -578,7 +578,7 @@ NAS Doctor 支持多语言界面切换，已实现全站中英文翻译，架构
 | 页面 | 翻译范围 |
 |------|----------|
 | 仪表盘 (Dashboard) | 卡片标题、状态标签、按钮、toast 消息、诊断发现（89 种类型）、网络/隧道状态 |
-| 设置 (Settings) | 全部卡片、通知规则、服务检查、表单标签、确认对话框 |
+| 设置 (Settings) | 全部卡片、通知规则、服务检查、表单标签、确认对话框、数据库统计 |
 | 告警 (Alerts) | 活动告警、事件时间线、预测趋势分析、严重性/状态标签 |
 | 统计 (Stats) | 容量预测、趋势图表、健康评分 |
 | 机群 (Fleet) | 节点列表、诊断发现、状态标签 |

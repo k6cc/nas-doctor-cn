@@ -2279,6 +2279,22 @@ func (d *DB) PruneServiceCheckHistory(olderThan time.Duration) (int, error) {
 	return int(n), nil
 }
 
+// PruneSpeedTestHistory deletes speedtest_history rows older than the given
+// duration. Per-sample rows in speedtest_samples are removed automatically
+// via the FK ON DELETE CASCADE on (test_id → speedtest_history.id).
+// Unlike PruneSnapshots' snapshot_id-bound delete, this uses timestamp
+// directly so rows with synthetic snapshot_ids (e.g. "speedtest-...") are
+// also covered.
+func (d *DB) PruneSpeedTestHistory(olderThan time.Duration) (int, error) {
+	cutoff := time.Now().Add(-olderThan)
+	result, err := d.db.Exec("DELETE FROM speedtest_history WHERE timestamp < ?", cutoff)
+	if err != nil {
+		return 0, err
+	}
+	n, _ := result.RowsAffected()
+	return int(n), nil
+}
+
 // DeleteServiceCheckByKey removes all history for a specific service check key.
 func (d *DB) DeleteServiceCheckByKey(key string) (int, error) {
 	result, err := d.db.Exec("DELETE FROM service_checks_history WHERE check_key = ?", key)

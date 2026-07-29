@@ -373,6 +373,24 @@ func (f *FakeStore) PruneServiceCheckHistory(olderThan time.Duration) (int, erro
 	return pruned, nil
 }
 
+// PruneSpeedTestHistory removes speedtest history entries older than olderThan.
+func (f *FakeStore) PruneSpeedTestHistory(olderThan time.Duration) (int, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	cutoff := time.Now().Add(-olderThan)
+	var kept []SpeedTestHistoryPoint
+	pruned := 0
+	for _, p := range f.speedTestHistory {
+		if p.Timestamp.Before(cutoff) {
+			pruned++
+		} else {
+			kept = append(kept, p)
+		}
+	}
+	f.speedTestHistory = kept
+	return pruned, nil
+}
+
 func (f *FakeStore) DeleteServiceCheckByKey(key string) (int, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()

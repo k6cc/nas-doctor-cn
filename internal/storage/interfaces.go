@@ -132,6 +132,7 @@ type LifecycleStore interface {
 	PruneNotificationLog(olderThan time.Duration) (int, error)
 	PruneAlerts(olderThan time.Duration) (int, error)
 	PruneOrphanedFindings() (int, error)
+	PruneSpeedTestHistory(olderThan time.Duration) (int, error)
 	PruneDiskUsageHistory(cutoff time.Time) (int64, error)
 	PruneToSizeMB(targetMB float64) (int, error)
 	Vacuum() error

@@ -40,6 +40,7 @@ const defaultDiskUsageMaxAge = 365 * 24 * time.Hour
 type RetentionResult struct {
 	SnapshotsPruned        int
 	ServiceChecksPruned    int
+	SpeedTestsPruned       int
 	NotificationsPruned    int
 	AlertsPruned           int
 	OrphansPruned          int
@@ -78,9 +79,10 @@ func NewRetentionManager(store storage.LifecycleStore, svc storage.ServiceCheckS
 //  2. Prune orphaned findings
 //  3. Prune notification log
 //  4. Prune service check history (3b)
-//  5. Prune resolved alerts
-//  6. DB size cap enforcement
-//  7. VACUUM (if anything was pruned and PruneToSizeMB didn't already vacuum)
+//  5. Prune speedtest history (3c)
+//  6. Prune resolved alerts
+//  7. DB size cap enforcement
+//  8. VACUUM (if anything was pruned and PruneToSizeMB didn't already vacuum)
 func (rm *RetentionManager) RunRetention(cfg RetentionManagerConfig) RetentionResult {
 	var result RetentionResult
 	needsVacuum := false
@@ -123,7 +125,19 @@ func (rm *RetentionManager) RunRetention(cfg RetentionManagerConfig) RetentionRe
 		}
 	}
 
-	// 3c. Prune disk_usage_history (snapshot-independent, own retention horizon).
+	// 3c. Prune speedtest history (timestamp-based, covers synthetic-id
+	// rows that PruneSnapshots' snapshot_id-bound delete cannot reach).
+	// speedtest_samples rows cascade-delete via FK. Reuses SnapshotMaxAge
+	// so speedtest retention stays aligned with snapshot retention.
+	if pruned, err := rm.store.PruneSpeedTestHistory(cfg.SnapshotMaxAge); err != nil {
+		rm.logger.Warn("prune speedtest history failed", "error", err)
+	} else if pruned > 0 {
+		rm.logger.Info("pruned speedtest history", "count", pruned)
+		result.SpeedTestsPruned = pruned
+		needsVacuum = true
+	}
+
+	// 3d. Prune disk_usage_history (snapshot-independent, own retention horizon).
 	// Falls back to defaultDiskUsageMaxAge (365d) when unset so callers that
 	// haven't plumbed this through yet still get sensible defaults.
 	diskUsageMaxAge := cfg.DiskUsageMaxAge

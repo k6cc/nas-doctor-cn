@@ -3214,20 +3214,20 @@ function loadDBStats() {
     .then(function(d) {
       var el = document.getElementById("db-stats");
       var lines = [];
-      lines.push("<strong>" + d.file_size_mb.toFixed(1) + " MB</strong> database size");
-      lines.push(d.snapshot_count + " snapshots stored");
-      lines.push(d.smart_history_rows + " SMART history rows");
-      lines.push(d.system_history_rows + " system history rows");
-      lines.push((d.service_check_rows || 0) + " service check rows");
+      lines.push("<strong>" + d.file_size_mb.toFixed(1) + " MB</strong> " + window.i18n.t('settings.db_stats.database_size'));
+      lines.push(window.i18n.t('settings.db_stats.snapshots_stored', {count: d.snapshot_count}));
+      lines.push(window.i18n.t('settings.db_stats.smart_history_rows', {count: d.smart_history_rows}));
+      lines.push(window.i18n.t('settings.db_stats.system_history_rows', {count: d.system_history_rows}));
+      lines.push(window.i18n.t('settings.db_stats.service_check_rows', {count: (d.service_check_rows || 0)}));
       if (d.oldest_snapshot) {
         var oldest = d.oldest_snapshot.substring(0, 10);
         var newest = d.newest_snapshot.substring(0, 10);
-        lines.push("Range: " + oldest + " → " + newest);
+        lines.push(window.i18n.t('settings.db_stats.range', {oldest: oldest, newest: newest}));
       }
       el.innerHTML = lines.join("<br>");
     })
     .catch(function() {
-      document.getElementById("db-stats").textContent = "Failed to load stats";
+      document.getElementById("db-stats").textContent = window.i18n.t('settings.db_stats.load_failed');
     });
 }
 
