@@ -542,6 +542,44 @@ function translateAlertTitle(title) {
   if (m) return window.i18n.t('finding.sata_cable.title', {device: m[1], model: m[2]});
   m = title.match(/^Command Timeouts on (.+) \((.+)\)$/);
   if (m) return window.i18n.t('finding.command_timeout.title', {device: m[1], model: m[2]});
+  // 通用匹配：遍历所有 finding 类型的英文模板
+  var enDict = (typeof dictionaries !== 'undefined' && dictionaries['en']) ? dictionaries['en'] : null;
+  if (enDict) {
+    for (var key in enDict) {
+      if (key.indexOf('finding.') !== 0 || key.indexOf('.title') !== key.length - 6) continue;
+      var enTmpl = enDict[key];
+      if (!enTmpl) continue;
+      var hasParams = enTmpl.indexOf('{{') !== -1;
+      if (!hasParams) {
+        if (title === enTmpl) {
+          var tr = window.i18n.t(key);
+          if (tr && tr !== key) return tr;
+        }
+      } else {
+        var parts = enTmpl.split(/(\{\{\w+\}\})/);
+        var regexStr = '';
+        for (var pi = 0; pi < parts.length; pi++) {
+          if (/^\{\{\w+\}\}$/.test(parts[pi])) { regexStr += '([\\s\\S]*?)'; }
+          else if (parts[pi]) { regexStr += parts[pi].replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+        }
+        try {
+          var match = title.match(new RegExp('^' + regexStr + '$'));
+          if (match) {
+            var translatedTmpl = window.i18n.t(key);
+            if (translatedTmpl && translatedTmpl !== key) {
+              var paramMatches = enTmpl.match(/\{\{(\w+)\}\}/g);
+              var result = translatedTmpl;
+              for (var pi2 = 0; pi2 < paramMatches.length && pi2 < match.length - 1; pi2++) {
+                var pname = paramMatches[pi2].replace(/\{\{|\}\}/g, '');
+                result = result.replace('{{' + pname + '}}', match[pi2 + 1]);
+              }
+              return result;
+            }
+          }
+        } catch(e) {}
+      }
+    }
+  }
   return title;
 }
 function statusClassForAlert(status) {
@@ -571,7 +609,7 @@ function loadAlerts() {
         var sev = escapeHtml(alertSevLabel(a.severity));
         var created = a.created_at ? new Date(a.created_at).toLocaleString() : "\u2014";
         var statusLabel = alertStatusLabel(a.status || "open");
-        if (a.suppression_reason) statusLabel += " (" + a.suppression_reason + ")";
+        if (a.suppression_reason) statusLabel += " (" + alertStatusLabel(a.suppression_reason) + ")";
 
         html += '<tr>';
         html += '<td>#' + a.id + '</td>';

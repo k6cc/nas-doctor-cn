@@ -419,12 +419,12 @@ sections.findings = function(sn, st) {
   var t = window.i18n ? window.i18n.t.bind(window.i18n) : function(k, p) { return k; };
   h += '<div class="section-block" data-section="findings">';
   var findings = sn ? (sn.findings || []) : [];
-  h += '<div class="section-title">' + t("dashboard.findings.title") + ' (' + findings.length + ')</div>';
-  if (findings.length === 0) {
+  var dismissed = (st && st.dismissed_findings) ? st.dismissed_findings : [];
+  var visibleFindings = findings.filter(function(f) { return dismissed.indexOf(f.title) === -1; });
+  h += '<div class="section-title">' + t("dashboard.findings.title") + ' (' + visibleFindings.length + ')</div>';
+  if (visibleFindings.length === 0) {
     h += '<div class="empty"><div class="empty-icon">&#9989;</div>' + t("dashboard.findings.empty") + '</div>';
   } else {
-    var dismissed = (st && st.dismissed_findings) ? st.dismissed_findings : [];
-    var visibleFindings = findings.filter(function(f) { return dismissed.indexOf(f.title) === -1; });
     var sortPref = (window.NasSort ? NasSort.getPrefs().findings : null) || "severity";
     if (window.NasSort) NasSort.sortFindings(visibleFindings, sortPref);
     else visibleFindings.sort(function(a, b) { return ({ critical:0,warning:1,info:2,ok:3 }[a.severity]||9) - ({ critical:0,warning:1,info:2,ok:3 }[b.severity]||9); });
