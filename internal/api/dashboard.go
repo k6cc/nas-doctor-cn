@@ -422,7 +422,7 @@ sections.findings = function(sn, st) {
   var dismissed = (st && st.dismissed_findings) ? st.dismissed_findings : [];
   var visibleFindings = findings.filter(function(f) { return dismissed.indexOf(f.title) === -1; });
   h += '<div class="section-title">' + t("dashboard.findings.title") + ' (' + visibleFindings.length + ')</div>';
-  if (findings.length === 0) {
+  if (visibleFindings.length === 0) {
     h += '<div class="empty"><div class="empty-icon">&#9989;</div>' + t("dashboard.findings.empty") + '</div>';
   } else {
     var sortPref = (window.NasSort ? NasSort.getPrefs().findings : null) || "severity";
