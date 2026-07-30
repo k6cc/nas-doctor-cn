@@ -567,11 +567,11 @@ NAS Doctor 支持多语言界面切换，已实现全站中英文翻译，架构
 ### 架构
 
 - **后端**：使用 Go `embed` 包嵌入 JSON 字典文件，无需外部资源依赖
-- **字典文件**：位于 `internal/api/i18n/locales/`，`en.json`（英文）和 `zh.json`（中文），各包含 1595+ 个翻译 key，完全对齐
+- **字典文件**：位于 `internal/api/i18n/locales/`，`en.json`（英文）和 `zh.json`（中文），各包含 1600 个翻译 key，完全对齐
 - **语言解析优先级**：URL 查询参数 `?lang=` → Cookie `nas-doctor-lang` → `Accept-Language` 请求头 → 默认英文
-- **前端运行时**：通过 `data-i18n`（textContent）、`data-i18n-html`（innerHTML）和 `data-i18n-attr`（属性翻译）三种标记实现 DOM 元素翻译
+- **前端运行时**：通过 `data-i18n`（textContent）、`data-i18n-html`（innerHTML）和 `data-i18n-attr`（属性翻译）三种标记实现 DOM 元素翻译；`translateFinding()` 全局函数支持诊断发现的参数化翻译
 - **即时切换**：语言切换无需页面刷新，同时通过 Cookie + localStorage 持久化用户选择
-- **防闪烁 (FOUC)**：内联脚本在 DOM 渲染前从 Cookie 读取语言设置，避免页面闪烁
+- **防闪烁 (FOUC)**：i18n 运行时在 `<head>` 中同步加载，翻译前隐藏 `<html>` 元素，`translateDOM()` 完成后恢复显示（含 1.5s 超时兜底），消除英文→中文的视觉闪烁
 
 ### 已翻译页面
 
@@ -579,7 +579,7 @@ NAS Doctor 支持多语言界面切换，已实现全站中英文翻译，架构
 |------|----------|
 | 仪表盘 (Dashboard) | 卡片标题、状态标签、按钮、toast 消息、诊断发现（89 种类型 × 5 字段）、严重度/优先级/成本/类别标签、网络/隧道状态 |
 | 设置 (Settings) | 全部卡片、通知规则、服务检查、表单标签、确认对话框、数据库统计 |
-| 告警 (Alerts) | 活动告警、告警标题（通用模板匹配）、事件时间线、预测趋势分析、严重性/状态标签、确认状态标签 |
+| 告警 (Alerts) | 活动告警、告警标题（通用模板匹配）、告警详情查看（通过快照关联 finding）、事件时间线、预测趋势分析、严重性/状态标签、确认状态标签 |
 | 统计 (Stats) | 容量预测、趋势图表、健康评分 |
 | 机群 (Fleet) | 节点列表、诊断发现、状态标签 |
 | 磁盘详情 (Disk Detail) | SMART 属性表、诊断发现、维护日志 |
@@ -592,7 +592,7 @@ NAS Doctor 支持多语言界面切换，已实现全站中英文翻译，架构
 诊断发现（Finding）支持自动翻译，覆盖 89 种类型：
 
 - **后端**：`Finding` 结构体通过 `FindingType` 字段标识发现类型（如 `sata_cable`、`command_timeout`）
-- **前端**：`translateFinding()` 函数从 `dictionaries['en']` 获取英文模板，构建正则提取参数，替换到翻译模板中
+- **前端**：`window.i18n.translateFinding()` 全局函数从 `dictionaries['en']` 获取英文模板，构建正则提取参数，替换到翻译模板中，所有页面共享同一实现
 - **通用方案**：无需为每种类型编写单独的正则，自动支持全部 89 种类型
 - **优雅降级**：无 `FindingType` 或无翻译键时，返回原始英文文本
 
@@ -638,6 +638,8 @@ NAS Doctor 支持多语言界面切换，已实现全站中英文翻译，架构
 | `verify_keys.py` | 校验 en.json/zh.json 键对齐，按命名空间统计 |
 | `add_keys.py` | 批量添加翻译键的通用工具 |
 | `gen_finding_keys.py` | 生成诊断发现类型的 i18n 键 |
+
+`verify_keys.py` 已集成到 GitHub Actions CI（`.github/workflows/docker.yml`），每次构建自动校验键对齐，对齐失败会中断构建。
 
 详见 `tools/i18n/README.md`。
 

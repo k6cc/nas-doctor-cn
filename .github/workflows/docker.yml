@@ -71,6 +71,9 @@ jobs:
             echo "value=${LATEST_TAG#v}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Verify i18n key alignment
+        run: python tools/i18n/verify_keys.py
+
       - name: Run tests
         run: go test ./...
 

@@ -168,7 +168,8 @@ func ServeI18nJS(lang string) ([]byte, error) {
 //   - data-i18n-html="key"       → innerHTML (use for text containing entities)
 //   - data-i18n-attr="attr:key"  → set a single attribute
 //     (comma-separated for multiple: data-i18n-attr="title:foo,placeholder:bar")
-const runtimeBody = `function lookup(dict,key){return dict&&Object.prototype.hasOwnProperty.call(dict,key)?dict[key]:null;}
+const runtimeBody = `document.documentElement.style.visibility="hidden";
+function lookup(dict,key){return dict&&Object.prototype.hasOwnProperty.call(dict,key)?dict[key]:null;}
 function notifyListeners(lang){for(var i=0;i<listeners.length;i++){try{listeners[i](lang);}catch(e){if(console&&console.error)console.error(e);}}}
 global.dictionaries=dictionaries;
 global.i18n={
@@ -222,6 +223,35 @@ translateDOM:function(root){
     }
   }
 },
-onLanguageChange:function(fn){listeners.push(fn);}
+onLanguageChange:function(fn){listeners.push(fn);},
+translateFinding:function(f,field){
+  if(!f||!f.finding_type||!f[field])return f?(f[field]||""):"";
+  var key='finding.'+f.finding_type+'.'+field;
+  var tmpl=this.t(key);
+  if(tmpl===key)return f[field]||"";
+  var orig=f[field];
+  var result=tmpl;
+  var enTmpl=dictionaries['en']?dictionaries['en'][key]:null;
+  if(!enTmpl)return result;
+  var paramMatches=enTmpl.match(/\{\{(\w+)\}\}/g);
+  if(!paramMatches||paramMatches.length===0)return result;
+  var parts=enTmpl.split(/(\{\{\w+\}\})/);
+  var regexStr='';
+  for(var pi=0;pi<parts.length;pi++){
+    if(/^\{\{\w+\}\}$/.test(parts[pi])){regexStr+='([\\s\\S]*?)';}
+    else if(parts[pi]){regexStr+=parts[pi].replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+  }
+  try{
+    var m=orig.match(new RegExp('^'+regexStr));
+    if(m){
+      for(var pi2=0;pi2<paramMatches.length&&pi2<m.length-1;pi2++){
+        var pname=paramMatches[pi2].replace(/\{\{|\}\}/g,'');
+        result=result.replace('{{'+pname+'}}',m[pi2+1]);
+      }
+    }
+  }catch(e){}
+  return result;
+}
 };
-document.addEventListener("DOMContentLoaded",function(){global.i18n.translateDOM();});`
+document.addEventListener("DOMContentLoaded",function(){global.i18n.translateDOM();document.documentElement.style.visibility="visible";});
+setTimeout(function(){document.documentElement.style.visibility="visible";},1500);`
