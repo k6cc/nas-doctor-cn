@@ -701,31 +701,32 @@ function loadAlertDetail(alertId, snapshotId, findingId) {
       }
       var html = '<div style="font-weight:600;color:var(--text);margin-bottom:8px">' + window.i18n.t('alerts.msg.finding_detail') + '</div>';
       html += '<div style="font-size:13px;line-height:1.7;max-width:700px">';
+      function lc(k){var l=window.i18n.t(k);return /[:：]$/.test(l)?l:l+'：';}
       if (finding.description) {
-        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + window.i18n.t('dashboard.finding.description') + '</span> ' + escapeHtml(window.i18n.translateFinding(finding, 'description')) + '</div>';
+        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + lc('dashboard.finding.description') + '</span> ' + escapeHtml(window.i18n.translateFinding(finding, 'description')) + '</div>';
       }
       if (finding.evidence) {
         var ev = Array.isArray(finding.evidence) ? finding.evidence.join("; ") : finding.evidence;
-        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + window.i18n.t('dashboard.finding.evidence') + '</span> ' + escapeHtml(ev) + '</div>';
+        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + lc('dashboard.finding.evidence') + '</span> ' + escapeHtml(ev) + '</div>';
       }
       if (finding.action) {
-        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + window.i18n.t('dashboard.finding.action') + '</span> ' + escapeHtml(window.i18n.translateFinding(finding, 'action')) + '</div>';
+        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + lc('dashboard.finding.action') + '</span> ' + escapeHtml(window.i18n.translateFinding(finding, 'action')) + '</div>';
       }
       if (finding.impact) {
-        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + window.i18n.t('dashboard.finding.impact') + '</span> ' + escapeHtml(window.i18n.translateFinding(finding, 'impact')) + '</div>';
+        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + lc('dashboard.finding.impact') + '</span> ' + escapeHtml(window.i18n.translateFinding(finding, 'impact')) + '</div>';
       }
       if (finding.priority) {
         var pLabel = window.i18n.t('dashboard.priority.' + finding.priority);
         if (pLabel === 'dashboard.priority.' + finding.priority) pLabel = finding.priority;
-        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + window.i18n.t('dashboard.finding.priority') + '</span> ' + escapeHtml(pLabel) + '</div>';
+        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + lc('dashboard.finding.priority') + '</span> ' + escapeHtml(pLabel) + '</div>';
       }
       if (finding.cost) {
-        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + window.i18n.t('dashboard.finding.cost') + '</span> ' + escapeHtml(window.i18n.translateFinding(finding, 'cost')) + '</div>';
+        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + lc('dashboard.finding.cost') + '</span> ' + escapeHtml(window.i18n.translateFinding(finding, 'cost')) + '</div>';
       }
       if (finding.category) {
         var cLabel = window.i18n.t('dashboard.category.' + finding.category);
         if (cLabel === 'dashboard.category.' + finding.category) cLabel = finding.category;
-        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + window.i18n.t('dashboard.finding.category') + '</span> ' + escapeHtml(cLabel) + '</div>';
+        html += '<div style="margin-bottom:6px"><span style="color:var(--text2)">' + lc('dashboard.finding.category') + '</span> ' + escapeHtml(cLabel) + '</div>';
       }
       html += '</div>';
       panel.innerHTML = html;

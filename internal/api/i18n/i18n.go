@@ -250,6 +250,20 @@ translateFinding:function(f,field){
       }
     }
   }catch(e){}
+  // Translate tier labels (e.g. "Occasional — likely transient") injected
+  // as {{tier}} params from backend analyzer. Only 4 known tiers, so a
+  // simple scan over finding.tier.* keys is cheap enough.
+  var tierPrefix='finding.tier.';
+  var enDict=dictionaries['en']||{};
+  for(var tk in enDict){
+    if(tk.indexOf(tierPrefix)===0){
+      var enTier=enDict[tk];
+      var trTier=this.t(tk);
+      if(trTier!==tk&&enTier!==trTier&&result.indexOf(enTier)!==-1){
+        result=result.split(enTier).join(trTier);
+      }
+    }
+  }
   return result;
 }
 };
